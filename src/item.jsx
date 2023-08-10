@@ -20,6 +20,10 @@ class Datum {
     toString() {
         return this.width + 'x' + this.height + 'x' + this.depth + ' wg' + this.weight
     }
+
+    toExport() {
+        return [this.id, this.width, this.type, this.height, this.depth, this.weight].join(';')
+    }
 }
 
 export default class ItemComponent extends React.Component {
@@ -99,11 +103,47 @@ export default class ItemComponent extends React.Component {
         )
     }
 
+    onImport = () => {
+        alert('planned to develop')
+    }
+
+    onExport = () => {
+        const { elements} = this.state
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + "id;type;width;height;depth;weight\n"
+            + elements.filter(e => e.enabled).map(e => e.toExport()).join("\n")
+
+        const link = document.createElement("a")
+        link.setAttribute("href", encodeURI(csvContent))
+        link.setAttribute("download", "export.csv")
+        link.click()
+    }
+
     render({ }, { elements, type, text, hasError }) {
         return (
             <nav className="panel">
-                <p className="panel-heading">
-                    Settings
+                <p className="panel-heading field">
+                    <div className="level">
+                        <div className="level-left">
+                            <div className="level-item">
+                                <p className="subtitle is-5">
+                                    <strong>Settings</strong>
+                                </p>
+                            </div>
+                        </div>
+                        <div className="level-right">
+                            <div className="level-item">
+                                <div className="field has-addons">
+                                    <p className="control">
+                                        <a href="#" onClick={this.onImport} className="button is-info is-light is-small is-rounded">import</a>
+                                    </p>
+                                    <p className="control">
+                                        <a href="#" onClick={this.onExport} className="button is-success is-light is-small is-rounded">export</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </p>
                 <form onSubmit={this.addElement} action="javascript:">
                     <div className="panel-block">
@@ -116,8 +156,8 @@ export default class ItemComponent extends React.Component {
                         </p>
                     </div>
                     <p className="panel-tabs">
-                        <a className={type === boxType ? "is-active" : ""} onClick={() => this.setType(boxType)}>Boxes</a>
-                        <a className={type === itemType ? "is-active" : ""} onClick={() => this.setType(itemType)}>Items</a>
+                        <a href="#" className={type === boxType ? "is-active" : ""} onClick={() => this.setType(boxType)}>Boxes</a>
+                        <a href="#" className={type === itemType ? "is-active" : ""} onClick={() => this.setType(itemType)}>Items</a>
                     </p>
                 </form>
                 { elements.filter(datum => datum.type === type).map(datum => (
