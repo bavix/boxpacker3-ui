@@ -6,11 +6,15 @@ Debug helper boxpacker3
 
 ```sh
 go install github.com/bavix/boxpacker3-ui@latest
+```
+
+Service start (default port `3000`):
+```sh
 boxpacker3-ui
 ```
 
-Default port `3000`. If you want to run on a different port, then run like this:
-```
+If you want to run on a different port, then run like this:
+```sh
 PORT=4000 boxpacker3-ui
 ```
 
