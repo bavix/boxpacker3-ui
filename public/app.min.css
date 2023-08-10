@@ -1,0 +1,5 @@
+body {overflow: hidden;margin: 0;}
+.container {max-width: 100% !important;}
+.columns {margin-left: 0; margin-right: 0;}
+.columns .column {padding-left: 0;padding-right: 0;}
+.column .panel {margin: 0.5rem;}

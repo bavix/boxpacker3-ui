@@ -1,0 +1,7 @@
+# github.com/bavix/boxpacker3 v0.0.0-20230810155028-470e80524a4b
+## explicit; go 1.20
+github.com/bavix/boxpacker3
+# golang.org/x/exp v0.0.0-20230810033253-352e893a4cad
+## explicit; go 1.20
+golang.org/x/exp/constraints
+golang.org/x/exp/slices
