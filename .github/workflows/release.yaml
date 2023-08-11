@@ -32,6 +32,9 @@ jobs:
       - name: Rebuild the public/ directory
         run: npm run build
 
+      - name: Check folder public
+        run: ls -alF public/
+
       - uses: wangyoucao577/go-release-action@v1.39
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
