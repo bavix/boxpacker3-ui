@@ -9,5 +9,3 @@ jobs:
     permissions:
       contents: write
     uses: bavix/.github/.github/workflows/go-release-binary.yml@0.0.2
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
