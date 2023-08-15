@@ -10086,7 +10086,6 @@
 	    y,
 	    _,
 	    b,
-	    g,
 	    m,
 	    w,
 	    x,
@@ -10099,8 +10098,8 @@
 	    z = l.length;
 	  for (u.__k = [], p = 0; p < z; p++) null != (b = u.__k[p] = null == (b = l[p]) || "boolean" == typeof b || "function" == typeof b ? null : "string" == typeof b || "number" == typeof b || "bigint" == typeof b ? d$1(null, b, null, null, b) : h$1(b) ? d$1(k$2, {
 	    children: b
-	  }, null, null, null) : b.__b > 0 ? d$1(b.type, b.props, b.key, b.ref ? b.ref : null, b.__v) : b) && (b.__ = u, b.__b = u.__b + 1, -1 === (x = A$2(b, I, w = p + H, j)) ? _ = c$1 : (_ = I[x] || c$1, I[x] = void 0, j--), L$1(n, b, _, i, o, r, f, e, a, v), g = b.__e, (y = b.ref) && _.ref != y && (_.ref && O$1(_.ref, null, b), v.push(y, b.__c || g, b)), null != g && (null == m && (m = g), S = !(P = _ === c$1 || null === _.__v) && x === w, P ? -1 == x && H-- : x !== w && (x === w + 1 ? (H++, S = !0) : x > w ? j > z - w ? (H += x - w, S = !0) : H-- : H = x < w && x == w - 1 ? x - w : 0), w = p + H, S = S || x == p && !P, "function" != typeof b.type || x === w && _.__k !== b.__k ? "function" == typeof b.type || S ? void 0 !== b.__d ? (e = b.__d, b.__d = void 0) : e = g.nextSibling : e = $$1(n, g, e) : e = C$1(b, e, n), "function" == typeof u.type && (u.__d = e)));
-	  for (u.__e = m, p = T; p--;) null != I[p] && ("function" == typeof u.type && null != I[p].__e && I[p].__e == u.__d && (u.__d = I[p].__e.nextSibling), q$2(I[p], I[p]));
+	  }, null, null, null) : b.__b > 0 ? d$1(b.type, b.props, b.key, b.ref ? b.ref : null, b.__v) : b) ? (b.__ = u, b.__b = u.__b + 1, -1 === (P = A$2(b, I, x = p + H, j)) ? _ = c$1 : (_ = I[P] || c$1, I[P] = void 0, j--), L$1(n, b, _, i, o, r, f, e, a, v), m = b.__e, (y = b.ref) && _.ref != y && (_.ref && O$1(_.ref, null, b), v.push(y, b.__c || m, b)), null != m && (null == w && (w = m), (S = _ === c$1 || null === _.__v) ? -1 == P && H-- : P !== x && (P === x + 1 ? H++ : P > x ? j > z - x ? H += P - x : H-- : H = P < x && P == x - 1 ? P - x : 0), x = p + H, "function" != typeof b.type || P === x && _.__k !== b.__k ? "function" == typeof b.type || P === x && !S ? void 0 !== b.__d ? (e = b.__d, b.__d = void 0) : e = m.nextSibling : e = $$1(n, m, e) : e = C$1(b, e, n), "function" == typeof u.type && (u.__d = e))) : (_ = I[p]) && null == _.key && _.__e && (_.__e == e && (e = g$2(_)), q$2(_, _, !1));
+	  for (u.__e = w, p = T; p--;) null != I[p] && ("function" == typeof u.type && null != I[p].__e && I[p].__e == u.__d && (u.__d = I[p].__e.nextSibling), q$2(I[p], I[p]));
 	}
 	function C$1(n, l, u) {
 	  for (var t, i = n.__k, o = 0; i && o < i.length; o++) (t = i[o]) && (t.__ = n, l = "function" == typeof t.type ? C$1(t, l, u) : $$1(u, t.__e, l));
@@ -10181,32 +10180,30 @@
 	    T = u.type;
 	  if (void 0 !== u.constructor) return null;
 	  null != t.__h && (c = t.__h, e = u.__e = t.__e, u.__h = null, r = [e]), (a = l$1.__b) && a(u);
-	  try {
-	    n: if ("function" == typeof T) {
-	      if (w = u.props, x = (a = T.contextType) && i[a.__c], C = a ? x ? x.props.value : a.__ : i, t.__c ? m = (p = u.__c = t.__c).__ = p.__E : ("prototype" in T && T.prototype.render ? u.__c = p = new T(w, C) : (u.__c = p = new b$1(w, C), p.constructor = T, p.render = B$2), x && x.sub(p), p.props = w, p.state || (p.state = {}), p.context = C, p.__n = i, y = p.__d = !0, p.__h = [], p._sb = []), null == p.__s && (p.__s = p.state), null != T.getDerivedStateFromProps && (p.__s == p.state && (p.__s = v$1({}, p.__s)), v$1(p.__s, T.getDerivedStateFromProps(w, p.__s))), d = p.props, _ = p.state, p.__v = u, y) null == T.getDerivedStateFromProps && null != p.componentWillMount && p.componentWillMount(), null != p.componentDidMount && p.__h.push(p.componentDidMount);else {
-	        if (null == T.getDerivedStateFromProps && w !== d && null != p.componentWillReceiveProps && p.componentWillReceiveProps(w, C), !p.__e && (null != p.shouldComponentUpdate && !1 === p.shouldComponentUpdate(w, p.__s, C) || u.__v === t.__v)) {
-	          for (u.__v !== t.__v && (p.props = w, p.state = p.__s, p.__d = !1), u.__e = t.__e, u.__k = t.__k, u.__k.forEach(function (n) {
-	            n && (n.__ = u);
-	          }), S = 0; S < p._sb.length; S++) p.__h.push(p._sb[S]);
-	          p._sb = [], p.__h.length && f.push(p);
-	          break n;
-	        }
-	        null != p.componentWillUpdate && p.componentWillUpdate(w, p.__s, C), null != p.componentDidUpdate && p.__h.push(function () {
-	          p.componentDidUpdate(d, _, g);
-	        });
+	  n: if ("function" == typeof T) try {
+	    if (w = u.props, x = (a = T.contextType) && i[a.__c], C = a ? x ? x.props.value : a.__ : i, t.__c ? m = (p = u.__c = t.__c).__ = p.__E : ("prototype" in T && T.prototype.render ? u.__c = p = new T(w, C) : (u.__c = p = new b$1(w, C), p.constructor = T, p.render = B$2), x && x.sub(p), p.props = w, p.state || (p.state = {}), p.context = C, p.__n = i, y = p.__d = !0, p.__h = [], p._sb = []), null == p.__s && (p.__s = p.state), null != T.getDerivedStateFromProps && (p.__s == p.state && (p.__s = v$1({}, p.__s)), v$1(p.__s, T.getDerivedStateFromProps(w, p.__s))), d = p.props, _ = p.state, p.__v = u, y) null == T.getDerivedStateFromProps && null != p.componentWillMount && p.componentWillMount(), null != p.componentDidMount && p.__h.push(p.componentDidMount);else {
+	      if (null == T.getDerivedStateFromProps && w !== d && null != p.componentWillReceiveProps && p.componentWillReceiveProps(w, C), !p.__e && (null != p.shouldComponentUpdate && !1 === p.shouldComponentUpdate(w, p.__s, C) || u.__v === t.__v)) {
+	        for (u.__v !== t.__v && (p.props = w, p.state = p.__s, p.__d = !1), u.__e = t.__e, u.__k = t.__k, u.__k.forEach(function (n) {
+	          n && (n.__ = u);
+	        }), S = 0; S < p._sb.length; S++) p.__h.push(p._sb[S]);
+	        p._sb = [], p.__h.length && f.push(p);
+	        break n;
 	      }
-	      if (p.context = C, p.props = w, p.__P = n, p.__e = !1, $ = l$1.__r, A = 0, "prototype" in T && T.prototype.render) {
-	        for (p.state = p.__s, p.__d = !1, $ && $(u), a = p.render(p.props, p.state, p.context), H = 0; H < p._sb.length; H++) p.__h.push(p._sb[H]);
-	        p._sb = [];
-	      } else do {
-	        p.__d = !1, $ && $(u), a = p.render(p.props, p.state, p.context), p.state = p.__s;
-	      } while (p.__d && ++A < 25);
-	      p.state = p.__s, null != p.getChildContext && (i = v$1(v$1({}, i), p.getChildContext())), y || null == p.getSnapshotBeforeUpdate || (g = p.getSnapshotBeforeUpdate(d, _)), P$1(n, h$1(I = null != a && a.type === k$2 && null == a.key ? a.props.children : a) ? I : [I], u, t, i, o, r, f, e, c, s), p.base = u.__e, u.__h = null, p.__h.length && f.push(p), m && (p.__E = p.__ = null);
-	    } else null == r && u.__v === t.__v ? (u.__k = t.__k, u.__e = t.__e) : u.__e = N$1(t.__e, u, t, i, o, r, f, c, s);
-	    (a = l$1.diffed) && a(u);
+	      null != p.componentWillUpdate && p.componentWillUpdate(w, p.__s, C), null != p.componentDidUpdate && p.__h.push(function () {
+	        p.componentDidUpdate(d, _, g);
+	      });
+	    }
+	    if (p.context = C, p.props = w, p.__P = n, p.__e = !1, $ = l$1.__r, A = 0, "prototype" in T && T.prototype.render) {
+	      for (p.state = p.__s, p.__d = !1, $ && $(u), a = p.render(p.props, p.state, p.context), H = 0; H < p._sb.length; H++) p.__h.push(p._sb[H]);
+	      p._sb = [];
+	    } else do {
+	      p.__d = !1, $ && $(u), a = p.render(p.props, p.state, p.context), p.state = p.__s;
+	    } while (p.__d && ++A < 25);
+	    p.state = p.__s, null != p.getChildContext && (i = v$1(v$1({}, i), p.getChildContext())), y || null == p.getSnapshotBeforeUpdate || (g = p.getSnapshotBeforeUpdate(d, _)), P$1(n, h$1(I = null != a && a.type === k$2 && null == a.key ? a.props.children : a) ? I : [I], u, t, i, o, r, f, e, c, s), p.base = u.__e, u.__h = null, p.__h.length && f.push(p), m && (p.__E = p.__ = null);
 	  } catch (n) {
 	    u.__v = null, (c || null != r) && (u.__e = e, u.__h = !!c, r[r.indexOf(e)] = null), l$1.__e(n, u, t);
-	  }
+	  } else null == r && u.__v === t.__v ? (u.__k = t.__k, u.__e = t.__e) : u.__e = N$1(t.__e, u, t, i, o, r, f, c, s);
+	  (a = l$1.diffed) && a(u);
 	}
 	function M$1(n, u, t) {
 	  for (var i = 0; i < t.length; i++) O$1(t[i], t[++i], t[++i]);
@@ -10574,23 +10571,23 @@
 	  if (n.then) for (var u, o = t; o = o.__;) if ((u = o.__c) && u.__c) return null == t.__e && (t.__e = e.__e, t.__k = e.__k), u.__c(n, t);
 	  T(n, t, e, r);
 	};
-	var I = l$1.unmount;
-	function L(n, t, e) {
+	var F = l$1.unmount;
+	function I(n, t, e) {
 	  return n && (n.__c && n.__c.__H && (n.__c.__H.__.forEach(function (n) {
 	    "function" == typeof n.__c && n.__c();
 	  }), n.__c.__H = null), null != (n = g({}, n)).__c && (n.__c.__P === e && (n.__c.__P = t), n.__c = null), n.__k = n.__k && n.__k.map(function (n) {
-	    return L(n, t, e);
+	    return I(n, t, e);
 	  })), n;
 	}
-	function U(n, t, e) {
+	function L(n, t, e) {
 	  return n && (n.__v = null, n.__k = n.__k && n.__k.map(function (n) {
-	    return U(n, t, e);
+	    return L(n, t, e);
 	  }), n.__c && n.__c.__P === t && (n.__e && e.insertBefore(n.__e, n.__d), n.__c.__e = !0, n.__c.__P = e)), n;
 	}
-	function D() {
+	function U() {
 	  this.__u = 0, this.t = null, this.__b = null;
 	}
-	function F(n) {
+	function D(n) {
 	  var t = n.__.__c;
 	  return t && t.__a && t.__a(n);
 	}
@@ -10612,12 +10609,12 @@
 	}
 	l$1.unmount = function (n) {
 	  var t = n.__c;
-	  t && t.__R && t.__R(), t && !0 === n.__h && (n.type = null), I && I(n);
-	}, (D.prototype = new b$1()).__c = function (n, t) {
+	  t && t.__R && t.__R(), t && !0 === n.__h && (n.type = null), F && F(n);
+	}, (U.prototype = new b$1()).__c = function (n, t) {
 	  var e = t.__c,
 	    r = this;
 	  null == r.t && (r.t = []), r.t.push(e);
-	  var u = F(r.__v),
+	  var u = D(r.__v),
 	    o = !1,
 	    i = function () {
 	      o || (o = !0, e.__R = null, u ? u(l) : l());
@@ -10627,7 +10624,7 @@
 	      if (! --r.__u) {
 	        if (r.state.__a) {
 	          var n = r.state.__a;
-	          r.__v.__k[0] = U(n, n.__c.__P, n.__c.__O);
+	          r.__v.__k[0] = L(n, n.__c.__P, n.__c.__O);
 	        }
 	        var t;
 	        for (r.setState({
@@ -10639,14 +10636,14 @@
 	  r.__u++ || c || r.setState({
 	    __a: r.__b = r.__v.__k[0]
 	  }), n.then(i, i);
-	}, D.prototype.componentWillUnmount = function () {
+	}, U.prototype.componentWillUnmount = function () {
 	  this.t = [];
-	}, D.prototype.render = function (n, e) {
+	}, U.prototype.render = function (n, e) {
 	  if (this.__b) {
 	    if (this.__v.__k) {
 	      var r = document.createElement("div"),
 	        o = this.__v.__k[0].__c;
-	      this.__v.__k[0] = L(this.__b, r, o.__O = o.__P);
+	      this.__v.__k[0] = I(this.__b, r, o.__O = o.__P);
 	    }
 	    this.__b = null;
 	  }
@@ -10670,7 +10667,7 @@
 	    r = n.i;
 	  e.componentWillUnmount = function () {
 	    D$1(null, e.l), e.l = null, e.i = null;
-	  }, e.i && e.i !== r && e.componentWillUnmount(), n.__v ? (e.l || (e.i = r, e.l = {
+	  }, e.i && e.i !== r && e.componentWillUnmount(), e.l || (e.i = r, e.l = {
 	    nodeType: 1,
 	    parentNode: r,
 	    childNodes: [],
@@ -10685,7 +10682,7 @@
 	    }
 	  }), D$1(y$1(P, {
 	    context: e.context
-	  }, n.__v), e.l)) : e.l && e.componentWillUnmount();
+	  }, n.__v), e.l);
 	}
 	function z(n, e) {
 	  var r = y$1(j, {
@@ -10696,7 +10693,7 @@
 	}
 	(V.prototype = new b$1()).__a = function (n) {
 	  var t = this,
-	    e = F(t.__v),
+	    e = D(t.__v),
 	    r = t.o.get(n);
 	  return r[0]++, function (u) {
 	    var o = function () {
@@ -10811,32 +10808,36 @@
 	  return !!n && n.$$typeof === B;
 	}
 	function sn(n) {
-	  return an(n) ? F$2.apply(null, arguments) : n;
+	  return an(n) && n.type === k$2;
 	}
 	function hn(n) {
-	  return !!n.__k && (D$1(null, n), !0);
+	  return an(n) ? F$2.apply(null, arguments) : n;
 	}
 	function vn(n) {
+	  return !!n.__k && (D$1(null, n), !0);
+	}
+	function dn(n) {
 	  return n && (n.base || 1 === n.nodeType && n) || null;
 	}
-	var dn = function (n, t) {
+	var pn = function (n, t) {
 	    return n(t);
 	  },
-	  pn = function (n, t) {
+	  mn = function (n, t) {
 	    return n(t);
 	  },
-	  mn = k$2;
-	function yn(n) {
+	  yn = k$2;
+	function _n(n) {
 	  n();
 	}
-	function _n(n) {
+	function bn(n) {
 	  return n;
 	}
-	function bn() {
-	  return [!1, yn];
+	function Sn() {
+	  return [!1, _n];
 	}
-	var Sn = y;
-	function gn(n, t) {
+	var gn = y,
+	  Cn = an;
+	function En(n, t) {
 	  var e = t(),
 	    r = h({
 	      h: {
@@ -10860,17 +10861,17 @@
 	    });
 	  }, [n]), e;
 	}
-	var Cn = {
+	var wn = {
 	  useState: h,
 	  useId: V$1,
 	  useReducer: s,
 	  useEffect: p,
 	  useLayoutEffect: y,
-	  useInsertionEffect: Sn,
-	  useTransition: bn,
-	  useDeferredValue: _n,
-	  useSyncExternalStore: gn,
-	  startTransition: yn,
+	  useInsertionEffect: gn,
+	  useTransition: Sn,
+	  useDeferredValue: bn,
+	  useSyncExternalStore: En,
+	  startTransition: _n,
 	  useRef: _,
 	  useImperativeHandle: A$1,
 	  useMemo: F$1,
@@ -10881,24 +10882,26 @@
 	  Children: O,
 	  render: G,
 	  hydrate: J,
-	  unmountComponentAtNode: hn,
+	  unmountComponentAtNode: vn,
 	  createPortal: z,
 	  createElement: y$1,
 	  createContext: G$1,
 	  createFactory: fn,
-	  cloneElement: sn,
+	  cloneElement: hn,
 	  createRef: _$1,
 	  Fragment: k$2,
 	  isValidElement: an,
-	  findDOMNode: vn,
+	  isElement: Cn,
+	  isFragment: sn,
+	  findDOMNode: dn,
 	  Component: b$1,
 	  PureComponent: w,
 	  memo: x,
 	  forwardRef: k,
-	  flushSync: pn,
-	  unstable_batchedUpdates: dn,
-	  StrictMode: mn,
-	  Suspense: D,
+	  flushSync: mn,
+	  unstable_batchedUpdates: pn,
+	  StrictMode: yn,
+	  Suspense: U,
 	  SuspenseList: V,
 	  lazy: M,
 	  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ln
@@ -13724,7 +13727,7 @@
 	    return [this.id, this.width, this.type, this.height, this.depth, this.weight].join(';');
 	  }
 	}
-	class ItemComponent extends Cn.Component {
+	class ItemComponent extends wn.Component {
 	  state = {
 	    hasError: false,
 	    text: '',
@@ -13816,65 +13819,65 @@
 	    text,
 	    hasError
 	  }) {
-	    return /*#__PURE__*/Cn.createElement("nav", {
+	    return /*#__PURE__*/wn.createElement("nav", {
 	      className: "panel"
-	    }, /*#__PURE__*/Cn.createElement("p", {
+	    }, /*#__PURE__*/wn.createElement("p", {
 	      className: "panel-heading field"
-	    }, /*#__PURE__*/Cn.createElement("div", {
+	    }, /*#__PURE__*/wn.createElement("div", {
 	      className: "level"
-	    }, /*#__PURE__*/Cn.createElement("div", {
+	    }, /*#__PURE__*/wn.createElement("div", {
 	      className: "level-left"
-	    }, /*#__PURE__*/Cn.createElement("div", {
+	    }, /*#__PURE__*/wn.createElement("div", {
 	      className: "level-item"
-	    }, /*#__PURE__*/Cn.createElement("p", {
+	    }, /*#__PURE__*/wn.createElement("p", {
 	      className: "subtitle is-5"
-	    }, /*#__PURE__*/Cn.createElement("strong", null, "Settings")))), /*#__PURE__*/Cn.createElement("div", {
+	    }, /*#__PURE__*/wn.createElement("strong", null, "Settings")))), /*#__PURE__*/wn.createElement("div", {
 	      className: "level-right"
-	    }, /*#__PURE__*/Cn.createElement("div", {
+	    }, /*#__PURE__*/wn.createElement("div", {
 	      className: "level-item"
-	    }, /*#__PURE__*/Cn.createElement("div", {
+	    }, /*#__PURE__*/wn.createElement("div", {
 	      className: "field has-addons"
-	    }, /*#__PURE__*/Cn.createElement("p", {
+	    }, /*#__PURE__*/wn.createElement("p", {
 	      className: "control"
-	    }, /*#__PURE__*/Cn.createElement("a", {
+	    }, /*#__PURE__*/wn.createElement("a", {
 	      href: "#",
 	      onClick: this.onImport,
 	      className: "button is-info is-light is-small is-rounded"
-	    }, "import")), /*#__PURE__*/Cn.createElement("p", {
+	    }, "import")), /*#__PURE__*/wn.createElement("p", {
 	      className: "control"
-	    }, /*#__PURE__*/Cn.createElement("a", {
+	    }, /*#__PURE__*/wn.createElement("a", {
 	      href: "#",
 	      onClick: this.onExport,
 	      className: "button is-success is-light is-small is-rounded"
-	    }, "export"))))))), /*#__PURE__*/Cn.createElement("form", {
+	    }, "export"))))))), /*#__PURE__*/wn.createElement("form", {
 	      onSubmit: this.addElement,
 	      action: "javascript:"
-	    }, /*#__PURE__*/Cn.createElement("div", {
+	    }, /*#__PURE__*/wn.createElement("div", {
 	      className: "panel-block"
-	    }, /*#__PURE__*/Cn.createElement("p", {
+	    }, /*#__PURE__*/wn.createElement("p", {
 	      className: "control has-icons-right"
-	    }, /*#__PURE__*/Cn.createElement("input", {
+	    }, /*#__PURE__*/wn.createElement("input", {
 	      value: text,
 	      onInput: this.setText,
 	      className: "input is-primary",
 	      type: "text",
 	      placeholder: "w;h;d;wg"
-	    }), hasError && /*#__PURE__*/Cn.createElement("p", {
+	    }), hasError && /*#__PURE__*/wn.createElement("p", {
 	      className: "help is-danger"
-	    }, "Incorrect syntax"))), /*#__PURE__*/Cn.createElement("p", {
+	    }, "Incorrect syntax"))), /*#__PURE__*/wn.createElement("p", {
 	      className: "panel-tabs"
-	    }, /*#__PURE__*/Cn.createElement("a", {
+	    }, /*#__PURE__*/wn.createElement("a", {
 	      href: "#",
 	      className: type === boxType ? "is-active" : "",
 	      onClick: () => this.setType(boxType)
-	    }, "Boxes"), /*#__PURE__*/Cn.createElement("a", {
+	    }, "Boxes"), /*#__PURE__*/wn.createElement("a", {
 	      href: "#",
 	      className: type === itemType ? "is-active" : "",
 	      onClick: () => this.setType(itemType)
-	    }, "Items"))), elements.filter(datum => datum.type === type).map(datum => /*#__PURE__*/Cn.createElement("label", {
+	    }, "Items"))), elements.filter(datum => datum.type === type).map(datum => /*#__PURE__*/wn.createElement("label", {
 	      key: datum.id,
 	      className: "panel-block"
-	    }, /*#__PURE__*/Cn.createElement("input", {
+	    }, /*#__PURE__*/wn.createElement("input", {
 	      type: "checkbox",
 	      checked: datum.enabled,
 	      onChange: () => this.switchEnabled(datum.id)
@@ -13883,7 +13886,7 @@
 	}
 
 	const playground = new Playground(document.getElementById('bp3'));
-	Cn.render( /*#__PURE__*/Cn.createElement(ItemComponent, {
+	wn.render( /*#__PURE__*/wn.createElement(ItemComponent, {
 	  playground: playground
 	}), document.getElementById('bp3-input'));
 
