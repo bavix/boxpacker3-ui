@@ -11434,8 +11434,9 @@
 	  const descriptors = Object.getOwnPropertyDescriptors(obj);
 	  const reducedDescriptors = {};
 	  forEach(descriptors, (descriptor, name) => {
-	    if (reducer(descriptor, name, obj) !== false) {
-	      reducedDescriptors[name] = descriptor;
+	    let ret;
+	    if ((ret = reducer(descriptor, name, obj)) !== false) {
+	      reducedDescriptors[name] = ret || descriptor;
 	    }
 	  });
 	  Object.defineProperties(obj, reducedDescriptors);
@@ -12157,10 +12158,6 @@
 	  return null;
 	}
 
-	const DEFAULT_CONTENT_TYPE = {
-	  'Content-Type': undefined
-	};
-
 	/**
 	 * It takes a string, tries to parse it, and if it fails, it returns the stringified version
 	 * of the input
@@ -12186,7 +12183,7 @@
 	}
 	const defaults = {
 	  transitional: transitionalDefaults,
-	  adapter: ['xhr', 'http'],
+	  adapter: platform.isNode ? 'http' : 'xhr',
 	  transformRequest: [function transformRequest(data, headers) {
 	    const contentType = headers.getContentType() || '';
 	    const hasJSONContentType = contentType.indexOf('application/json') > -1;
@@ -12267,15 +12264,13 @@
 	  },
 	  headers: {
 	    common: {
-	      'Accept': 'application/json, text/plain, */*'
+	      'Accept': 'application/json, text/plain, */*',
+	      'Content-Type': undefined
 	    }
 	  }
 	};
-	utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+	utils.forEach(['delete', 'get', 'head', 'post', 'put', 'patch'], method => {
 	  defaults.headers[method] = {};
-	});
-	utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-	  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
 	});
 	var defaults$1 = defaults;
 
@@ -12526,7 +12521,19 @@
 	  }
 	}
 	AxiosHeaders.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
-	utils.freezeMethods(AxiosHeaders.prototype);
+
+	// reserved names hotfix
+	utils.reduceDescriptors(AxiosHeaders.prototype, ({
+	  value
+	}, key) => {
+	  let mapped = key[0].toUpperCase() + key.slice(1); // map `set` => `Set`
+	  return {
+	    get: () => value,
+	    set(headerValue) {
+	      this[mapped] = headerValue;
+	    }
+	  };
+	});
 	utils.freezeMethods(AxiosHeaders);
 	var AxiosHeaders$1 = AxiosHeaders;
 
@@ -13182,7 +13189,7 @@
 	  return config;
 	}
 
-	const VERSION = "1.4.0";
+	const VERSION = "1.5.0";
 
 	const validators$1 = {};
 
@@ -13322,11 +13329,10 @@
 
 	    // Set config.method
 	    config.method = (config.method || this.defaults.method || 'get').toLowerCase();
-	    let contextHeaders;
 
 	    // Flatten headers
-	    contextHeaders = headers && utils.merge(headers.common, headers[config.method]);
-	    contextHeaders && utils.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'common'], method => {
+	    let contextHeaders = headers && utils.merge(headers.common, headers[config.method]);
+	    headers && utils.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'common'], method => {
 	      delete headers[method];
 	    });
 	    config.headers = AxiosHeaders$1.concat(contextHeaders, headers);
@@ -13697,6 +13703,7 @@
 	axios.mergeConfig = mergeConfig;
 	axios.AxiosHeaders = AxiosHeaders$1;
 	axios.formToJSON = thing => formDataToJSON(utils.isHTMLForm(thing) ? new FormData(thing) : thing);
+	axios.getAdapter = adapters.getAdapter;
 	axios.HttpStatusCode = HttpStatusCode$1;
 	axios.default = axios;
 
