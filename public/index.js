@@ -12978,7 +12978,8 @@
 	    // Specifically not if we're in a web worker, or react-native.
 	    if (platform.isStandardBrowserEnv) {
 	      // Add xsrf header
-	      const xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName && cookies.read(config.xsrfCookieName);
+	      // regarding CVE-2023-45857 config.withCredentials condition was removed temporarily
+	      const xsrfValue = isURLSameOrigin(fullPath) && config.xsrfCookieName && cookies.read(config.xsrfCookieName);
 	      if (xsrfValue) {
 	        requestHeaders.set(config.xsrfHeaderName, xsrfValue);
 	      }
@@ -13247,7 +13248,7 @@
 	  return config;
 	}
 
-	const VERSION = "1.5.1";
+	const VERSION = "1.6.0";
 
 	const validators$1 = {};
 
