@@ -31,7 +31,7 @@
     "@rollup/plugin-replace": "^5.0.5",
     "axios": "^1.6.0",
     "preact": "^10.18.2",
-    "rollup": "^4.2.0",
+    "rollup": "^4.3.0",
     "three": "^0.158.0",
     "uuid-color": "^0.1.1"
   }
