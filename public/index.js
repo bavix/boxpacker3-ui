@@ -10121,8 +10121,8 @@
 	  (!n.__d && (n.__d = !0) && i$1.push(n) && !x$2.__r++ || o$1 !== l$1.debounceRendering) && ((o$1 = l$1.debounceRendering) || r$1)(x$2);
 	}
 	function x$2() {
-	  var n, l, u, t, o, r, e, c, s;
-	  for (i$1.sort(f$1); n = i$1.shift();) n.__d && (l = i$1.length, t = void 0, r = (o = (u = n).__v).__e, c = [], s = [], (e = u.__P) && ((t = v$1({}, o)).__v = o.__v + 1, L$1(e, t, o, u.__n, void 0 !== e.ownerSVGElement, 32 & o.__u ? [r] : null, c, null == r ? m$1(o) : r, !!(32 & o.__u), s), t.__.__k[t.__i] = t, M$1(c, t, s), t.__e != r && k$2(t)), i$1.length > l && i$1.sort(f$1));
+	  var n, u, t, o, r, e, c, s, a;
+	  for (i$1.sort(f$1); n = i$1.shift();) n.__d && (u = i$1.length, o = void 0, e = (r = (t = n).__v).__e, s = [], a = [], (c = t.__P) && ((o = v$1({}, r)).__v = r.__v + 1, l$1.vnode && l$1.vnode(o), L$1(c, o, r, t.__n, void 0 !== c.ownerSVGElement, 32 & r.__u ? [e] : null, s, null == e ? m$1(r) : e, !!(32 & r.__u), a), o.__.__k[o.__i] = o, M$1(s, o, a), o.__e != e && k$2(o)), i$1.length > u && i$1.sort(f$1));
 	  x$2.__r = 0;
 	}
 	function C$1(n, l, u, t, i, o, r, f, e, a, h) {
