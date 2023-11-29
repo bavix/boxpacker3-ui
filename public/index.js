@@ -668,7 +668,7 @@
 				gl_FragColor = textureCube( envMap, vec3( flipEnvMap * vOutputDirection.x, vOutputDirection.yz ) );
 
 			}
-		`,blending:NoBlending,depthTest:false,depthWrite:false});}function _getCommonVertexShader(){return(/* glsl */`
+		`,blending:NoBlending,depthTest:false,depthWrite:false});}function _getCommonVertexShader(){return/* glsl */`
 
 		precision mediump float;
 		precision mediump int;
@@ -723,7 +723,7 @@
 			gl_Position = vec4( position, 1.0 );
 
 		}
-	`);}function WebGLCubeUVMaps(renderer){let cubeUVmaps=new WeakMap();let pmremGenerator=null;function get(texture){if(texture&&texture.isTexture){const mapping=texture.mapping;const isEquirectMap=mapping===EquirectangularReflectionMapping||mapping===EquirectangularRefractionMapping;const isCubeMap=mapping===CubeReflectionMapping||mapping===CubeRefractionMapping;// equirect/cube map to cubeUV conversion
+	`;}function WebGLCubeUVMaps(renderer){let cubeUVmaps=new WeakMap();let pmremGenerator=null;function get(texture){if(texture&&texture.isTexture){const mapping=texture.mapping;const isEquirectMap=mapping===EquirectangularReflectionMapping||mapping===EquirectangularRefractionMapping;const isCubeMap=mapping===CubeReflectionMapping||mapping===CubeRefractionMapping;// equirect/cube map to cubeUV conversion
 	if(isEquirectMap||isCubeMap){if(texture.isRenderTargetTexture&&texture.needsPMREMUpdate===true){texture.needsPMREMUpdate=false;let renderTarget=cubeUVmaps.get(texture);if(pmremGenerator===null)pmremGenerator=new PMREMGenerator(renderer);renderTarget=isEquirectMap?pmremGenerator.fromEquirectangular(texture,renderTarget):pmremGenerator.fromCubemap(texture,renderTarget);cubeUVmaps.set(texture,renderTarget);return renderTarget.texture;}else {if(cubeUVmaps.has(texture)){return cubeUVmaps.get(texture).texture;}else {const image=texture.image;if(isEquirectMap&&image&&image.height>0||isCubeMap&&image&&isCubeTextureComplete(image)){if(pmremGenerator===null)pmremGenerator=new PMREMGenerator(renderer);const renderTarget=isEquirectMap?pmremGenerator.fromEquirectangular(texture):pmremGenerator.fromCubemap(texture);cubeUVmaps.set(texture,renderTarget);texture.addEventListener('dispose',onTextureDispose);return renderTarget.texture;}else {// image not yet ready. try the conversion next frame
 	return null;}}}}}return texture;}function isCubeTextureComplete(image){let count=0;const length=6;for(let i=0;i<length;i++){if(image[i]!==undefined)count++;}return count===length;}function onTextureDispose(event){const texture=event.target;texture.removeEventListener('dispose',onTextureDispose);const cubemapUV=cubeUVmaps.get(texture);if(cubemapUV!==undefined){cubeUVmaps.delete(texture);cubemapUV.dispose();}}function dispose(){cubeUVmaps=new WeakMap();if(pmremGenerator!==null){pmremGenerator.dispose();pmremGenerator=null;}}return {get:get,dispose:dispose};}function WebGLExtensions(gl){const extensions={};function getExtension(name){if(extensions[name]!==undefined){return extensions[name];}let extension;switch(name){case'WEBGL_depth_texture':extension=gl.getExtension('WEBGL_depth_texture')||gl.getExtension('MOZ_WEBGL_depth_texture')||gl.getExtension('WEBKIT_WEBGL_depth_texture');break;case'EXT_texture_filter_anisotropic':extension=gl.getExtension('EXT_texture_filter_anisotropic')||gl.getExtension('MOZ_EXT_texture_filter_anisotropic')||gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');break;case'WEBGL_compressed_texture_s3tc':extension=gl.getExtension('WEBGL_compressed_texture_s3tc')||gl.getExtension('MOZ_WEBGL_compressed_texture_s3tc')||gl.getExtension('WEBKIT_WEBGL_compressed_texture_s3tc');break;case'WEBGL_compressed_texture_pvrtc':extension=gl.getExtension('WEBGL_compressed_texture_pvrtc')||gl.getExtension('WEBKIT_WEBGL_compressed_texture_pvrtc');break;default:extension=gl.getExtension(name);}extensions[name]=extension;return extension;}return {has:function(name){return getExtension(name)!==null;},init:function(capabilities){if(capabilities.isWebGL2){getExtension('EXT_color_buffer_float');}else {getExtension('WEBGL_depth_texture');getExtension('OES_texture_float');getExtension('OES_texture_half_float');getExtension('OES_texture_half_float_linear');getExtension('OES_standard_derivatives');getExtension('OES_element_index_uint');getExtension('OES_vertex_array_object');getExtension('ANGLE_instanced_arrays');}getExtension('OES_texture_float_linear');getExtension('EXT_color_buffer_half_float');getExtension('WEBGL_multisampled_render_to_texture');},get:function(name){const extension=getExtension(name);if(extension===null){console.warn('THREE.WebGLRenderer: '+name+' extension not supported.');}return extension;}};}function WebGLGeometries(gl,attributes,info,bindingStates){const geometries={};const wireframeAttributes=new WeakMap();function onGeometryDispose(event){const geometry=event.target;if(geometry.index!==null){attributes.remove(geometry.index);}for(const name in geometry.attributes){attributes.remove(geometry.attributes[name]);}for(const name in geometry.morphAttributes){const array=geometry.morphAttributes[name];for(let i=0,l=array.length;i<l;i++){attributes.remove(array[i]);}}geometry.removeEventListener('dispose',onGeometryDispose);delete geometries[geometry.id];const attribute=wireframeAttributes.get(geometry);if(attribute){attributes.remove(attribute);wireframeAttributes.delete(geometry);}bindingStates.releaseStatesOfGeometry(geometry);if(geometry.isInstancedBufferGeometry===true){delete geometry._maxInstanceCount;}//
 	info.memory.geometries--;}function get(object,geometry){if(geometries[geometry.id]===true)return geometry;geometry.addEventListener('dispose',onGeometryDispose);geometries[geometry.id]=true;info.memory.geometries++;return geometry;}function update(geometry){const geometryAttributes=geometry.attributes;// Updating index buffer in VAO now. See WebGLBindingStates.
@@ -5830,7 +5830,6 @@
 	  for (let i = array.length - 1; i >= 0; --i) {
 	    if (array[i] >= 65535) return true; // account for PRIMITIVE_RESTART_FIXED_INDEX, #24565
 	  }
-
 	  return false;
 	}
 
@@ -8044,7 +8043,6 @@
 	      if (n.lesser(49)) return true;
 	      // we don't know if it's prime: let the other functions figure it out
 	    }
-
 	    function millerRabinTest(n, a) {
 	      var nPrev = n.prev(),
 	        b = nPrev,
@@ -8207,13 +8205,11 @@
 	        if (xSign) {
 	          xDigit = highestPower2 - 1 - xDigit; // two's complement for negative numbers
 	        }
-
 	        yDivMod = divModAny(yRem, highestPower2);
 	        yDigit = yDivMod[1].toJSNumber();
 	        if (ySign) {
 	          yDigit = highestPower2 - 1 - yDigit; // two's complement for negative numbers
 	        }
-
 	        xRem = xDivMod[0];
 	        yRem = yDivMod[0];
 	        result.push(fn(xDigit, yDigit));
@@ -9832,7 +9828,6 @@
 	      }
 	    });
 	  }
-
 	  var isRaw = DEFAULT_IS_RAW;
 	  if (options.hasOwnProperty("raw")) {
 	    isRaw = options.raw;
@@ -9841,7 +9836,6 @@
 	  if (options.hasOwnProperty("alpha")) {
 	    alpha = Math.min(Math.max(options.alpha, 0), 1); // clamp to [0; 1]
 	  }
-
 	  if ("rgb" in receivers) {
 	    if (alpha === undefined) {
 	      receivers.rgb(red, green, blue);
