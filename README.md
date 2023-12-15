@@ -8,7 +8,7 @@ Debug helper boxpacker3
 go install github.com/bavix/boxpacker3-ui@latest
 ```
 
-Service start (default port `3000`):
+Service start (default port `8080`):
 ```sh
 boxpacker3-ui
 ```
