@@ -12767,7 +12767,7 @@
 	 * @returns {string} The combined URL
 	 */
 	function combineURLs(baseURL, relativeURL) {
-	  return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL;
+	  return relativeURL ? baseURL.replace(/\/?\/$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL;
 	}
 
 	/**
@@ -13312,7 +13312,7 @@
 	  return config;
 	}
 
-	const VERSION = "1.6.2";
+	const VERSION = "1.6.3";
 
 	const validators$1 = {};
 
