@@ -12114,7 +12114,6 @@
 	    });
 	  }
 	}
-	var InterceptorManager$1 = InterceptorManager;
 
 	var transitionalDefaults = {
 	  silentJSONParsing: true,
@@ -13402,8 +13401,8 @@
 	  constructor(instanceConfig) {
 	    this.defaults = instanceConfig;
 	    this.interceptors = {
-	      request: new InterceptorManager$1(),
-	      response: new InterceptorManager$1()
+	      request: new InterceptorManager(),
+	      response: new InterceptorManager()
 	    };
 	  }
 
@@ -13830,11 +13829,8 @@
 	axios.HttpStatusCode = HttpStatusCode$1;
 	axios.default = axios;
 
-	// this module should only have a default export
-	var axios$1 = axios;
-
 	async function api (url, data) {
-	  return await axios$1.post(url, data).then(resp => resp.data);
+	  return await axios.post(url, data).then(resp => resp.data);
 	}
 
 	const datumValidate = /^(\d+);(\d+);(\d+);(\d+)$/;
