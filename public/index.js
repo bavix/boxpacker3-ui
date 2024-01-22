@@ -1644,6 +1644,7 @@
 	    let performCursorZoom = false;
 	    const pointers = [];
 	    const pointerPositions = {};
+	    let controlActive = false;
 	    function getAutoRotationAngle(deltaTime) {
 	      if (deltaTime !== null) {
 	        return 2 * Math.PI / 60 * scope.autoRotateSpeed * deltaTime;
@@ -1652,8 +1653,8 @@
 	      }
 	    }
 	    function getZoomScale(delta) {
-	      const normalized_delta = Math.abs(delta) / (100 * (window.devicePixelRatio | 0));
-	      return Math.pow(0.95, scope.zoomSpeed * normalized_delta);
+	      const normalizedDelta = Math.abs(delta * 0.01);
+	      return Math.pow(0.95, scope.zoomSpeed * normalizedDelta);
 	    }
 	    function rotateLeft(angle) {
 	      sphericalDelta.theta -= angle;
@@ -2033,8 +2034,52 @@
 	      if (scope.enabled === false || scope.enableZoom === false || state !== STATE.NONE) return;
 	      event.preventDefault();
 	      scope.dispatchEvent(_startEvent);
-	      handleMouseWheel(event);
+	      handleMouseWheel(customWheelEvent(event));
 	      scope.dispatchEvent(_endEvent);
+	    }
+	    function customWheelEvent(event) {
+	      const mode = event.deltaMode;
+
+	      // minimal wheel event altered to meet delta-zoom demand
+	      const newEvent = {
+	        clientX: event.clientX,
+	        clientY: event.clientY,
+	        deltaY: event.deltaY
+	      };
+	      switch (mode) {
+	        case 1:
+	          // LINE_MODE
+	          newEvent.deltaY *= 16;
+	          break;
+	        case 2:
+	          // PAGE_MODE
+	          newEvent.deltaY *= 100;
+	          break;
+	      }
+
+	      // detect if event was triggered by pinching
+	      if (event.ctrlKey && !controlActive) {
+	        newEvent.deltaY *= 10;
+	      }
+	      return newEvent;
+	    }
+	    function interceptControlDown(event) {
+	      if (event.key === "Control") {
+	        controlActive = true;
+	        document.addEventListener('keyup', interceptControlUp, {
+	          passive: true,
+	          capture: true
+	        });
+	      }
+	    }
+	    function interceptControlUp(event) {
+	      if (event.key === "Control") {
+	        controlActive = false;
+	        document.removeEventListener('keyup', interceptControlUp, {
+	          passive: true,
+	          capture: true
+	        });
+	      }
 	    }
 	    function onKeyDown(event) {
 	      if (scope.enabled === false || scope.enablePan === false) return;
@@ -2145,6 +2190,10 @@
 	    scope.domElement.addEventListener('pointercancel', onPointerUp);
 	    scope.domElement.addEventListener('wheel', onMouseWheel, {
 	      passive: false
+	    });
+	    document.addEventListener('keydown', interceptControlDown, {
+	      passive: true,
+	      capture: true
 	    });
 
 	    // force an update at start
