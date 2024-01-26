@@ -12361,9 +12361,6 @@
 	    }
 	    const isFormData = utils$1.isFormData(data);
 	    if (isFormData) {
-	      if (!hasJSONContentType) {
-	        return data;
-	      }
 	      return hasJSONContentType ? JSON.stringify(formDataToJSON(data)) : data;
 	    }
 	    if (utils$1.isArrayBuffer(data) || utils$1.isBuffer(data) || utils$1.isStream(data) || utils$1.isFile(data) || utils$1.isBlob(data)) {
@@ -13361,7 +13358,7 @@
 	  return config;
 	}
 
-	const VERSION = "1.6.6";
+	const VERSION = "1.6.7";
 
 	const validators$1 = {};
 
@@ -13468,17 +13465,18 @@
 	    try {
 	      return await this._request(configOrUrl, config);
 	    } catch (err) {
-	      const dummy = {};
-	      if (Error.captureStackTrace) {
-	        Error.captureStackTrace(dummy);
-	      } else {
-	        dummy.stack = new Error().stack;
-	      }
-	      // slice off the Error: ... line
-	      dummy.stack = dummy.stack.replace(/^.+\n/, '');
-	      // match without the 2 top stack lines
-	      if (!err.stack.endsWith(dummy.stack.replace(/^.+\n.+\n/, ''))) {
-	        err.stack += '\n' + dummy.stack;
+	      if (err instanceof Error) {
+	        let dummy;
+	        Error.captureStackTrace ? Error.captureStackTrace(dummy = {}) : dummy = new Error();
+
+	        // slice off the Error: ... line
+	        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, '') : '';
+	        if (!err.stack) {
+	          err.stack = stack;
+	          // match without the 2 top stack lines
+	        } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ''))) {
+	          err.stack += '\n' + stack;
+	        }
 	      }
 	      throw err;
 	    }
