@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.14 - 2024-01-31
+
+### What's Changed
+
+* Bump bavix/.github from 0.1.9 to 0.2.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/99
+* Bump axios from 1.6.5 to 1.6.6 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/100
+* Bump bavix/.github from 0.2.0 to 0.2.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/101
+* Bump [@babel](https://github.com/babel)/core from 7.23.7 to 7.23.9 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/103
+* Bump axios from 1.6.6 to 1.6.7 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/102
+* Bump bavix/.github from 0.2.1 to 0.2.2 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/104
+* Bump three from 0.160.1 to 0.161.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/105
+
+**Full Changelog**: https://github.com/bavix/boxpacker3-ui/compare/0.0.13...0.0.14
+
 ## 0.0.13 - 2024-01-22
 
 ### What's Changed
