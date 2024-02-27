@@ -8,4 +8,4 @@ jobs:
   build_bp3ui:
     permissions:
       contents: write
-    uses: bavix/.github/.github/workflows/go-release-binary.yml@0.2.3
+    uses: bavix/.github/.github/workflows/go-release-binary.yml@0.2.4
