@@ -13383,7 +13383,9 @@ void main() {
 	  });
 	}
 
-	const headersToObject = thing => thing instanceof AxiosHeaders$1 ? thing.toJSON() : thing;
+	const headersToObject = thing => thing instanceof AxiosHeaders$1 ? {
+	  ...thing
+	} : thing;
 
 	/**
 	 * Config-specific merge-function which creates a new config-object
@@ -13483,7 +13485,7 @@ void main() {
 	  return config;
 	}
 
-	const VERSION = "1.6.7";
+	const VERSION = "1.6.8";
 
 	const validators$1 = {};
 
