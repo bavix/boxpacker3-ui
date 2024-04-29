@@ -12525,7 +12525,6 @@ void main() {
 	utils$1.forEach(['delete', 'get', 'head', 'post', 'put', 'patch'], method => {
 	  defaults.headers[method] = {};
 	});
-	var defaults$1 = defaults;
 
 	// RawAxiosHeaders whose duplicates are ignored by node
 	// c.f. https://nodejs.org/api/http.html#http_message_headers
@@ -12788,7 +12787,6 @@ void main() {
 	  };
 	});
 	utils$1.freezeMethods(AxiosHeaders);
-	var AxiosHeaders$1 = AxiosHeaders;
 
 	/**
 	 * Transform the data for a request or a response
@@ -12799,9 +12797,9 @@ void main() {
 	 * @returns {*} The resulting transformed data
 	 */
 	function transformData(fns, response) {
-	  const config = this || defaults$1;
+	  const config = this || defaults;
 	  const context = response || config;
-	  const headers = AxiosHeaders$1.from(context.headers);
+	  const headers = AxiosHeaders.from(context.headers);
 	  let data = context.data;
 	  utils$1.forEach(fns, function transform(fn) {
 	    data = fn.call(config, data, headers.normalize(), response ? response.status : undefined);
@@ -13048,7 +13046,7 @@ void main() {
 	var xhrAdapter = isXHRAdapterSupported && function (config) {
 	  return new Promise(function dispatchXhrRequest(resolve, reject) {
 	    let requestData = config.data;
-	    const requestHeaders = AxiosHeaders$1.from(config.headers).normalize();
+	    const requestHeaders = AxiosHeaders.from(config.headers).normalize();
 	    let {
 	      responseType,
 	      withXSRFToken
@@ -13090,7 +13088,7 @@ void main() {
 	        return;
 	      }
 	      // Prepare the response
-	      const responseHeaders = AxiosHeaders$1.from('getAllResponseHeaders' in request && request.getAllResponseHeaders());
+	      const responseHeaders = AxiosHeaders.from('getAllResponseHeaders' in request && request.getAllResponseHeaders());
 	      const responseData = !responseType || responseType === 'text' || responseType === 'json' ? request.responseText : request.response;
 	      const response = {
 	        data: responseData,
@@ -13317,20 +13315,20 @@ void main() {
 	 */
 	function dispatchRequest(config) {
 	  throwIfCancellationRequested(config);
-	  config.headers = AxiosHeaders$1.from(config.headers);
+	  config.headers = AxiosHeaders.from(config.headers);
 
 	  // Transform request data
 	  config.data = transformData.call(config, config.transformRequest);
 	  if (['post', 'put', 'patch'].indexOf(config.method) !== -1) {
 	    config.headers.setContentType('application/x-www-form-urlencoded', false);
 	  }
-	  const adapter = adapters.getAdapter(config.adapter || defaults$1.adapter);
+	  const adapter = adapters.getAdapter(config.adapter || defaults.adapter);
 	  return adapter(config).then(function onAdapterResolution(response) {
 	    throwIfCancellationRequested(config);
 
 	    // Transform response data
 	    response.data = transformData.call(config, config.transformResponse, response);
-	    response.headers = AxiosHeaders$1.from(response.headers);
+	    response.headers = AxiosHeaders.from(response.headers);
 	    return response;
 	  }, function onAdapterRejection(reason) {
 	    if (!isCancel(reason)) {
@@ -13339,14 +13337,14 @@ void main() {
 	      // Transform response data
 	      if (reason && reason.response) {
 	        reason.response.data = transformData.call(config, config.transformResponse, reason.response);
-	        reason.response.headers = AxiosHeaders$1.from(reason.response.headers);
+	        reason.response.headers = AxiosHeaders.from(reason.response.headers);
 	      }
 	    }
 	    return Promise.reject(reason);
 	  });
 	}
 
-	const headersToObject = thing => thing instanceof AxiosHeaders$1 ? {
+	const headersToObject = thing => thing instanceof AxiosHeaders ? {
 	  ...thing
 	} : thing;
 
@@ -13614,7 +13612,7 @@ void main() {
 	    headers && utils$1.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'common'], method => {
 	      delete headers[method];
 	    });
-	    config.headers = AxiosHeaders$1.concat(contextHeaders, headers);
+	    config.headers = AxiosHeaders.concat(contextHeaders, headers);
 
 	    // filter out skipped interceptors
 	    const requestInterceptorChain = [];
@@ -13705,7 +13703,6 @@ void main() {
 	  Axios.prototype[method] = generateHTTPMethod();
 	  Axios.prototype[method + 'Form'] = generateHTTPMethod(true);
 	});
-	var Axios$1 = Axios;
 
 	/**
 	 * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -13812,7 +13809,6 @@ void main() {
 	    };
 	  }
 	}
-	var CancelToken$1 = CancelToken;
 
 	/**
 	 * Syntactic sugar for invoking a function and expanding an array for arguments.
@@ -13920,7 +13916,6 @@ void main() {
 	Object.entries(HttpStatusCode).forEach(([key, value]) => {
 	  HttpStatusCode[value] = key;
 	});
-	var HttpStatusCode$1 = HttpStatusCode;
 
 	/**
 	 * Create an instance of Axios
@@ -13930,11 +13925,11 @@ void main() {
 	 * @returns {Axios} A new instance of Axios
 	 */
 	function createInstance(defaultConfig) {
-	  const context = new Axios$1(defaultConfig);
-	  const instance = bind(Axios$1.prototype.request, context);
+	  const context = new Axios(defaultConfig);
+	  const instance = bind(Axios.prototype.request, context);
 
 	  // Copy axios.prototype to instance
-	  utils$1.extend(instance, Axios$1.prototype, context, {
+	  utils$1.extend(instance, Axios.prototype, context, {
 	    allOwnKeys: true
 	  });
 
@@ -13951,14 +13946,14 @@ void main() {
 	}
 
 	// Create the default instance to be exported
-	const axios = createInstance(defaults$1);
+	const axios = createInstance(defaults);
 
 	// Expose Axios class to allow class inheritance
-	axios.Axios = Axios$1;
+	axios.Axios = Axios;
 
 	// Expose Cancel & CancelToken
 	axios.CanceledError = CanceledError;
-	axios.CancelToken = CancelToken$1;
+	axios.CancelToken = CancelToken;
 	axios.isCancel = isCancel;
 	axios.VERSION = VERSION;
 	axios.toFormData = toFormData;
@@ -13980,10 +13975,10 @@ void main() {
 
 	// Expose mergeConfig
 	axios.mergeConfig = mergeConfig;
-	axios.AxiosHeaders = AxiosHeaders$1;
+	axios.AxiosHeaders = AxiosHeaders;
 	axios.formToJSON = thing => formDataToJSON(utils$1.isHTMLForm(thing) ? new FormData(thing) : thing);
 	axios.getAdapter = adapters.getAdapter;
-	axios.HttpStatusCode = HttpStatusCode$1;
+	axios.HttpStatusCode = HttpStatusCode;
 	axios.default = axios;
 
 	async function api (url, data) {
