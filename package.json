@@ -29,7 +29,7 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-replace": "^5.0.5",
-    "axios": "^1.7.1",
+    "axios": "^1.7.2",
     "preact": "^10.22.0",
     "rollup": "^4.17.2",
     "three": "^0.164.1",
