@@ -13505,11 +13505,11 @@ void main() {
 	    loaded
 	  }));
 	};
-	const isFetchSupported = typeof fetch !== 'undefined';
-	const isReadableStreamSupported = isFetchSupported && typeof ReadableStream !== 'undefined';
+	const isFetchSupported = typeof fetch === 'function' && typeof Request === 'function' && typeof Response === 'function';
+	const isReadableStreamSupported = isFetchSupported && typeof ReadableStream === 'function';
 
 	// used only inside the fetch adapter
-	const encodeText = isFetchSupported && (typeof TextEncoder !== 'undefined' ? (encoder => str => encoder.encode(str))(new TextEncoder()) : async str => new Uint8Array(await new Response(str).arrayBuffer()));
+	const encodeText = isFetchSupported && (typeof TextEncoder === 'function' ? (encoder => str => encoder.encode(str))(new TextEncoder()) : async str => new Uint8Array(await new Response(str).arrayBuffer()));
 	const supportsRequestStream = isReadableStreamSupported && (() => {
 	  let duplexAccessed = false;
 	  const hasContentType = new Request(platform.origin, {
@@ -13760,7 +13760,7 @@ void main() {
 	  });
 	}
 
-	const VERSION = "1.7.1";
+	const VERSION = "1.7.2";
 
 	const validators$1 = {};
 
