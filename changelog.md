@@ -1,5 +1,66 @@
 # Changelog
 
+## 0.0.15 - 2024-06-06
+
+### What's Changed
+
+* Bump preact from 10.19.3 to 10.19.4 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/106
+* Bump bavix/.github from 0.2.2 to 0.2.3 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/108
+* Bump rollup from 4.9.6 to 4.10.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/107
+* Bump rollup from 4.10.0 to 4.11.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/109
+* Bump rollup from 4.11.0 to 4.12.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/110
+* Bump preact from 10.19.4 to 10.19.5 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/111
+* Configure Mend Bolt for GitHub by [@mend-bolt-for-github](https://github.com/mend-bolt-for-github) in https://github.com/bavix/boxpacker3-ui/pull/112
+* Bump preact from 10.19.5 to 10.19.6 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/113
+* Bump bavix/.github from 0.2.3 to 0.2.4 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/114
+* Bump [@babel](https://github.com/babel)/core from 7.23.9 to 7.24.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/115
+* Bump three from 0.161.0 to 0.162.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/116
+* Bump rollup from 4.12.0 to 4.12.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/117
+* Bump rollup from 4.12.1 to 4.13.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/118
+* Bump axios from 1.6.7 to 1.6.8 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/119
+* Bump preact from 10.19.6 to 10.19.7 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/120
+* Bump [@babel](https://github.com/babel)/core from 7.24.0 to 7.24.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/121
+* Bump [@babel](https://github.com/babel)/preset-react from 7.23.3 to 7.24.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/122
+* Bump [@babel](https://github.com/babel)/core from 7.24.1 to 7.24.3 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/123
+* Bump preact from 10.19.7 to 10.20.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/124
+* Bump preact from 10.20.0 to 10.20.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/125
+* Bump bavix/.github from 0.2.4 to 0.2.5 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/126
+* Bump rollup from 4.13.0 to 4.13.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/127
+* Bump three from 0.162.0 to 0.163.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/129
+* Bump rollup from 4.13.1 to 4.13.2 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/128
+* Bump rollup from 4.13.2 to 4.14.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/130
+* Bump [@babel](https://github.com/babel)/core from 7.24.3 to 7.24.4 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/131
+* Bump rollup from 4.14.0 to 4.14.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/132
+* Bump preact from 10.20.1 to 10.20.2 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/133
+* Bump rollup from 4.14.1 to 4.14.2 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/134
+* Bump rollup from 4.14.2 to 4.14.3 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/135
+* Bump rollup from 4.14.3 to 4.16.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/136
+* Bump rollup from 4.16.1 to 4.16.4 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/137
+* Bump three from 0.163.0 to 0.164.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/138
+* Bump rollup from 4.16.4 to 4.17.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/139
+* Bump rollup from 4.17.1 to 4.17.2 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/141
+* Bump [@babel](https://github.com/babel)/core from 7.24.4 to 7.24.5 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/142
+* Bump preact from 10.20.2 to 10.21.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/140
+* Bump preact from 10.21.0 to 10.22.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/143
+* Bump axios from 1.6.8 to 1.7.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/144
+* Bump rollup from 4.17.2 to 4.18.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/145
+* Bump axios from 1.7.1 to 1.7.2 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/146
+* Bump [@rollup](https://github.com/rollup)/plugin-commonjs from 25.0.7 to 25.0.8 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/147
+* Bump [@babel](https://github.com/babel)/preset-react from 7.24.1 to 7.24.6 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/149
+* Bump [@babel](https://github.com/babel)/core from 7.24.5 to 7.24.6 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/148
+* Bump three from 0.164.1 to 0.165.0 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/150
+* Bump [@babel](https://github.com/babel)/core from 7.24.6 to 7.24.7 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/151
+* Bump [@rollup](https://github.com/rollup)/plugin-replace from 5.0.5 to 5.0.6 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/152
+* Bump [@babel](https://github.com/babel)/preset-react from 7.24.6 to 7.24.7 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/153
+* Bump [@rollup](https://github.com/rollup)/plugin-commonjs from 25.0.8 to 26.0.1 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/154
+* Bump [@rollup](https://github.com/rollup)/plugin-replace from 5.0.6 to 5.0.7 by [@dependabot](https://github.com/dependabot) in https://github.com/bavix/boxpacker3-ui/pull/155
+
+### New Contributors
+
+* [@mend-bolt-for-github](https://github.com/mend-bolt-for-github) made their first contribution in https://github.com/bavix/boxpacker3-ui/pull/112
+
+**Full Changelog**: https://github.com/bavix/boxpacker3-ui/compare/0.0.14...0.0.15
+
 ## 0.0.14 - 2024-01-31
 
 ### What's Changed
