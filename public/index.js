@@ -11942,7 +11942,10 @@ void main() {
 	  code && (this.code = code);
 	  config && (this.config = config);
 	  request && (this.request = request);
-	  response && (this.response = response);
+	  if (response) {
+	    this.response = response;
+	    this.status = response.status ? response.status : null;
+	  }
 	}
 	utils$1.inherits(AxiosError, Error, {
 	  toJSON: function toJSON() {
@@ -11961,7 +11964,7 @@ void main() {
 	      // Axios
 	      config: utils$1.toJSONObject(this.config),
 	      code: this.code,
-	      status: this.response && this.response.status ? this.response.status : null
+	      status: this.status
 	    };
 	  }
 	});
@@ -12358,6 +12361,7 @@ void main() {
 	};
 
 	const hasBrowserEnv = typeof window !== 'undefined' && typeof document !== 'undefined';
+	const _navigator = typeof navigator === 'object' && navigator || undefined;
 
 	/**
 	 * Determine if we're running in a standard browser environment
@@ -12376,9 +12380,7 @@ void main() {
 	 *
 	 * @returns {boolean}
 	 */
-	const hasStandardBrowserEnv = (product => {
-	  return hasBrowserEnv && ['ReactNative', 'NativeScript', 'NS'].indexOf(product) < 0;
-	})(typeof navigator !== 'undefined' && navigator.product);
+	const hasStandardBrowserEnv = hasBrowserEnv && (!_navigator || ['ReactNative', 'NativeScript', 'NS'].indexOf(_navigator.product) < 0);
 
 	/**
 	 * Determine if we're running in a standard browser webWorker environment
@@ -12401,6 +12403,7 @@ void main() {
 		hasBrowserEnv: hasBrowserEnv,
 		hasStandardBrowserEnv: hasStandardBrowserEnv,
 		hasStandardBrowserWebWorkerEnv: hasStandardBrowserWebWorkerEnv,
+		navigator: _navigator,
 		origin: origin
 	});
 
@@ -13062,7 +13065,7 @@ void main() {
 	// Standard browser envs have full support of the APIs needed to test
 	// whether the request URL is of the same origin as current location.
 	function standardBrowserEnv() {
-	  const msie = /(msie|trident)/i.test(navigator.userAgent);
+	  const msie = platform.navigator && /(msie|trident)/i.test(platform.navigator.userAgent);
 	  const urlParsingNode = document.createElement('a');
 	  let originURL;
 
@@ -13699,6 +13702,10 @@ void main() {
 	    if (!utils$1.isString(withCredentials)) {
 	      withCredentials = withCredentials ? 'include' : 'omit';
 	    }
+
+	    // Cloudflare Workers throws when credentials are defined
+	    // see https://github.com/cloudflare/workerd/issues/902
+	    const isCredentialsSupported = "credentials" in Request.prototype;
 	    request = new Request(url, {
 	      ...fetchOptions,
 	      signal: composedSignal,
@@ -13706,7 +13713,7 @@ void main() {
 	      headers: headers.normalize().toJSON(),
 	      body: data,
 	      duplex: "half",
-	      credentials: withCredentials
+	      credentials: isCredentialsSupported ? withCredentials : undefined
 	    });
 	    let response = await fetch(request);
 	    const isStreamResponse = supportsResponseStream && (responseType === 'stream' || responseType === 'response');
@@ -13856,7 +13863,7 @@ void main() {
 	  });
 	}
 
-	const VERSION = "1.7.4";
+	const VERSION = "1.7.5";
 
 	const validators$1 = {};
 
