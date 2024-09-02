@@ -13509,38 +13509,41 @@ void main() {
 	};
 
 	const composeSignals = (signals, timeout) => {
-	  let controller = new AbortController();
-	  let aborted;
-	  const onabort = function (cancel) {
-	    if (!aborted) {
-	      aborted = true;
-	      unsubscribe();
-	      const err = cancel instanceof Error ? cancel : this.reason;
-	      controller.abort(err instanceof AxiosError ? err : new CanceledError(err instanceof Error ? err.message : err));
-	    }
-	  };
-	  let timer = timeout && setTimeout(() => {
-	    onabort(new AxiosError(`timeout ${timeout} of ms exceeded`, AxiosError.ETIMEDOUT));
-	  }, timeout);
-	  const unsubscribe = () => {
-	    if (signals) {
-	      timer && clearTimeout(timer);
-	      timer = null;
-	      signals.forEach(signal => {
-	        signal && (signal.removeEventListener ? signal.removeEventListener('abort', onabort) : signal.unsubscribe(onabort));
-	      });
-	      signals = null;
-	    }
-	  };
-	  signals.forEach(signal => signal && signal.addEventListener && signal.addEventListener('abort', onabort));
 	  const {
-	    signal
-	  } = controller;
-	  signal.unsubscribe = unsubscribe;
-	  return [signal, () => {
-	    timer && clearTimeout(timer);
-	    timer = null;
-	  }];
+	    length
+	  } = signals = signals ? signals.filter(Boolean) : [];
+	  if (timeout || length) {
+	    let controller = new AbortController();
+	    let aborted;
+	    const onabort = function (reason) {
+	      if (!aborted) {
+	        aborted = true;
+	        unsubscribe();
+	        const err = reason instanceof Error ? reason : this.reason;
+	        controller.abort(err instanceof AxiosError ? err : new CanceledError(err instanceof Error ? err.message : err));
+	      }
+	    };
+	    let timer = timeout && setTimeout(() => {
+	      timer = null;
+	      onabort(new AxiosError(`timeout ${timeout} of ms exceeded`, AxiosError.ETIMEDOUT));
+	    }, timeout);
+	    const unsubscribe = () => {
+	      if (signals) {
+	        timer && clearTimeout(timer);
+	        timer = null;
+	        signals.forEach(signal => {
+	          signal.unsubscribe ? signal.unsubscribe(onabort) : signal.removeEventListener('abort', onabort);
+	        });
+	        signals = null;
+	      }
+	    };
+	    signals.forEach(signal => signal.addEventListener('abort', onabort));
+	    const {
+	      signal
+	    } = controller;
+	    signal.unsubscribe = () => utils$1.asap(unsubscribe);
+	    return signal;
+	  }
 	};
 
 	const streamChunk = function* (chunk, chunkSize) {
@@ -13557,13 +13560,34 @@ void main() {
 	    pos = end;
 	  }
 	};
-	const readBytes = async function* (iterable, chunkSize, encode) {
-	  for await (const chunk of iterable) {
-	    yield* streamChunk(ArrayBuffer.isView(chunk) ? chunk : await encode(String(chunk)), chunkSize);
+	const readBytes = async function* (iterable, chunkSize) {
+	  for await (const chunk of readStream(iterable)) {
+	    yield* streamChunk(chunk, chunkSize);
 	  }
 	};
-	const trackStream = (stream, chunkSize, onProgress, onFinish, encode) => {
-	  const iterator = readBytes(stream, chunkSize, encode);
+	const readStream = async function* (stream) {
+	  if (stream[Symbol.asyncIterator]) {
+	    yield* stream;
+	    return;
+	  }
+	  const reader = stream.getReader();
+	  try {
+	    for (;;) {
+	      const {
+	        done,
+	        value
+	      } = await reader.read();
+	      if (done) {
+	        break;
+	      }
+	      yield value;
+	    }
+	  } finally {
+	    await reader.cancel();
+	  }
+	};
+	const trackStream = (stream, chunkSize, onProgress, onFinish) => {
+	  const iterator = readBytes(stream, chunkSize);
 	  let bytes = 0;
 	  let done;
 	  let _onFinish = e => {
@@ -13648,7 +13672,11 @@ void main() {
 	    return body.size;
 	  }
 	  if (utils$1.isSpecCompliantForm(body)) {
-	    return (await new Request(body).arrayBuffer()).byteLength;
+	    const _request = new Request(platform.origin, {
+	      method: 'POST',
+	      body
+	    });
+	    return (await _request.arrayBuffer()).byteLength;
 	  }
 	  if (utils$1.isArrayBufferView(body) || utils$1.isArrayBuffer(body)) {
 	    return body.byteLength;
@@ -13680,14 +13708,11 @@ void main() {
 	    fetchOptions
 	  } = resolveConfig(config);
 	  responseType = responseType ? (responseType + '').toLowerCase() : 'text';
-	  let [composedSignal, stopTimeout] = signal || cancelToken || timeout ? composeSignals([signal, cancelToken], timeout) : [];
-	  let finished, request;
-	  const onFinish = () => {
-	    !finished && setTimeout(() => {
-	      composedSignal && composedSignal.unsubscribe();
-	    });
-	    finished = true;
-	  };
+	  let composedSignal = composeSignals([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
+	  let request;
+	  const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
+	    composedSignal.unsubscribe();
+	  });
 	  let requestContentLength;
 	  try {
 	    if (onUploadProgress && supportsRequestStream && method !== 'get' && method !== 'head' && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
@@ -13702,7 +13727,7 @@ void main() {
 	      }
 	      if (_request.body) {
 	        const [onProgress, flush] = progressEventDecorator(requestContentLength, progressEventReducer(asyncDecorator(onUploadProgress)));
-	        data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush, encodeText);
+	        data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
 	      }
 	    }
 	    if (!utils$1.isString(withCredentials)) {
@@ -13723,7 +13748,7 @@ void main() {
 	    });
 	    let response = await fetch(request);
 	    const isStreamResponse = supportsResponseStream && (responseType === 'stream' || responseType === 'response');
-	    if (supportsResponseStream && (onDownloadProgress || isStreamResponse)) {
+	    if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
 	      const options = {};
 	      ['status', 'statusText', 'headers'].forEach(prop => {
 	        options[prop] = response[prop];
@@ -13732,13 +13757,12 @@ void main() {
 	      const [onProgress, flush] = onDownloadProgress && progressEventDecorator(responseContentLength, progressEventReducer(asyncDecorator(onDownloadProgress), true)) || [];
 	      response = new Response(trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
 	        flush && flush();
-	        isStreamResponse && onFinish();
-	      }, encodeText), options);
+	        unsubscribe && unsubscribe();
+	      }), options);
 	    }
 	    responseType = responseType || 'text';
 	    let responseData = await resolvers[utils$1.findKey(resolvers, responseType) || 'text'](response, config);
-	    !isStreamResponse && onFinish();
-	    stopTimeout && stopTimeout();
+	    !isStreamResponse && unsubscribe && unsubscribe();
 	    return await new Promise((resolve, reject) => {
 	      settle(resolve, reject, {
 	        data: responseData,
@@ -13750,7 +13774,7 @@ void main() {
 	      });
 	    });
 	  } catch (err) {
-	    onFinish();
+	    unsubscribe && unsubscribe();
 	    if (err && err.name === 'TypeError' && /fetch/i.test(err.message)) {
 	      throw Object.assign(new AxiosError('Network Error', AxiosError.ERR_NETWORK, config, request), {
 	        cause: err.cause || err
@@ -13869,7 +13893,7 @@ void main() {
 	  });
 	}
 
-	const VERSION = "1.7.5";
+	const VERSION = "1.7.7";
 
 	const validators$1 = {};
 
@@ -14219,6 +14243,15 @@ void main() {
 	    if (index !== -1) {
 	      this._listeners.splice(index, 1);
 	    }
+	  }
+	  toAbortSignal() {
+	    const controller = new AbortController();
+	    const abort = err => {
+	      controller.abort(err);
+	    };
+	    this.subscribe(abort);
+	    controller.signal.unsubscribe = () => this.unsubscribe(abort);
+	    return controller.signal;
 	  }
 
 	  /**
