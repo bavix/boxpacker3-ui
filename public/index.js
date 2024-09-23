@@ -7261,7 +7261,6 @@ void main() {
 	}
 
 	var v3 = v35('v3', 0x30, md5);
-	var v3$1 = v3;
 
 	function v4(options, buf, offset) {
 	  options = options || {};
@@ -7357,7 +7356,6 @@ void main() {
 	}
 
 	var v5 = v35('v5', 0x50, sha1);
-	var v5$1 = v5;
 
 	var nil = '00000000-0000-0000-0000-000000000000';
 
@@ -7374,9 +7372,9 @@ void main() {
 		parse: parse,
 		stringify: stringify,
 		v1: v1,
-		v3: v3$1,
+		v3: v3,
 		v4: v4,
-		v5: v5$1,
+		v5: v5,
 		validate: validate,
 		version: version
 	});
@@ -12528,7 +12526,7 @@ void main() {
 	      }
 	    }
 	  }
-	  return (encoder || JSON.stringify)(rawValue);
+	  return (0, JSON.stringify)(rawValue);
 	}
 	const defaults = {
 	  transitional: transitionalDefaults,
@@ -13547,7 +13545,7 @@ void main() {
 
 	const streamChunk = function* (chunk, chunkSize) {
 	  let len = chunk.byteLength;
-	  if (!chunkSize || len < chunkSize) {
+	  if (len < chunkSize) {
 	    yield chunk;
 	    return;
 	  }
