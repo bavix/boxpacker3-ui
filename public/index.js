@@ -6849,8 +6849,6 @@ void main() {
 	  }
 	}
 
-	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
 	var lib$1 = {};
 
 	// Unique ID creation requires a high quality random # generator. In the browser we therefore
@@ -7381,2706 +7379,2751 @@ void main() {
 
 	var BigInteger = {exports: {}};
 
-	(function (module) {
-	  var bigInt = function (undefined$1) {
+	var hasRequiredBigInteger;
+	function requireBigInteger() {
+	  if (hasRequiredBigInteger) return BigInteger.exports;
+	  hasRequiredBigInteger = 1;
+	  (function (module) {
+	    var bigInt = function (undefined$1) {
 
-	    var BASE = 1e7,
-	      LOG_BASE = 7,
-	      MAX_INT = 9007199254740992,
-	      MAX_INT_ARR = smallToArray(MAX_INT),
-	      DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
-	    var supportsNativeBigInt = typeof BigInt === "function";
-	    function Integer(v, radix, alphabet, caseSensitive) {
-	      if (typeof v === "undefined") return Integer[0];
-	      if (typeof radix !== "undefined") return +radix === 10 && !alphabet ? parseValue(v) : parseBase(v, radix, alphabet, caseSensitive);
-	      return parseValue(v);
-	    }
-	    function BigInteger(value, sign) {
-	      this.value = value;
-	      this.sign = sign;
-	      this.isSmall = false;
-	    }
-	    BigInteger.prototype = Object.create(Integer.prototype);
-	    function SmallInteger(value) {
-	      this.value = value;
-	      this.sign = value < 0;
-	      this.isSmall = true;
-	    }
-	    SmallInteger.prototype = Object.create(Integer.prototype);
-	    function NativeBigInt(value) {
-	      this.value = value;
-	    }
-	    NativeBigInt.prototype = Object.create(Integer.prototype);
-	    function isPrecise(n) {
-	      return -MAX_INT < n && n < MAX_INT;
-	    }
-	    function smallToArray(n) {
-	      // For performance reasons doesn't reference BASE, need to change this function if BASE changes
-	      if (n < 1e7) return [n];
-	      if (n < 1e14) return [n % 1e7, Math.floor(n / 1e7)];
-	      return [n % 1e7, Math.floor(n / 1e7) % 1e7, Math.floor(n / 1e14)];
-	    }
-	    function arrayToSmall(arr) {
-	      // If BASE changes this function may need to change
-	      trim(arr);
-	      var length = arr.length;
-	      if (length < 4 && compareAbs(arr, MAX_INT_ARR) < 0) {
-	        switch (length) {
-	          case 0:
-	            return 0;
-	          case 1:
-	            return arr[0];
-	          case 2:
-	            return arr[0] + arr[1] * BASE;
-	          default:
-	            return arr[0] + (arr[1] + arr[2] * BASE) * BASE;
-	        }
+	      var BASE = 1e7,
+	        LOG_BASE = 7,
+	        MAX_INT = 9007199254740992,
+	        MAX_INT_ARR = smallToArray(MAX_INT),
+	        DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
+	      var supportsNativeBigInt = typeof BigInt === "function";
+	      function Integer(v, radix, alphabet, caseSensitive) {
+	        if (typeof v === "undefined") return Integer[0];
+	        if (typeof radix !== "undefined") return +radix === 10 && !alphabet ? parseValue(v) : parseBase(v, radix, alphabet, caseSensitive);
+	        return parseValue(v);
 	      }
-	      return arr;
-	    }
-	    function trim(v) {
-	      var i = v.length;
-	      while (v[--i] === 0);
-	      v.length = i + 1;
-	    }
-	    function createArray(length) {
-	      // function shamelessly stolen from Yaffle's library https://github.com/Yaffle/BigInteger
-	      var x = new Array(length);
-	      var i = -1;
-	      while (++i < length) {
-	        x[i] = 0;
+	      function BigInteger(value, sign) {
+	        this.value = value;
+	        this.sign = sign;
+	        this.isSmall = false;
 	      }
-	      return x;
-	    }
-	    function truncate(n) {
-	      if (n > 0) return Math.floor(n);
-	      return Math.ceil(n);
-	    }
-	    function add(a, b) {
-	      // assumes a and b are arrays with a.length >= b.length
-	      var l_a = a.length,
-	        l_b = b.length,
-	        r = new Array(l_a),
-	        carry = 0,
-	        base = BASE,
-	        sum,
-	        i;
-	      for (i = 0; i < l_b; i++) {
-	        sum = a[i] + b[i] + carry;
-	        carry = sum >= base ? 1 : 0;
-	        r[i] = sum - carry * base;
+	      BigInteger.prototype = Object.create(Integer.prototype);
+	      function SmallInteger(value) {
+	        this.value = value;
+	        this.sign = value < 0;
+	        this.isSmall = true;
 	      }
-	      while (i < l_a) {
-	        sum = a[i] + carry;
-	        carry = sum === base ? 1 : 0;
-	        r[i++] = sum - carry * base;
+	      SmallInteger.prototype = Object.create(Integer.prototype);
+	      function NativeBigInt(value) {
+	        this.value = value;
 	      }
-	      if (carry > 0) r.push(carry);
-	      return r;
-	    }
-	    function addAny(a, b) {
-	      if (a.length >= b.length) return add(a, b);
-	      return add(b, a);
-	    }
-	    function addSmall(a, carry) {
-	      // assumes a is array, carry is number with 0 <= carry < MAX_INT
-	      var l = a.length,
-	        r = new Array(l),
-	        base = BASE,
-	        sum,
-	        i;
-	      for (i = 0; i < l; i++) {
-	        sum = a[i] - base + carry;
-	        carry = Math.floor(sum / base);
-	        r[i] = sum - carry * base;
-	        carry += 1;
+	      NativeBigInt.prototype = Object.create(Integer.prototype);
+	      function isPrecise(n) {
+	        return -MAX_INT < n && n < MAX_INT;
 	      }
-	      while (carry > 0) {
-	        r[i++] = carry % base;
-	        carry = Math.floor(carry / base);
+	      function smallToArray(n) {
+	        // For performance reasons doesn't reference BASE, need to change this function if BASE changes
+	        if (n < 1e7) return [n];
+	        if (n < 1e14) return [n % 1e7, Math.floor(n / 1e7)];
+	        return [n % 1e7, Math.floor(n / 1e7) % 1e7, Math.floor(n / 1e14)];
 	      }
-	      return r;
-	    }
-	    BigInteger.prototype.add = function (v) {
-	      var n = parseValue(v);
-	      if (this.sign !== n.sign) {
-	        return this.subtract(n.negate());
-	      }
-	      var a = this.value,
-	        b = n.value;
-	      if (n.isSmall) {
-	        return new BigInteger(addSmall(a, Math.abs(b)), this.sign);
-	      }
-	      return new BigInteger(addAny(a, b), this.sign);
-	    };
-	    BigInteger.prototype.plus = BigInteger.prototype.add;
-	    SmallInteger.prototype.add = function (v) {
-	      var n = parseValue(v);
-	      var a = this.value;
-	      if (a < 0 !== n.sign) {
-	        return this.subtract(n.negate());
-	      }
-	      var b = n.value;
-	      if (n.isSmall) {
-	        if (isPrecise(a + b)) return new SmallInteger(a + b);
-	        b = smallToArray(Math.abs(b));
-	      }
-	      return new BigInteger(addSmall(b, Math.abs(a)), a < 0);
-	    };
-	    SmallInteger.prototype.plus = SmallInteger.prototype.add;
-	    NativeBigInt.prototype.add = function (v) {
-	      return new NativeBigInt(this.value + parseValue(v).value);
-	    };
-	    NativeBigInt.prototype.plus = NativeBigInt.prototype.add;
-	    function subtract(a, b) {
-	      // assumes a and b are arrays with a >= b
-	      var a_l = a.length,
-	        b_l = b.length,
-	        r = new Array(a_l),
-	        borrow = 0,
-	        base = BASE,
-	        i,
-	        difference;
-	      for (i = 0; i < b_l; i++) {
-	        difference = a[i] - borrow - b[i];
-	        if (difference < 0) {
-	          difference += base;
-	          borrow = 1;
-	        } else borrow = 0;
-	        r[i] = difference;
-	      }
-	      for (i = b_l; i < a_l; i++) {
-	        difference = a[i] - borrow;
-	        if (difference < 0) difference += base;else {
-	          r[i++] = difference;
-	          break;
-	        }
-	        r[i] = difference;
-	      }
-	      for (; i < a_l; i++) {
-	        r[i] = a[i];
-	      }
-	      trim(r);
-	      return r;
-	    }
-	    function subtractAny(a, b, sign) {
-	      var value;
-	      if (compareAbs(a, b) >= 0) {
-	        value = subtract(a, b);
-	      } else {
-	        value = subtract(b, a);
-	        sign = !sign;
-	      }
-	      value = arrayToSmall(value);
-	      if (typeof value === "number") {
-	        if (sign) value = -value;
-	        return new SmallInteger(value);
-	      }
-	      return new BigInteger(value, sign);
-	    }
-	    function subtractSmall(a, b, sign) {
-	      // assumes a is array, b is number with 0 <= b < MAX_INT
-	      var l = a.length,
-	        r = new Array(l),
-	        carry = -b,
-	        base = BASE,
-	        i,
-	        difference;
-	      for (i = 0; i < l; i++) {
-	        difference = a[i] + carry;
-	        carry = Math.floor(difference / base);
-	        difference %= base;
-	        r[i] = difference < 0 ? difference + base : difference;
-	      }
-	      r = arrayToSmall(r);
-	      if (typeof r === "number") {
-	        if (sign) r = -r;
-	        return new SmallInteger(r);
-	      }
-	      return new BigInteger(r, sign);
-	    }
-	    BigInteger.prototype.subtract = function (v) {
-	      var n = parseValue(v);
-	      if (this.sign !== n.sign) {
-	        return this.add(n.negate());
-	      }
-	      var a = this.value,
-	        b = n.value;
-	      if (n.isSmall) return subtractSmall(a, Math.abs(b), this.sign);
-	      return subtractAny(a, b, this.sign);
-	    };
-	    BigInteger.prototype.minus = BigInteger.prototype.subtract;
-	    SmallInteger.prototype.subtract = function (v) {
-	      var n = parseValue(v);
-	      var a = this.value;
-	      if (a < 0 !== n.sign) {
-	        return this.add(n.negate());
-	      }
-	      var b = n.value;
-	      if (n.isSmall) {
-	        return new SmallInteger(a - b);
-	      }
-	      return subtractSmall(b, Math.abs(a), a >= 0);
-	    };
-	    SmallInteger.prototype.minus = SmallInteger.prototype.subtract;
-	    NativeBigInt.prototype.subtract = function (v) {
-	      return new NativeBigInt(this.value - parseValue(v).value);
-	    };
-	    NativeBigInt.prototype.minus = NativeBigInt.prototype.subtract;
-	    BigInteger.prototype.negate = function () {
-	      return new BigInteger(this.value, !this.sign);
-	    };
-	    SmallInteger.prototype.negate = function () {
-	      var sign = this.sign;
-	      var small = new SmallInteger(-this.value);
-	      small.sign = !sign;
-	      return small;
-	    };
-	    NativeBigInt.prototype.negate = function () {
-	      return new NativeBigInt(-this.value);
-	    };
-	    BigInteger.prototype.abs = function () {
-	      return new BigInteger(this.value, false);
-	    };
-	    SmallInteger.prototype.abs = function () {
-	      return new SmallInteger(Math.abs(this.value));
-	    };
-	    NativeBigInt.prototype.abs = function () {
-	      return new NativeBigInt(this.value >= 0 ? this.value : -this.value);
-	    };
-	    function multiplyLong(a, b) {
-	      var a_l = a.length,
-	        b_l = b.length,
-	        l = a_l + b_l,
-	        r = createArray(l),
-	        base = BASE,
-	        product,
-	        carry,
-	        i,
-	        a_i,
-	        b_j;
-	      for (i = 0; i < a_l; ++i) {
-	        a_i = a[i];
-	        for (var j = 0; j < b_l; ++j) {
-	          b_j = b[j];
-	          product = a_i * b_j + r[i + j];
-	          carry = Math.floor(product / base);
-	          r[i + j] = product - carry * base;
-	          r[i + j + 1] += carry;
-	        }
-	      }
-	      trim(r);
-	      return r;
-	    }
-	    function multiplySmall(a, b) {
-	      // assumes a is array, b is number with |b| < BASE
-	      var l = a.length,
-	        r = new Array(l),
-	        base = BASE,
-	        carry = 0,
-	        product,
-	        i;
-	      for (i = 0; i < l; i++) {
-	        product = a[i] * b + carry;
-	        carry = Math.floor(product / base);
-	        r[i] = product - carry * base;
-	      }
-	      while (carry > 0) {
-	        r[i++] = carry % base;
-	        carry = Math.floor(carry / base);
-	      }
-	      return r;
-	    }
-	    function shiftLeft(x, n) {
-	      var r = [];
-	      while (n-- > 0) r.push(0);
-	      return r.concat(x);
-	    }
-	    function multiplyKaratsuba(x, y) {
-	      var n = Math.max(x.length, y.length);
-	      if (n <= 30) return multiplyLong(x, y);
-	      n = Math.ceil(n / 2);
-	      var b = x.slice(n),
-	        a = x.slice(0, n),
-	        d = y.slice(n),
-	        c = y.slice(0, n);
-	      var ac = multiplyKaratsuba(a, c),
-	        bd = multiplyKaratsuba(b, d),
-	        abcd = multiplyKaratsuba(addAny(a, b), addAny(c, d));
-	      var product = addAny(addAny(ac, shiftLeft(subtract(subtract(abcd, ac), bd), n)), shiftLeft(bd, 2 * n));
-	      trim(product);
-	      return product;
-	    }
-
-	    // The following function is derived from a surface fit of a graph plotting the performance difference
-	    // between long multiplication and karatsuba multiplication versus the lengths of the two arrays.
-	    function useKaratsuba(l1, l2) {
-	      return -0.012 * l1 - 0.012 * l2 + 0.000015 * l1 * l2 > 0;
-	    }
-	    BigInteger.prototype.multiply = function (v) {
-	      var n = parseValue(v),
-	        a = this.value,
-	        b = n.value,
-	        sign = this.sign !== n.sign,
-	        abs;
-	      if (n.isSmall) {
-	        if (b === 0) return Integer[0];
-	        if (b === 1) return this;
-	        if (b === -1) return this.negate();
-	        abs = Math.abs(b);
-	        if (abs < BASE) {
-	          return new BigInteger(multiplySmall(a, abs), sign);
-	        }
-	        b = smallToArray(abs);
-	      }
-	      if (useKaratsuba(a.length, b.length))
-	        // Karatsuba is only faster for certain array sizes
-	        return new BigInteger(multiplyKaratsuba(a, b), sign);
-	      return new BigInteger(multiplyLong(a, b), sign);
-	    };
-	    BigInteger.prototype.times = BigInteger.prototype.multiply;
-	    function multiplySmallAndArray(a, b, sign) {
-	      // a >= 0
-	      if (a < BASE) {
-	        return new BigInteger(multiplySmall(b, a), sign);
-	      }
-	      return new BigInteger(multiplyLong(b, smallToArray(a)), sign);
-	    }
-	    SmallInteger.prototype._multiplyBySmall = function (a) {
-	      if (isPrecise(a.value * this.value)) {
-	        return new SmallInteger(a.value * this.value);
-	      }
-	      return multiplySmallAndArray(Math.abs(a.value), smallToArray(Math.abs(this.value)), this.sign !== a.sign);
-	    };
-	    BigInteger.prototype._multiplyBySmall = function (a) {
-	      if (a.value === 0) return Integer[0];
-	      if (a.value === 1) return this;
-	      if (a.value === -1) return this.negate();
-	      return multiplySmallAndArray(Math.abs(a.value), this.value, this.sign !== a.sign);
-	    };
-	    SmallInteger.prototype.multiply = function (v) {
-	      return parseValue(v)._multiplyBySmall(this);
-	    };
-	    SmallInteger.prototype.times = SmallInteger.prototype.multiply;
-	    NativeBigInt.prototype.multiply = function (v) {
-	      return new NativeBigInt(this.value * parseValue(v).value);
-	    };
-	    NativeBigInt.prototype.times = NativeBigInt.prototype.multiply;
-	    function square(a) {
-	      //console.assert(2 * BASE * BASE < MAX_INT);
-	      var l = a.length,
-	        r = createArray(l + l),
-	        base = BASE,
-	        product,
-	        carry,
-	        i,
-	        a_i,
-	        a_j;
-	      for (i = 0; i < l; i++) {
-	        a_i = a[i];
-	        carry = 0 - a_i * a_i;
-	        for (var j = i; j < l; j++) {
-	          a_j = a[j];
-	          product = 2 * (a_i * a_j) + r[i + j] + carry;
-	          carry = Math.floor(product / base);
-	          r[i + j] = product - carry * base;
-	        }
-	        r[i + l] = carry;
-	      }
-	      trim(r);
-	      return r;
-	    }
-	    BigInteger.prototype.square = function () {
-	      return new BigInteger(square(this.value), false);
-	    };
-	    SmallInteger.prototype.square = function () {
-	      var value = this.value * this.value;
-	      if (isPrecise(value)) return new SmallInteger(value);
-	      return new BigInteger(square(smallToArray(Math.abs(this.value))), false);
-	    };
-	    NativeBigInt.prototype.square = function (v) {
-	      return new NativeBigInt(this.value * this.value);
-	    };
-	    function divMod1(a, b) {
-	      // Left over from previous version. Performs faster than divMod2 on smaller input sizes.
-	      var a_l = a.length,
-	        b_l = b.length,
-	        base = BASE,
-	        result = createArray(b.length),
-	        divisorMostSignificantDigit = b[b_l - 1],
-	        // normalization
-	        lambda = Math.ceil(base / (2 * divisorMostSignificantDigit)),
-	        remainder = multiplySmall(a, lambda),
-	        divisor = multiplySmall(b, lambda),
-	        quotientDigit,
-	        shift,
-	        carry,
-	        borrow,
-	        i,
-	        l,
-	        q;
-	      if (remainder.length <= a_l) remainder.push(0);
-	      divisor.push(0);
-	      divisorMostSignificantDigit = divisor[b_l - 1];
-	      for (shift = a_l - b_l; shift >= 0; shift--) {
-	        quotientDigit = base - 1;
-	        if (remainder[shift + b_l] !== divisorMostSignificantDigit) {
-	          quotientDigit = Math.floor((remainder[shift + b_l] * base + remainder[shift + b_l - 1]) / divisorMostSignificantDigit);
-	        }
-	        // quotientDigit <= base - 1
-	        carry = 0;
-	        borrow = 0;
-	        l = divisor.length;
-	        for (i = 0; i < l; i++) {
-	          carry += quotientDigit * divisor[i];
-	          q = Math.floor(carry / base);
-	          borrow += remainder[shift + i] - (carry - q * base);
-	          carry = q;
-	          if (borrow < 0) {
-	            remainder[shift + i] = borrow + base;
-	            borrow = -1;
-	          } else {
-	            remainder[shift + i] = borrow;
-	            borrow = 0;
+	      function arrayToSmall(arr) {
+	        // If BASE changes this function may need to change
+	        trim(arr);
+	        var length = arr.length;
+	        if (length < 4 && compareAbs(arr, MAX_INT_ARR) < 0) {
+	          switch (length) {
+	            case 0:
+	              return 0;
+	            case 1:
+	              return arr[0];
+	            case 2:
+	              return arr[0] + arr[1] * BASE;
+	            default:
+	              return arr[0] + (arr[1] + arr[2] * BASE) * BASE;
 	          }
 	        }
-	        while (borrow !== 0) {
-	          quotientDigit -= 1;
+	        return arr;
+	      }
+	      function trim(v) {
+	        var i = v.length;
+	        while (v[--i] === 0);
+	        v.length = i + 1;
+	      }
+	      function createArray(length) {
+	        // function shamelessly stolen from Yaffle's library https://github.com/Yaffle/BigInteger
+	        var x = new Array(length);
+	        var i = -1;
+	        while (++i < length) {
+	          x[i] = 0;
+	        }
+	        return x;
+	      }
+	      function truncate(n) {
+	        if (n > 0) return Math.floor(n);
+	        return Math.ceil(n);
+	      }
+	      function add(a, b) {
+	        // assumes a and b are arrays with a.length >= b.length
+	        var l_a = a.length,
+	          l_b = b.length,
+	          r = new Array(l_a),
+	          carry = 0,
+	          base = BASE,
+	          sum,
+	          i;
+	        for (i = 0; i < l_b; i++) {
+	          sum = a[i] + b[i] + carry;
+	          carry = sum >= base ? 1 : 0;
+	          r[i] = sum - carry * base;
+	        }
+	        while (i < l_a) {
+	          sum = a[i] + carry;
+	          carry = sum === base ? 1 : 0;
+	          r[i++] = sum - carry * base;
+	        }
+	        if (carry > 0) r.push(carry);
+	        return r;
+	      }
+	      function addAny(a, b) {
+	        if (a.length >= b.length) return add(a, b);
+	        return add(b, a);
+	      }
+	      function addSmall(a, carry) {
+	        // assumes a is array, carry is number with 0 <= carry < MAX_INT
+	        var l = a.length,
+	          r = new Array(l),
+	          base = BASE,
+	          sum,
+	          i;
+	        for (i = 0; i < l; i++) {
+	          sum = a[i] - base + carry;
+	          carry = Math.floor(sum / base);
+	          r[i] = sum - carry * base;
+	          carry += 1;
+	        }
+	        while (carry > 0) {
+	          r[i++] = carry % base;
+	          carry = Math.floor(carry / base);
+	        }
+	        return r;
+	      }
+	      BigInteger.prototype.add = function (v) {
+	        var n = parseValue(v);
+	        if (this.sign !== n.sign) {
+	          return this.subtract(n.negate());
+	        }
+	        var a = this.value,
+	          b = n.value;
+	        if (n.isSmall) {
+	          return new BigInteger(addSmall(a, Math.abs(b)), this.sign);
+	        }
+	        return new BigInteger(addAny(a, b), this.sign);
+	      };
+	      BigInteger.prototype.plus = BigInteger.prototype.add;
+	      SmallInteger.prototype.add = function (v) {
+	        var n = parseValue(v);
+	        var a = this.value;
+	        if (a < 0 !== n.sign) {
+	          return this.subtract(n.negate());
+	        }
+	        var b = n.value;
+	        if (n.isSmall) {
+	          if (isPrecise(a + b)) return new SmallInteger(a + b);
+	          b = smallToArray(Math.abs(b));
+	        }
+	        return new BigInteger(addSmall(b, Math.abs(a)), a < 0);
+	      };
+	      SmallInteger.prototype.plus = SmallInteger.prototype.add;
+	      NativeBigInt.prototype.add = function (v) {
+	        return new NativeBigInt(this.value + parseValue(v).value);
+	      };
+	      NativeBigInt.prototype.plus = NativeBigInt.prototype.add;
+	      function subtract(a, b) {
+	        // assumes a and b are arrays with a >= b
+	        var a_l = a.length,
+	          b_l = b.length,
+	          r = new Array(a_l),
+	          borrow = 0,
+	          base = BASE,
+	          i,
+	          difference;
+	        for (i = 0; i < b_l; i++) {
+	          difference = a[i] - borrow - b[i];
+	          if (difference < 0) {
+	            difference += base;
+	            borrow = 1;
+	          } else borrow = 0;
+	          r[i] = difference;
+	        }
+	        for (i = b_l; i < a_l; i++) {
+	          difference = a[i] - borrow;
+	          if (difference < 0) difference += base;else {
+	            r[i++] = difference;
+	            break;
+	          }
+	          r[i] = difference;
+	        }
+	        for (; i < a_l; i++) {
+	          r[i] = a[i];
+	        }
+	        trim(r);
+	        return r;
+	      }
+	      function subtractAny(a, b, sign) {
+	        var value;
+	        if (compareAbs(a, b) >= 0) {
+	          value = subtract(a, b);
+	        } else {
+	          value = subtract(b, a);
+	          sign = !sign;
+	        }
+	        value = arrayToSmall(value);
+	        if (typeof value === "number") {
+	          if (sign) value = -value;
+	          return new SmallInteger(value);
+	        }
+	        return new BigInteger(value, sign);
+	      }
+	      function subtractSmall(a, b, sign) {
+	        // assumes a is array, b is number with 0 <= b < MAX_INT
+	        var l = a.length,
+	          r = new Array(l),
+	          carry = -b,
+	          base = BASE,
+	          i,
+	          difference;
+	        for (i = 0; i < l; i++) {
+	          difference = a[i] + carry;
+	          carry = Math.floor(difference / base);
+	          difference %= base;
+	          r[i] = difference < 0 ? difference + base : difference;
+	        }
+	        r = arrayToSmall(r);
+	        if (typeof r === "number") {
+	          if (sign) r = -r;
+	          return new SmallInteger(r);
+	        }
+	        return new BigInteger(r, sign);
+	      }
+	      BigInteger.prototype.subtract = function (v) {
+	        var n = parseValue(v);
+	        if (this.sign !== n.sign) {
+	          return this.add(n.negate());
+	        }
+	        var a = this.value,
+	          b = n.value;
+	        if (n.isSmall) return subtractSmall(a, Math.abs(b), this.sign);
+	        return subtractAny(a, b, this.sign);
+	      };
+	      BigInteger.prototype.minus = BigInteger.prototype.subtract;
+	      SmallInteger.prototype.subtract = function (v) {
+	        var n = parseValue(v);
+	        var a = this.value;
+	        if (a < 0 !== n.sign) {
+	          return this.add(n.negate());
+	        }
+	        var b = n.value;
+	        if (n.isSmall) {
+	          return new SmallInteger(a - b);
+	        }
+	        return subtractSmall(b, Math.abs(a), a >= 0);
+	      };
+	      SmallInteger.prototype.minus = SmallInteger.prototype.subtract;
+	      NativeBigInt.prototype.subtract = function (v) {
+	        return new NativeBigInt(this.value - parseValue(v).value);
+	      };
+	      NativeBigInt.prototype.minus = NativeBigInt.prototype.subtract;
+	      BigInteger.prototype.negate = function () {
+	        return new BigInteger(this.value, !this.sign);
+	      };
+	      SmallInteger.prototype.negate = function () {
+	        var sign = this.sign;
+	        var small = new SmallInteger(-this.value);
+	        small.sign = !sign;
+	        return small;
+	      };
+	      NativeBigInt.prototype.negate = function () {
+	        return new NativeBigInt(-this.value);
+	      };
+	      BigInteger.prototype.abs = function () {
+	        return new BigInteger(this.value, false);
+	      };
+	      SmallInteger.prototype.abs = function () {
+	        return new SmallInteger(Math.abs(this.value));
+	      };
+	      NativeBigInt.prototype.abs = function () {
+	        return new NativeBigInt(this.value >= 0 ? this.value : -this.value);
+	      };
+	      function multiplyLong(a, b) {
+	        var a_l = a.length,
+	          b_l = b.length,
+	          l = a_l + b_l,
+	          r = createArray(l),
+	          base = BASE,
+	          product,
+	          carry,
+	          i,
+	          a_i,
+	          b_j;
+	        for (i = 0; i < a_l; ++i) {
+	          a_i = a[i];
+	          for (var j = 0; j < b_l; ++j) {
+	            b_j = b[j];
+	            product = a_i * b_j + r[i + j];
+	            carry = Math.floor(product / base);
+	            r[i + j] = product - carry * base;
+	            r[i + j + 1] += carry;
+	          }
+	        }
+	        trim(r);
+	        return r;
+	      }
+	      function multiplySmall(a, b) {
+	        // assumes a is array, b is number with |b| < BASE
+	        var l = a.length,
+	          r = new Array(l),
+	          base = BASE,
+	          carry = 0,
+	          product,
+	          i;
+	        for (i = 0; i < l; i++) {
+	          product = a[i] * b + carry;
+	          carry = Math.floor(product / base);
+	          r[i] = product - carry * base;
+	        }
+	        while (carry > 0) {
+	          r[i++] = carry % base;
+	          carry = Math.floor(carry / base);
+	        }
+	        return r;
+	      }
+	      function shiftLeft(x, n) {
+	        var r = [];
+	        while (n-- > 0) r.push(0);
+	        return r.concat(x);
+	      }
+	      function multiplyKaratsuba(x, y) {
+	        var n = Math.max(x.length, y.length);
+	        if (n <= 30) return multiplyLong(x, y);
+	        n = Math.ceil(n / 2);
+	        var b = x.slice(n),
+	          a = x.slice(0, n),
+	          d = y.slice(n),
+	          c = y.slice(0, n);
+	        var ac = multiplyKaratsuba(a, c),
+	          bd = multiplyKaratsuba(b, d),
+	          abcd = multiplyKaratsuba(addAny(a, b), addAny(c, d));
+	        var product = addAny(addAny(ac, shiftLeft(subtract(subtract(abcd, ac), bd), n)), shiftLeft(bd, 2 * n));
+	        trim(product);
+	        return product;
+	      }
+
+	      // The following function is derived from a surface fit of a graph plotting the performance difference
+	      // between long multiplication and karatsuba multiplication versus the lengths of the two arrays.
+	      function useKaratsuba(l1, l2) {
+	        return -0.012 * l1 - 0.012 * l2 + 0.000015 * l1 * l2 > 0;
+	      }
+	      BigInteger.prototype.multiply = function (v) {
+	        var n = parseValue(v),
+	          a = this.value,
+	          b = n.value,
+	          sign = this.sign !== n.sign,
+	          abs;
+	        if (n.isSmall) {
+	          if (b === 0) return Integer[0];
+	          if (b === 1) return this;
+	          if (b === -1) return this.negate();
+	          abs = Math.abs(b);
+	          if (abs < BASE) {
+	            return new BigInteger(multiplySmall(a, abs), sign);
+	          }
+	          b = smallToArray(abs);
+	        }
+	        if (useKaratsuba(a.length, b.length))
+	          // Karatsuba is only faster for certain array sizes
+	          return new BigInteger(multiplyKaratsuba(a, b), sign);
+	        return new BigInteger(multiplyLong(a, b), sign);
+	      };
+	      BigInteger.prototype.times = BigInteger.prototype.multiply;
+	      function multiplySmallAndArray(a, b, sign) {
+	        // a >= 0
+	        if (a < BASE) {
+	          return new BigInteger(multiplySmall(b, a), sign);
+	        }
+	        return new BigInteger(multiplyLong(b, smallToArray(a)), sign);
+	      }
+	      SmallInteger.prototype._multiplyBySmall = function (a) {
+	        if (isPrecise(a.value * this.value)) {
+	          return new SmallInteger(a.value * this.value);
+	        }
+	        return multiplySmallAndArray(Math.abs(a.value), smallToArray(Math.abs(this.value)), this.sign !== a.sign);
+	      };
+	      BigInteger.prototype._multiplyBySmall = function (a) {
+	        if (a.value === 0) return Integer[0];
+	        if (a.value === 1) return this;
+	        if (a.value === -1) return this.negate();
+	        return multiplySmallAndArray(Math.abs(a.value), this.value, this.sign !== a.sign);
+	      };
+	      SmallInteger.prototype.multiply = function (v) {
+	        return parseValue(v)._multiplyBySmall(this);
+	      };
+	      SmallInteger.prototype.times = SmallInteger.prototype.multiply;
+	      NativeBigInt.prototype.multiply = function (v) {
+	        return new NativeBigInt(this.value * parseValue(v).value);
+	      };
+	      NativeBigInt.prototype.times = NativeBigInt.prototype.multiply;
+	      function square(a) {
+	        //console.assert(2 * BASE * BASE < MAX_INT);
+	        var l = a.length,
+	          r = createArray(l + l),
+	          base = BASE,
+	          product,
+	          carry,
+	          i,
+	          a_i,
+	          a_j;
+	        for (i = 0; i < l; i++) {
+	          a_i = a[i];
+	          carry = 0 - a_i * a_i;
+	          for (var j = i; j < l; j++) {
+	            a_j = a[j];
+	            product = 2 * (a_i * a_j) + r[i + j] + carry;
+	            carry = Math.floor(product / base);
+	            r[i + j] = product - carry * base;
+	          }
+	          r[i + l] = carry;
+	        }
+	        trim(r);
+	        return r;
+	      }
+	      BigInteger.prototype.square = function () {
+	        return new BigInteger(square(this.value), false);
+	      };
+	      SmallInteger.prototype.square = function () {
+	        var value = this.value * this.value;
+	        if (isPrecise(value)) return new SmallInteger(value);
+	        return new BigInteger(square(smallToArray(Math.abs(this.value))), false);
+	      };
+	      NativeBigInt.prototype.square = function (v) {
+	        return new NativeBigInt(this.value * this.value);
+	      };
+	      function divMod1(a, b) {
+	        // Left over from previous version. Performs faster than divMod2 on smaller input sizes.
+	        var a_l = a.length,
+	          b_l = b.length,
+	          base = BASE,
+	          result = createArray(b.length),
+	          divisorMostSignificantDigit = b[b_l - 1],
+	          // normalization
+	          lambda = Math.ceil(base / (2 * divisorMostSignificantDigit)),
+	          remainder = multiplySmall(a, lambda),
+	          divisor = multiplySmall(b, lambda),
+	          quotientDigit,
+	          shift,
+	          carry,
+	          borrow,
+	          i,
+	          l,
+	          q;
+	        if (remainder.length <= a_l) remainder.push(0);
+	        divisor.push(0);
+	        divisorMostSignificantDigit = divisor[b_l - 1];
+	        for (shift = a_l - b_l; shift >= 0; shift--) {
+	          quotientDigit = base - 1;
+	          if (remainder[shift + b_l] !== divisorMostSignificantDigit) {
+	            quotientDigit = Math.floor((remainder[shift + b_l] * base + remainder[shift + b_l - 1]) / divisorMostSignificantDigit);
+	          }
+	          // quotientDigit <= base - 1
 	          carry = 0;
+	          borrow = 0;
+	          l = divisor.length;
 	          for (i = 0; i < l; i++) {
-	            carry += remainder[shift + i] - base + divisor[i];
-	            if (carry < 0) {
-	              remainder[shift + i] = carry + base;
-	              carry = 0;
+	            carry += quotientDigit * divisor[i];
+	            q = Math.floor(carry / base);
+	            borrow += remainder[shift + i] - (carry - q * base);
+	            carry = q;
+	            if (borrow < 0) {
+	              remainder[shift + i] = borrow + base;
+	              borrow = -1;
 	            } else {
-	              remainder[shift + i] = carry;
-	              carry = 1;
+	              remainder[shift + i] = borrow;
+	              borrow = 0;
 	            }
 	          }
-	          borrow += carry;
-	        }
-	        result[shift] = quotientDigit;
-	      }
-	      // denormalization
-	      remainder = divModSmall(remainder, lambda)[0];
-	      return [arrayToSmall(result), arrayToSmall(remainder)];
-	    }
-	    function divMod2(a, b) {
-	      // Implementation idea shamelessly stolen from Silent Matt's library http://silentmatt.com/biginteger/
-	      // Performs faster than divMod1 on larger input sizes.
-	      var a_l = a.length,
-	        b_l = b.length,
-	        result = [],
-	        part = [],
-	        base = BASE,
-	        guess,
-	        xlen,
-	        highx,
-	        highy,
-	        check;
-	      while (a_l) {
-	        part.unshift(a[--a_l]);
-	        trim(part);
-	        if (compareAbs(part, b) < 0) {
-	          result.push(0);
-	          continue;
-	        }
-	        xlen = part.length;
-	        highx = part[xlen - 1] * base + part[xlen - 2];
-	        highy = b[b_l - 1] * base + b[b_l - 2];
-	        if (xlen > b_l) {
-	          highx = (highx + 1) * base;
-	        }
-	        guess = Math.ceil(highx / highy);
-	        do {
-	          check = multiplySmall(b, guess);
-	          if (compareAbs(check, part) <= 0) break;
-	          guess--;
-	        } while (guess);
-	        result.push(guess);
-	        part = subtract(part, check);
-	      }
-	      result.reverse();
-	      return [arrayToSmall(result), arrayToSmall(part)];
-	    }
-	    function divModSmall(value, lambda) {
-	      var length = value.length,
-	        quotient = createArray(length),
-	        base = BASE,
-	        i,
-	        q,
-	        remainder,
-	        divisor;
-	      remainder = 0;
-	      for (i = length - 1; i >= 0; --i) {
-	        divisor = remainder * base + value[i];
-	        q = truncate(divisor / lambda);
-	        remainder = divisor - q * lambda;
-	        quotient[i] = q | 0;
-	      }
-	      return [quotient, remainder | 0];
-	    }
-	    function divModAny(self, v) {
-	      var value,
-	        n = parseValue(v);
-	      if (supportsNativeBigInt) {
-	        return [new NativeBigInt(self.value / n.value), new NativeBigInt(self.value % n.value)];
-	      }
-	      var a = self.value,
-	        b = n.value;
-	      var quotient;
-	      if (b === 0) throw new Error("Cannot divide by zero");
-	      if (self.isSmall) {
-	        if (n.isSmall) {
-	          return [new SmallInteger(truncate(a / b)), new SmallInteger(a % b)];
-	        }
-	        return [Integer[0], self];
-	      }
-	      if (n.isSmall) {
-	        if (b === 1) return [self, Integer[0]];
-	        if (b == -1) return [self.negate(), Integer[0]];
-	        var abs = Math.abs(b);
-	        if (abs < BASE) {
-	          value = divModSmall(a, abs);
-	          quotient = arrayToSmall(value[0]);
-	          var remainder = value[1];
-	          if (self.sign) remainder = -remainder;
-	          if (typeof quotient === "number") {
-	            if (self.sign !== n.sign) quotient = -quotient;
-	            return [new SmallInteger(quotient), new SmallInteger(remainder)];
+	          while (borrow !== 0) {
+	            quotientDigit -= 1;
+	            carry = 0;
+	            for (i = 0; i < l; i++) {
+	              carry += remainder[shift + i] - base + divisor[i];
+	              if (carry < 0) {
+	                remainder[shift + i] = carry + base;
+	                carry = 0;
+	              } else {
+	                remainder[shift + i] = carry;
+	                carry = 1;
+	              }
+	            }
+	            borrow += carry;
 	          }
-	          return [new BigInteger(quotient, self.sign !== n.sign), new SmallInteger(remainder)];
+	          result[shift] = quotientDigit;
 	        }
-	        b = smallToArray(abs);
+	        // denormalization
+	        remainder = divModSmall(remainder, lambda)[0];
+	        return [arrayToSmall(result), arrayToSmall(remainder)];
 	      }
-	      var comparison = compareAbs(a, b);
-	      if (comparison === -1) return [Integer[0], self];
-	      if (comparison === 0) return [Integer[self.sign === n.sign ? 1 : -1], Integer[0]];
-
-	      // divMod1 is faster on smaller input sizes
-	      if (a.length + b.length <= 200) value = divMod1(a, b);else value = divMod2(a, b);
-	      quotient = value[0];
-	      var qSign = self.sign !== n.sign,
-	        mod = value[1],
-	        mSign = self.sign;
-	      if (typeof quotient === "number") {
-	        if (qSign) quotient = -quotient;
-	        quotient = new SmallInteger(quotient);
-	      } else quotient = new BigInteger(quotient, qSign);
-	      if (typeof mod === "number") {
-	        if (mSign) mod = -mod;
-	        mod = new SmallInteger(mod);
-	      } else mod = new BigInteger(mod, mSign);
-	      return [quotient, mod];
-	    }
-	    BigInteger.prototype.divmod = function (v) {
-	      var result = divModAny(this, v);
-	      return {
-	        quotient: result[0],
-	        remainder: result[1]
-	      };
-	    };
-	    NativeBigInt.prototype.divmod = SmallInteger.prototype.divmod = BigInteger.prototype.divmod;
-	    BigInteger.prototype.divide = function (v) {
-	      return divModAny(this, v)[0];
-	    };
-	    NativeBigInt.prototype.over = NativeBigInt.prototype.divide = function (v) {
-	      return new NativeBigInt(this.value / parseValue(v).value);
-	    };
-	    SmallInteger.prototype.over = SmallInteger.prototype.divide = BigInteger.prototype.over = BigInteger.prototype.divide;
-	    BigInteger.prototype.mod = function (v) {
-	      return divModAny(this, v)[1];
-	    };
-	    NativeBigInt.prototype.mod = NativeBigInt.prototype.remainder = function (v) {
-	      return new NativeBigInt(this.value % parseValue(v).value);
-	    };
-	    SmallInteger.prototype.remainder = SmallInteger.prototype.mod = BigInteger.prototype.remainder = BigInteger.prototype.mod;
-	    BigInteger.prototype.pow = function (v) {
-	      var n = parseValue(v),
-	        a = this.value,
-	        b = n.value,
-	        value,
-	        x,
-	        y;
-	      if (b === 0) return Integer[1];
-	      if (a === 0) return Integer[0];
-	      if (a === 1) return Integer[1];
-	      if (a === -1) return n.isEven() ? Integer[1] : Integer[-1];
-	      if (n.sign) {
-	        return Integer[0];
-	      }
-	      if (!n.isSmall) throw new Error("The exponent " + n.toString() + " is too large.");
-	      if (this.isSmall) {
-	        if (isPrecise(value = Math.pow(a, b))) return new SmallInteger(truncate(value));
-	      }
-	      x = this;
-	      y = Integer[1];
-	      while (true) {
-	        if (b & 1 === 1) {
-	          y = y.times(x);
-	          --b;
-	        }
-	        if (b === 0) break;
-	        b /= 2;
-	        x = x.square();
-	      }
-	      return y;
-	    };
-	    SmallInteger.prototype.pow = BigInteger.prototype.pow;
-	    NativeBigInt.prototype.pow = function (v) {
-	      var n = parseValue(v);
-	      var a = this.value,
-	        b = n.value;
-	      var _0 = BigInt(0),
-	        _1 = BigInt(1),
-	        _2 = BigInt(2);
-	      if (b === _0) return Integer[1];
-	      if (a === _0) return Integer[0];
-	      if (a === _1) return Integer[1];
-	      if (a === BigInt(-1)) return n.isEven() ? Integer[1] : Integer[-1];
-	      if (n.isNegative()) return new NativeBigInt(_0);
-	      var x = this;
-	      var y = Integer[1];
-	      while (true) {
-	        if ((b & _1) === _1) {
-	          y = y.times(x);
-	          --b;
-	        }
-	        if (b === _0) break;
-	        b /= _2;
-	        x = x.square();
-	      }
-	      return y;
-	    };
-	    BigInteger.prototype.modPow = function (exp, mod) {
-	      exp = parseValue(exp);
-	      mod = parseValue(mod);
-	      if (mod.isZero()) throw new Error("Cannot take modPow with modulus 0");
-	      var r = Integer[1],
-	        base = this.mod(mod);
-	      if (exp.isNegative()) {
-	        exp = exp.multiply(Integer[-1]);
-	        base = base.modInv(mod);
-	      }
-	      while (exp.isPositive()) {
-	        if (base.isZero()) return Integer[0];
-	        if (exp.isOdd()) r = r.multiply(base).mod(mod);
-	        exp = exp.divide(2);
-	        base = base.square().mod(mod);
-	      }
-	      return r;
-	    };
-	    NativeBigInt.prototype.modPow = SmallInteger.prototype.modPow = BigInteger.prototype.modPow;
-	    function compareAbs(a, b) {
-	      if (a.length !== b.length) {
-	        return a.length > b.length ? 1 : -1;
-	      }
-	      for (var i = a.length - 1; i >= 0; i--) {
-	        if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1;
-	      }
-	      return 0;
-	    }
-	    BigInteger.prototype.compareAbs = function (v) {
-	      var n = parseValue(v),
-	        a = this.value,
-	        b = n.value;
-	      if (n.isSmall) return 1;
-	      return compareAbs(a, b);
-	    };
-	    SmallInteger.prototype.compareAbs = function (v) {
-	      var n = parseValue(v),
-	        a = Math.abs(this.value),
-	        b = n.value;
-	      if (n.isSmall) {
-	        b = Math.abs(b);
-	        return a === b ? 0 : a > b ? 1 : -1;
-	      }
-	      return -1;
-	    };
-	    NativeBigInt.prototype.compareAbs = function (v) {
-	      var a = this.value;
-	      var b = parseValue(v).value;
-	      a = a >= 0 ? a : -a;
-	      b = b >= 0 ? b : -b;
-	      return a === b ? 0 : a > b ? 1 : -1;
-	    };
-	    BigInteger.prototype.compare = function (v) {
-	      // See discussion about comparison with Infinity:
-	      // https://github.com/peterolson/BigInteger.js/issues/61
-	      if (v === Infinity) {
-	        return -1;
-	      }
-	      if (v === -Infinity) {
-	        return 1;
-	      }
-	      var n = parseValue(v),
-	        a = this.value,
-	        b = n.value;
-	      if (this.sign !== n.sign) {
-	        return n.sign ? 1 : -1;
-	      }
-	      if (n.isSmall) {
-	        return this.sign ? -1 : 1;
-	      }
-	      return compareAbs(a, b) * (this.sign ? -1 : 1);
-	    };
-	    BigInteger.prototype.compareTo = BigInteger.prototype.compare;
-	    SmallInteger.prototype.compare = function (v) {
-	      if (v === Infinity) {
-	        return -1;
-	      }
-	      if (v === -Infinity) {
-	        return 1;
-	      }
-	      var n = parseValue(v),
-	        a = this.value,
-	        b = n.value;
-	      if (n.isSmall) {
-	        return a == b ? 0 : a > b ? 1 : -1;
-	      }
-	      if (a < 0 !== n.sign) {
-	        return a < 0 ? -1 : 1;
-	      }
-	      return a < 0 ? 1 : -1;
-	    };
-	    SmallInteger.prototype.compareTo = SmallInteger.prototype.compare;
-	    NativeBigInt.prototype.compare = function (v) {
-	      if (v === Infinity) {
-	        return -1;
-	      }
-	      if (v === -Infinity) {
-	        return 1;
-	      }
-	      var a = this.value;
-	      var b = parseValue(v).value;
-	      return a === b ? 0 : a > b ? 1 : -1;
-	    };
-	    NativeBigInt.prototype.compareTo = NativeBigInt.prototype.compare;
-	    BigInteger.prototype.equals = function (v) {
-	      return this.compare(v) === 0;
-	    };
-	    NativeBigInt.prototype.eq = NativeBigInt.prototype.equals = SmallInteger.prototype.eq = SmallInteger.prototype.equals = BigInteger.prototype.eq = BigInteger.prototype.equals;
-	    BigInteger.prototype.notEquals = function (v) {
-	      return this.compare(v) !== 0;
-	    };
-	    NativeBigInt.prototype.neq = NativeBigInt.prototype.notEquals = SmallInteger.prototype.neq = SmallInteger.prototype.notEquals = BigInteger.prototype.neq = BigInteger.prototype.notEquals;
-	    BigInteger.prototype.greater = function (v) {
-	      return this.compare(v) > 0;
-	    };
-	    NativeBigInt.prototype.gt = NativeBigInt.prototype.greater = SmallInteger.prototype.gt = SmallInteger.prototype.greater = BigInteger.prototype.gt = BigInteger.prototype.greater;
-	    BigInteger.prototype.lesser = function (v) {
-	      return this.compare(v) < 0;
-	    };
-	    NativeBigInt.prototype.lt = NativeBigInt.prototype.lesser = SmallInteger.prototype.lt = SmallInteger.prototype.lesser = BigInteger.prototype.lt = BigInteger.prototype.lesser;
-	    BigInteger.prototype.greaterOrEquals = function (v) {
-	      return this.compare(v) >= 0;
-	    };
-	    NativeBigInt.prototype.geq = NativeBigInt.prototype.greaterOrEquals = SmallInteger.prototype.geq = SmallInteger.prototype.greaterOrEquals = BigInteger.prototype.geq = BigInteger.prototype.greaterOrEquals;
-	    BigInteger.prototype.lesserOrEquals = function (v) {
-	      return this.compare(v) <= 0;
-	    };
-	    NativeBigInt.prototype.leq = NativeBigInt.prototype.lesserOrEquals = SmallInteger.prototype.leq = SmallInteger.prototype.lesserOrEquals = BigInteger.prototype.leq = BigInteger.prototype.lesserOrEquals;
-	    BigInteger.prototype.isEven = function () {
-	      return (this.value[0] & 1) === 0;
-	    };
-	    SmallInteger.prototype.isEven = function () {
-	      return (this.value & 1) === 0;
-	    };
-	    NativeBigInt.prototype.isEven = function () {
-	      return (this.value & BigInt(1)) === BigInt(0);
-	    };
-	    BigInteger.prototype.isOdd = function () {
-	      return (this.value[0] & 1) === 1;
-	    };
-	    SmallInteger.prototype.isOdd = function () {
-	      return (this.value & 1) === 1;
-	    };
-	    NativeBigInt.prototype.isOdd = function () {
-	      return (this.value & BigInt(1)) === BigInt(1);
-	    };
-	    BigInteger.prototype.isPositive = function () {
-	      return !this.sign;
-	    };
-	    SmallInteger.prototype.isPositive = function () {
-	      return this.value > 0;
-	    };
-	    NativeBigInt.prototype.isPositive = SmallInteger.prototype.isPositive;
-	    BigInteger.prototype.isNegative = function () {
-	      return this.sign;
-	    };
-	    SmallInteger.prototype.isNegative = function () {
-	      return this.value < 0;
-	    };
-	    NativeBigInt.prototype.isNegative = SmallInteger.prototype.isNegative;
-	    BigInteger.prototype.isUnit = function () {
-	      return false;
-	    };
-	    SmallInteger.prototype.isUnit = function () {
-	      return Math.abs(this.value) === 1;
-	    };
-	    NativeBigInt.prototype.isUnit = function () {
-	      return this.abs().value === BigInt(1);
-	    };
-	    BigInteger.prototype.isZero = function () {
-	      return false;
-	    };
-	    SmallInteger.prototype.isZero = function () {
-	      return this.value === 0;
-	    };
-	    NativeBigInt.prototype.isZero = function () {
-	      return this.value === BigInt(0);
-	    };
-	    BigInteger.prototype.isDivisibleBy = function (v) {
-	      var n = parseValue(v);
-	      if (n.isZero()) return false;
-	      if (n.isUnit()) return true;
-	      if (n.compareAbs(2) === 0) return this.isEven();
-	      return this.mod(n).isZero();
-	    };
-	    NativeBigInt.prototype.isDivisibleBy = SmallInteger.prototype.isDivisibleBy = BigInteger.prototype.isDivisibleBy;
-	    function isBasicPrime(v) {
-	      var n = v.abs();
-	      if (n.isUnit()) return false;
-	      if (n.equals(2) || n.equals(3) || n.equals(5)) return true;
-	      if (n.isEven() || n.isDivisibleBy(3) || n.isDivisibleBy(5)) return false;
-	      if (n.lesser(49)) return true;
-	      // we don't know if it's prime: let the other functions figure it out
-	    }
-	    function millerRabinTest(n, a) {
-	      var nPrev = n.prev(),
-	        b = nPrev,
-	        r = 0,
-	        d,
-	        i,
-	        x;
-	      while (b.isEven()) b = b.divide(2), r++;
-	      next: for (i = 0; i < a.length; i++) {
-	        if (n.lesser(a[i])) continue;
-	        x = bigInt(a[i]).modPow(b, n);
-	        if (x.isUnit() || x.equals(nPrev)) continue;
-	        for (d = r - 1; d != 0; d--) {
-	          x = x.square().mod(n);
-	          if (x.isUnit()) return false;
-	          if (x.equals(nPrev)) continue next;
-	        }
-	        return false;
-	      }
-	      return true;
-	    }
-
-	    // Set "strict" to true to force GRH-supported lower bound of 2*log(N)^2
-	    BigInteger.prototype.isPrime = function (strict) {
-	      var isPrime = isBasicPrime(this);
-	      if (isPrime !== undefined$1) return isPrime;
-	      var n = this.abs();
-	      var bits = n.bitLength();
-	      if (bits <= 64) return millerRabinTest(n, [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]);
-	      var logN = Math.log(2) * bits.toJSNumber();
-	      var t = Math.ceil(strict === true ? 2 * Math.pow(logN, 2) : logN);
-	      for (var a = [], i = 0; i < t; i++) {
-	        a.push(bigInt(i + 2));
-	      }
-	      return millerRabinTest(n, a);
-	    };
-	    NativeBigInt.prototype.isPrime = SmallInteger.prototype.isPrime = BigInteger.prototype.isPrime;
-	    BigInteger.prototype.isProbablePrime = function (iterations, rng) {
-	      var isPrime = isBasicPrime(this);
-	      if (isPrime !== undefined$1) return isPrime;
-	      var n = this.abs();
-	      var t = iterations === undefined$1 ? 5 : iterations;
-	      for (var a = [], i = 0; i < t; i++) {
-	        a.push(bigInt.randBetween(2, n.minus(2), rng));
-	      }
-	      return millerRabinTest(n, a);
-	    };
-	    NativeBigInt.prototype.isProbablePrime = SmallInteger.prototype.isProbablePrime = BigInteger.prototype.isProbablePrime;
-	    BigInteger.prototype.modInv = function (n) {
-	      var t = bigInt.zero,
-	        newT = bigInt.one,
-	        r = parseValue(n),
-	        newR = this.abs(),
-	        q,
-	        lastT,
-	        lastR;
-	      while (!newR.isZero()) {
-	        q = r.divide(newR);
-	        lastT = t;
-	        lastR = r;
-	        t = newT;
-	        r = newR;
-	        newT = lastT.subtract(q.multiply(newT));
-	        newR = lastR.subtract(q.multiply(newR));
-	      }
-	      if (!r.isUnit()) throw new Error(this.toString() + " and " + n.toString() + " are not co-prime");
-	      if (t.compare(0) === -1) {
-	        t = t.add(n);
-	      }
-	      if (this.isNegative()) {
-	        return t.negate();
-	      }
-	      return t;
-	    };
-	    NativeBigInt.prototype.modInv = SmallInteger.prototype.modInv = BigInteger.prototype.modInv;
-	    BigInteger.prototype.next = function () {
-	      var value = this.value;
-	      if (this.sign) {
-	        return subtractSmall(value, 1, this.sign);
-	      }
-	      return new BigInteger(addSmall(value, 1), this.sign);
-	    };
-	    SmallInteger.prototype.next = function () {
-	      var value = this.value;
-	      if (value + 1 < MAX_INT) return new SmallInteger(value + 1);
-	      return new BigInteger(MAX_INT_ARR, false);
-	    };
-	    NativeBigInt.prototype.next = function () {
-	      return new NativeBigInt(this.value + BigInt(1));
-	    };
-	    BigInteger.prototype.prev = function () {
-	      var value = this.value;
-	      if (this.sign) {
-	        return new BigInteger(addSmall(value, 1), true);
-	      }
-	      return subtractSmall(value, 1, this.sign);
-	    };
-	    SmallInteger.prototype.prev = function () {
-	      var value = this.value;
-	      if (value - 1 > -MAX_INT) return new SmallInteger(value - 1);
-	      return new BigInteger(MAX_INT_ARR, true);
-	    };
-	    NativeBigInt.prototype.prev = function () {
-	      return new NativeBigInt(this.value - BigInt(1));
-	    };
-	    var powersOfTwo = [1];
-	    while (2 * powersOfTwo[powersOfTwo.length - 1] <= BASE) powersOfTwo.push(2 * powersOfTwo[powersOfTwo.length - 1]);
-	    var powers2Length = powersOfTwo.length,
-	      highestPower2 = powersOfTwo[powers2Length - 1];
-	    function shift_isSmall(n) {
-	      return Math.abs(n) <= BASE;
-	    }
-	    BigInteger.prototype.shiftLeft = function (v) {
-	      var n = parseValue(v).toJSNumber();
-	      if (!shift_isSmall(n)) {
-	        throw new Error(String(n) + " is too large for shifting.");
-	      }
-	      if (n < 0) return this.shiftRight(-n);
-	      var result = this;
-	      if (result.isZero()) return result;
-	      while (n >= powers2Length) {
-	        result = result.multiply(highestPower2);
-	        n -= powers2Length - 1;
-	      }
-	      return result.multiply(powersOfTwo[n]);
-	    };
-	    NativeBigInt.prototype.shiftLeft = SmallInteger.prototype.shiftLeft = BigInteger.prototype.shiftLeft;
-	    BigInteger.prototype.shiftRight = function (v) {
-	      var remQuo;
-	      var n = parseValue(v).toJSNumber();
-	      if (!shift_isSmall(n)) {
-	        throw new Error(String(n) + " is too large for shifting.");
-	      }
-	      if (n < 0) return this.shiftLeft(-n);
-	      var result = this;
-	      while (n >= powers2Length) {
-	        if (result.isZero() || result.isNegative() && result.isUnit()) return result;
-	        remQuo = divModAny(result, highestPower2);
-	        result = remQuo[1].isNegative() ? remQuo[0].prev() : remQuo[0];
-	        n -= powers2Length - 1;
-	      }
-	      remQuo = divModAny(result, powersOfTwo[n]);
-	      return remQuo[1].isNegative() ? remQuo[0].prev() : remQuo[0];
-	    };
-	    NativeBigInt.prototype.shiftRight = SmallInteger.prototype.shiftRight = BigInteger.prototype.shiftRight;
-	    function bitwise(x, y, fn) {
-	      y = parseValue(y);
-	      var xSign = x.isNegative(),
-	        ySign = y.isNegative();
-	      var xRem = xSign ? x.not() : x,
-	        yRem = ySign ? y.not() : y;
-	      var xDigit = 0,
-	        yDigit = 0;
-	      var xDivMod = null,
-	        yDivMod = null;
-	      var result = [];
-	      while (!xRem.isZero() || !yRem.isZero()) {
-	        xDivMod = divModAny(xRem, highestPower2);
-	        xDigit = xDivMod[1].toJSNumber();
-	        if (xSign) {
-	          xDigit = highestPower2 - 1 - xDigit; // two's complement for negative numbers
-	        }
-	        yDivMod = divModAny(yRem, highestPower2);
-	        yDigit = yDivMod[1].toJSNumber();
-	        if (ySign) {
-	          yDigit = highestPower2 - 1 - yDigit; // two's complement for negative numbers
-	        }
-	        xRem = xDivMod[0];
-	        yRem = yDivMod[0];
-	        result.push(fn(xDigit, yDigit));
-	      }
-	      var sum = fn(xSign ? 1 : 0, ySign ? 1 : 0) !== 0 ? bigInt(-1) : bigInt(0);
-	      for (var i = result.length - 1; i >= 0; i -= 1) {
-	        sum = sum.multiply(highestPower2).add(bigInt(result[i]));
-	      }
-	      return sum;
-	    }
-	    BigInteger.prototype.not = function () {
-	      return this.negate().prev();
-	    };
-	    NativeBigInt.prototype.not = SmallInteger.prototype.not = BigInteger.prototype.not;
-	    BigInteger.prototype.and = function (n) {
-	      return bitwise(this, n, function (a, b) {
-	        return a & b;
-	      });
-	    };
-	    NativeBigInt.prototype.and = SmallInteger.prototype.and = BigInteger.prototype.and;
-	    BigInteger.prototype.or = function (n) {
-	      return bitwise(this, n, function (a, b) {
-	        return a | b;
-	      });
-	    };
-	    NativeBigInt.prototype.or = SmallInteger.prototype.or = BigInteger.prototype.or;
-	    BigInteger.prototype.xor = function (n) {
-	      return bitwise(this, n, function (a, b) {
-	        return a ^ b;
-	      });
-	    };
-	    NativeBigInt.prototype.xor = SmallInteger.prototype.xor = BigInteger.prototype.xor;
-	    var LOBMASK_I = 1 << 30,
-	      LOBMASK_BI = (BASE & -BASE) * (BASE & -BASE) | LOBMASK_I;
-	    function roughLOB(n) {
-	      // get lowestOneBit (rough)
-	      // SmallInteger: return Min(lowestOneBit(n), 1 << 30)
-	      // BigInteger: return Min(lowestOneBit(n), 1 << 14) [BASE=1e7]
-	      var v = n.value,
-	        x = typeof v === "number" ? v | LOBMASK_I : typeof v === "bigint" ? v | BigInt(LOBMASK_I) : v[0] + v[1] * BASE | LOBMASK_BI;
-	      return x & -x;
-	    }
-	    function integerLogarithm(value, base) {
-	      if (base.compareTo(value) <= 0) {
-	        var tmp = integerLogarithm(value, base.square(base));
-	        var p = tmp.p;
-	        var e = tmp.e;
-	        var t = p.multiply(base);
-	        return t.compareTo(value) <= 0 ? {
-	          p: t,
-	          e: e * 2 + 1
-	        } : {
-	          p: p,
-	          e: e * 2
-	        };
-	      }
-	      return {
-	        p: bigInt(1),
-	        e: 0
-	      };
-	    }
-	    BigInteger.prototype.bitLength = function () {
-	      var n = this;
-	      if (n.compareTo(bigInt(0)) < 0) {
-	        n = n.negate().subtract(bigInt(1));
-	      }
-	      if (n.compareTo(bigInt(0)) === 0) {
-	        return bigInt(0);
-	      }
-	      return bigInt(integerLogarithm(n, bigInt(2)).e).add(bigInt(1));
-	    };
-	    NativeBigInt.prototype.bitLength = SmallInteger.prototype.bitLength = BigInteger.prototype.bitLength;
-	    function max(a, b) {
-	      a = parseValue(a);
-	      b = parseValue(b);
-	      return a.greater(b) ? a : b;
-	    }
-	    function min(a, b) {
-	      a = parseValue(a);
-	      b = parseValue(b);
-	      return a.lesser(b) ? a : b;
-	    }
-	    function gcd(a, b) {
-	      a = parseValue(a).abs();
-	      b = parseValue(b).abs();
-	      if (a.equals(b)) return a;
-	      if (a.isZero()) return b;
-	      if (b.isZero()) return a;
-	      var c = Integer[1],
-	        d,
-	        t;
-	      while (a.isEven() && b.isEven()) {
-	        d = min(roughLOB(a), roughLOB(b));
-	        a = a.divide(d);
-	        b = b.divide(d);
-	        c = c.multiply(d);
-	      }
-	      while (a.isEven()) {
-	        a = a.divide(roughLOB(a));
-	      }
-	      do {
-	        while (b.isEven()) {
-	          b = b.divide(roughLOB(b));
-	        }
-	        if (a.greater(b)) {
-	          t = b;
-	          b = a;
-	          a = t;
-	        }
-	        b = b.subtract(a);
-	      } while (!b.isZero());
-	      return c.isUnit() ? a : a.multiply(c);
-	    }
-	    function lcm(a, b) {
-	      a = parseValue(a).abs();
-	      b = parseValue(b).abs();
-	      return a.divide(gcd(a, b)).multiply(b);
-	    }
-	    function randBetween(a, b, rng) {
-	      a = parseValue(a);
-	      b = parseValue(b);
-	      var usedRNG = rng || Math.random;
-	      var low = min(a, b),
-	        high = max(a, b);
-	      var range = high.subtract(low).add(1);
-	      if (range.isSmall) return low.add(Math.floor(usedRNG() * range));
-	      var digits = toBase(range, BASE).value;
-	      var result = [],
-	        restricted = true;
-	      for (var i = 0; i < digits.length; i++) {
-	        var top = restricted ? digits[i] + (i + 1 < digits.length ? digits[i + 1] / BASE : 0) : BASE;
-	        var digit = truncate(usedRNG() * top);
-	        result.push(digit);
-	        if (digit < digits[i]) restricted = false;
-	      }
-	      return low.add(Integer.fromArray(result, BASE, false));
-	    }
-	    var parseBase = function (text, base, alphabet, caseSensitive) {
-	      alphabet = alphabet || DEFAULT_ALPHABET;
-	      text = String(text);
-	      if (!caseSensitive) {
-	        text = text.toLowerCase();
-	        alphabet = alphabet.toLowerCase();
-	      }
-	      var length = text.length;
-	      var i;
-	      var absBase = Math.abs(base);
-	      var alphabetValues = {};
-	      for (i = 0; i < alphabet.length; i++) {
-	        alphabetValues[alphabet[i]] = i;
-	      }
-	      for (i = 0; i < length; i++) {
-	        var c = text[i];
-	        if (c === "-") continue;
-	        if (c in alphabetValues) {
-	          if (alphabetValues[c] >= absBase) {
-	            if (c === "1" && absBase === 1) continue;
-	            throw new Error(c + " is not a valid digit in base " + base + ".");
+	      function divMod2(a, b) {
+	        // Implementation idea shamelessly stolen from Silent Matt's library http://silentmatt.com/biginteger/
+	        // Performs faster than divMod1 on larger input sizes.
+	        var a_l = a.length,
+	          b_l = b.length,
+	          result = [],
+	          part = [],
+	          base = BASE,
+	          guess,
+	          xlen,
+	          highx,
+	          highy,
+	          check;
+	        while (a_l) {
+	          part.unshift(a[--a_l]);
+	          trim(part);
+	          if (compareAbs(part, b) < 0) {
+	            result.push(0);
+	            continue;
 	          }
-	        }
-	      }
-	      base = parseValue(base);
-	      var digits = [];
-	      var isNegative = text[0] === "-";
-	      for (i = isNegative ? 1 : 0; i < text.length; i++) {
-	        var c = text[i];
-	        if (c in alphabetValues) digits.push(parseValue(alphabetValues[c]));else if (c === "<") {
-	          var start = i;
+	          xlen = part.length;
+	          highx = part[xlen - 1] * base + part[xlen - 2];
+	          highy = b[b_l - 1] * base + b[b_l - 2];
+	          if (xlen > b_l) {
+	            highx = (highx + 1) * base;
+	          }
+	          guess = Math.ceil(highx / highy);
 	          do {
-	            i++;
-	          } while (text[i] !== ">" && i < text.length);
-	          digits.push(parseValue(text.slice(start + 1, i)));
-	        } else throw new Error(c + " is not a valid character");
+	            check = multiplySmall(b, guess);
+	            if (compareAbs(check, part) <= 0) break;
+	            guess--;
+	          } while (guess);
+	          result.push(guess);
+	          part = subtract(part, check);
+	        }
+	        result.reverse();
+	        return [arrayToSmall(result), arrayToSmall(part)];
 	      }
-	      return parseBaseFromArray(digits, base, isNegative);
-	    };
-	    function parseBaseFromArray(digits, base, isNegative) {
-	      var val = Integer[0],
-	        pow = Integer[1],
-	        i;
-	      for (i = digits.length - 1; i >= 0; i--) {
-	        val = val.add(digits[i].times(pow));
-	        pow = pow.times(base);
+	      function divModSmall(value, lambda) {
+	        var length = value.length,
+	          quotient = createArray(length),
+	          base = BASE,
+	          i,
+	          q,
+	          remainder,
+	          divisor;
+	        remainder = 0;
+	        for (i = length - 1; i >= 0; --i) {
+	          divisor = remainder * base + value[i];
+	          q = truncate(divisor / lambda);
+	          remainder = divisor - q * lambda;
+	          quotient[i] = q | 0;
+	        }
+	        return [quotient, remainder | 0];
 	      }
-	      return isNegative ? val.negate() : val;
-	    }
-	    function stringify(digit, alphabet) {
-	      alphabet = alphabet || DEFAULT_ALPHABET;
-	      if (digit < alphabet.length) {
-	        return alphabet[digit];
+	      function divModAny(self, v) {
+	        var value,
+	          n = parseValue(v);
+	        if (supportsNativeBigInt) {
+	          return [new NativeBigInt(self.value / n.value), new NativeBigInt(self.value % n.value)];
+	        }
+	        var a = self.value,
+	          b = n.value;
+	        var quotient;
+	        if (b === 0) throw new Error("Cannot divide by zero");
+	        if (self.isSmall) {
+	          if (n.isSmall) {
+	            return [new SmallInteger(truncate(a / b)), new SmallInteger(a % b)];
+	          }
+	          return [Integer[0], self];
+	        }
+	        if (n.isSmall) {
+	          if (b === 1) return [self, Integer[0]];
+	          if (b == -1) return [self.negate(), Integer[0]];
+	          var abs = Math.abs(b);
+	          if (abs < BASE) {
+	            value = divModSmall(a, abs);
+	            quotient = arrayToSmall(value[0]);
+	            var remainder = value[1];
+	            if (self.sign) remainder = -remainder;
+	            if (typeof quotient === "number") {
+	              if (self.sign !== n.sign) quotient = -quotient;
+	              return [new SmallInteger(quotient), new SmallInteger(remainder)];
+	            }
+	            return [new BigInteger(quotient, self.sign !== n.sign), new SmallInteger(remainder)];
+	          }
+	          b = smallToArray(abs);
+	        }
+	        var comparison = compareAbs(a, b);
+	        if (comparison === -1) return [Integer[0], self];
+	        if (comparison === 0) return [Integer[self.sign === n.sign ? 1 : -1], Integer[0]];
+
+	        // divMod1 is faster on smaller input sizes
+	        if (a.length + b.length <= 200) value = divMod1(a, b);else value = divMod2(a, b);
+	        quotient = value[0];
+	        var qSign = self.sign !== n.sign,
+	          mod = value[1],
+	          mSign = self.sign;
+	        if (typeof quotient === "number") {
+	          if (qSign) quotient = -quotient;
+	          quotient = new SmallInteger(quotient);
+	        } else quotient = new BigInteger(quotient, qSign);
+	        if (typeof mod === "number") {
+	          if (mSign) mod = -mod;
+	          mod = new SmallInteger(mod);
+	        } else mod = new BigInteger(mod, mSign);
+	        return [quotient, mod];
 	      }
-	      return "<" + digit + ">";
-	    }
-	    function toBase(n, base) {
-	      base = bigInt(base);
-	      if (base.isZero()) {
-	        if (n.isZero()) return {
-	          value: [0],
-	          isNegative: false
-	        };
-	        throw new Error("Cannot convert nonzero numbers to base 0.");
-	      }
-	      if (base.equals(-1)) {
-	        if (n.isZero()) return {
-	          value: [0],
-	          isNegative: false
-	        };
-	        if (n.isNegative()) return {
-	          value: [].concat.apply([], Array.apply(null, Array(-n.toJSNumber())).map(Array.prototype.valueOf, [1, 0])),
-	          isNegative: false
-	        };
-	        var arr = Array.apply(null, Array(n.toJSNumber() - 1)).map(Array.prototype.valueOf, [0, 1]);
-	        arr.unshift([1]);
+	      BigInteger.prototype.divmod = function (v) {
+	        var result = divModAny(this, v);
 	        return {
-	          value: [].concat.apply([], arr),
-	          isNegative: false
+	          quotient: result[0],
+	          remainder: result[1]
 	        };
+	      };
+	      NativeBigInt.prototype.divmod = SmallInteger.prototype.divmod = BigInteger.prototype.divmod;
+	      BigInteger.prototype.divide = function (v) {
+	        return divModAny(this, v)[0];
+	      };
+	      NativeBigInt.prototype.over = NativeBigInt.prototype.divide = function (v) {
+	        return new NativeBigInt(this.value / parseValue(v).value);
+	      };
+	      SmallInteger.prototype.over = SmallInteger.prototype.divide = BigInteger.prototype.over = BigInteger.prototype.divide;
+	      BigInteger.prototype.mod = function (v) {
+	        return divModAny(this, v)[1];
+	      };
+	      NativeBigInt.prototype.mod = NativeBigInt.prototype.remainder = function (v) {
+	        return new NativeBigInt(this.value % parseValue(v).value);
+	      };
+	      SmallInteger.prototype.remainder = SmallInteger.prototype.mod = BigInteger.prototype.remainder = BigInteger.prototype.mod;
+	      BigInteger.prototype.pow = function (v) {
+	        var n = parseValue(v),
+	          a = this.value,
+	          b = n.value,
+	          value,
+	          x,
+	          y;
+	        if (b === 0) return Integer[1];
+	        if (a === 0) return Integer[0];
+	        if (a === 1) return Integer[1];
+	        if (a === -1) return n.isEven() ? Integer[1] : Integer[-1];
+	        if (n.sign) {
+	          return Integer[0];
+	        }
+	        if (!n.isSmall) throw new Error("The exponent " + n.toString() + " is too large.");
+	        if (this.isSmall) {
+	          if (isPrecise(value = Math.pow(a, b))) return new SmallInteger(truncate(value));
+	        }
+	        x = this;
+	        y = Integer[1];
+	        while (true) {
+	          if (b & 1 === 1) {
+	            y = y.times(x);
+	            --b;
+	          }
+	          if (b === 0) break;
+	          b /= 2;
+	          x = x.square();
+	        }
+	        return y;
+	      };
+	      SmallInteger.prototype.pow = BigInteger.prototype.pow;
+	      NativeBigInt.prototype.pow = function (v) {
+	        var n = parseValue(v);
+	        var a = this.value,
+	          b = n.value;
+	        var _0 = BigInt(0),
+	          _1 = BigInt(1),
+	          _2 = BigInt(2);
+	        if (b === _0) return Integer[1];
+	        if (a === _0) return Integer[0];
+	        if (a === _1) return Integer[1];
+	        if (a === BigInt(-1)) return n.isEven() ? Integer[1] : Integer[-1];
+	        if (n.isNegative()) return new NativeBigInt(_0);
+	        var x = this;
+	        var y = Integer[1];
+	        while (true) {
+	          if ((b & _1) === _1) {
+	            y = y.times(x);
+	            --b;
+	          }
+	          if (b === _0) break;
+	          b /= _2;
+	          x = x.square();
+	        }
+	        return y;
+	      };
+	      BigInteger.prototype.modPow = function (exp, mod) {
+	        exp = parseValue(exp);
+	        mod = parseValue(mod);
+	        if (mod.isZero()) throw new Error("Cannot take modPow with modulus 0");
+	        var r = Integer[1],
+	          base = this.mod(mod);
+	        if (exp.isNegative()) {
+	          exp = exp.multiply(Integer[-1]);
+	          base = base.modInv(mod);
+	        }
+	        while (exp.isPositive()) {
+	          if (base.isZero()) return Integer[0];
+	          if (exp.isOdd()) r = r.multiply(base).mod(mod);
+	          exp = exp.divide(2);
+	          base = base.square().mod(mod);
+	        }
+	        return r;
+	      };
+	      NativeBigInt.prototype.modPow = SmallInteger.prototype.modPow = BigInteger.prototype.modPow;
+	      function compareAbs(a, b) {
+	        if (a.length !== b.length) {
+	          return a.length > b.length ? 1 : -1;
+	        }
+	        for (var i = a.length - 1; i >= 0; i--) {
+	          if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1;
+	        }
+	        return 0;
 	      }
-	      var neg = false;
-	      if (n.isNegative() && base.isPositive()) {
-	        neg = true;
-	        n = n.abs();
+	      BigInteger.prototype.compareAbs = function (v) {
+	        var n = parseValue(v),
+	          a = this.value,
+	          b = n.value;
+	        if (n.isSmall) return 1;
+	        return compareAbs(a, b);
+	      };
+	      SmallInteger.prototype.compareAbs = function (v) {
+	        var n = parseValue(v),
+	          a = Math.abs(this.value),
+	          b = n.value;
+	        if (n.isSmall) {
+	          b = Math.abs(b);
+	          return a === b ? 0 : a > b ? 1 : -1;
+	        }
+	        return -1;
+	      };
+	      NativeBigInt.prototype.compareAbs = function (v) {
+	        var a = this.value;
+	        var b = parseValue(v).value;
+	        a = a >= 0 ? a : -a;
+	        b = b >= 0 ? b : -b;
+	        return a === b ? 0 : a > b ? 1 : -1;
+	      };
+	      BigInteger.prototype.compare = function (v) {
+	        // See discussion about comparison with Infinity:
+	        // https://github.com/peterolson/BigInteger.js/issues/61
+	        if (v === Infinity) {
+	          return -1;
+	        }
+	        if (v === -Infinity) {
+	          return 1;
+	        }
+	        var n = parseValue(v),
+	          a = this.value,
+	          b = n.value;
+	        if (this.sign !== n.sign) {
+	          return n.sign ? 1 : -1;
+	        }
+	        if (n.isSmall) {
+	          return this.sign ? -1 : 1;
+	        }
+	        return compareAbs(a, b) * (this.sign ? -1 : 1);
+	      };
+	      BigInteger.prototype.compareTo = BigInteger.prototype.compare;
+	      SmallInteger.prototype.compare = function (v) {
+	        if (v === Infinity) {
+	          return -1;
+	        }
+	        if (v === -Infinity) {
+	          return 1;
+	        }
+	        var n = parseValue(v),
+	          a = this.value,
+	          b = n.value;
+	        if (n.isSmall) {
+	          return a == b ? 0 : a > b ? 1 : -1;
+	        }
+	        if (a < 0 !== n.sign) {
+	          return a < 0 ? -1 : 1;
+	        }
+	        return a < 0 ? 1 : -1;
+	      };
+	      SmallInteger.prototype.compareTo = SmallInteger.prototype.compare;
+	      NativeBigInt.prototype.compare = function (v) {
+	        if (v === Infinity) {
+	          return -1;
+	        }
+	        if (v === -Infinity) {
+	          return 1;
+	        }
+	        var a = this.value;
+	        var b = parseValue(v).value;
+	        return a === b ? 0 : a > b ? 1 : -1;
+	      };
+	      NativeBigInt.prototype.compareTo = NativeBigInt.prototype.compare;
+	      BigInteger.prototype.equals = function (v) {
+	        return this.compare(v) === 0;
+	      };
+	      NativeBigInt.prototype.eq = NativeBigInt.prototype.equals = SmallInteger.prototype.eq = SmallInteger.prototype.equals = BigInteger.prototype.eq = BigInteger.prototype.equals;
+	      BigInteger.prototype.notEquals = function (v) {
+	        return this.compare(v) !== 0;
+	      };
+	      NativeBigInt.prototype.neq = NativeBigInt.prototype.notEquals = SmallInteger.prototype.neq = SmallInteger.prototype.notEquals = BigInteger.prototype.neq = BigInteger.prototype.notEquals;
+	      BigInteger.prototype.greater = function (v) {
+	        return this.compare(v) > 0;
+	      };
+	      NativeBigInt.prototype.gt = NativeBigInt.prototype.greater = SmallInteger.prototype.gt = SmallInteger.prototype.greater = BigInteger.prototype.gt = BigInteger.prototype.greater;
+	      BigInteger.prototype.lesser = function (v) {
+	        return this.compare(v) < 0;
+	      };
+	      NativeBigInt.prototype.lt = NativeBigInt.prototype.lesser = SmallInteger.prototype.lt = SmallInteger.prototype.lesser = BigInteger.prototype.lt = BigInteger.prototype.lesser;
+	      BigInteger.prototype.greaterOrEquals = function (v) {
+	        return this.compare(v) >= 0;
+	      };
+	      NativeBigInt.prototype.geq = NativeBigInt.prototype.greaterOrEquals = SmallInteger.prototype.geq = SmallInteger.prototype.greaterOrEquals = BigInteger.prototype.geq = BigInteger.prototype.greaterOrEquals;
+	      BigInteger.prototype.lesserOrEquals = function (v) {
+	        return this.compare(v) <= 0;
+	      };
+	      NativeBigInt.prototype.leq = NativeBigInt.prototype.lesserOrEquals = SmallInteger.prototype.leq = SmallInteger.prototype.lesserOrEquals = BigInteger.prototype.leq = BigInteger.prototype.lesserOrEquals;
+	      BigInteger.prototype.isEven = function () {
+	        return (this.value[0] & 1) === 0;
+	      };
+	      SmallInteger.prototype.isEven = function () {
+	        return (this.value & 1) === 0;
+	      };
+	      NativeBigInt.prototype.isEven = function () {
+	        return (this.value & BigInt(1)) === BigInt(0);
+	      };
+	      BigInteger.prototype.isOdd = function () {
+	        return (this.value[0] & 1) === 1;
+	      };
+	      SmallInteger.prototype.isOdd = function () {
+	        return (this.value & 1) === 1;
+	      };
+	      NativeBigInt.prototype.isOdd = function () {
+	        return (this.value & BigInt(1)) === BigInt(1);
+	      };
+	      BigInteger.prototype.isPositive = function () {
+	        return !this.sign;
+	      };
+	      SmallInteger.prototype.isPositive = function () {
+	        return this.value > 0;
+	      };
+	      NativeBigInt.prototype.isPositive = SmallInteger.prototype.isPositive;
+	      BigInteger.prototype.isNegative = function () {
+	        return this.sign;
+	      };
+	      SmallInteger.prototype.isNegative = function () {
+	        return this.value < 0;
+	      };
+	      NativeBigInt.prototype.isNegative = SmallInteger.prototype.isNegative;
+	      BigInteger.prototype.isUnit = function () {
+	        return false;
+	      };
+	      SmallInteger.prototype.isUnit = function () {
+	        return Math.abs(this.value) === 1;
+	      };
+	      NativeBigInt.prototype.isUnit = function () {
+	        return this.abs().value === BigInt(1);
+	      };
+	      BigInteger.prototype.isZero = function () {
+	        return false;
+	      };
+	      SmallInteger.prototype.isZero = function () {
+	        return this.value === 0;
+	      };
+	      NativeBigInt.prototype.isZero = function () {
+	        return this.value === BigInt(0);
+	      };
+	      BigInteger.prototype.isDivisibleBy = function (v) {
+	        var n = parseValue(v);
+	        if (n.isZero()) return false;
+	        if (n.isUnit()) return true;
+	        if (n.compareAbs(2) === 0) return this.isEven();
+	        return this.mod(n).isZero();
+	      };
+	      NativeBigInt.prototype.isDivisibleBy = SmallInteger.prototype.isDivisibleBy = BigInteger.prototype.isDivisibleBy;
+	      function isBasicPrime(v) {
+	        var n = v.abs();
+	        if (n.isUnit()) return false;
+	        if (n.equals(2) || n.equals(3) || n.equals(5)) return true;
+	        if (n.isEven() || n.isDivisibleBy(3) || n.isDivisibleBy(5)) return false;
+	        if (n.lesser(49)) return true;
+	        // we don't know if it's prime: let the other functions figure it out
 	      }
-	      if (base.isUnit()) {
-	        if (n.isZero()) return {
-	          value: [0],
-	          isNegative: false
-	        };
+	      function millerRabinTest(n, a) {
+	        var nPrev = n.prev(),
+	          b = nPrev,
+	          r = 0,
+	          d,
+	          i,
+	          x;
+	        while (b.isEven()) b = b.divide(2), r++;
+	        next: for (i = 0; i < a.length; i++) {
+	          if (n.lesser(a[i])) continue;
+	          x = bigInt(a[i]).modPow(b, n);
+	          if (x.isUnit() || x.equals(nPrev)) continue;
+	          for (d = r - 1; d != 0; d--) {
+	            x = x.square().mod(n);
+	            if (x.isUnit()) return false;
+	            if (x.equals(nPrev)) continue next;
+	          }
+	          return false;
+	        }
+	        return true;
+	      }
+
+	      // Set "strict" to true to force GRH-supported lower bound of 2*log(N)^2
+	      BigInteger.prototype.isPrime = function (strict) {
+	        var isPrime = isBasicPrime(this);
+	        if (isPrime !== undefined$1) return isPrime;
+	        var n = this.abs();
+	        var bits = n.bitLength();
+	        if (bits <= 64) return millerRabinTest(n, [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]);
+	        var logN = Math.log(2) * bits.toJSNumber();
+	        var t = Math.ceil(strict === true ? 2 * Math.pow(logN, 2) : logN);
+	        for (var a = [], i = 0; i < t; i++) {
+	          a.push(bigInt(i + 2));
+	        }
+	        return millerRabinTest(n, a);
+	      };
+	      NativeBigInt.prototype.isPrime = SmallInteger.prototype.isPrime = BigInteger.prototype.isPrime;
+	      BigInteger.prototype.isProbablePrime = function (iterations, rng) {
+	        var isPrime = isBasicPrime(this);
+	        if (isPrime !== undefined$1) return isPrime;
+	        var n = this.abs();
+	        var t = iterations === undefined$1 ? 5 : iterations;
+	        for (var a = [], i = 0; i < t; i++) {
+	          a.push(bigInt.randBetween(2, n.minus(2), rng));
+	        }
+	        return millerRabinTest(n, a);
+	      };
+	      NativeBigInt.prototype.isProbablePrime = SmallInteger.prototype.isProbablePrime = BigInteger.prototype.isProbablePrime;
+	      BigInteger.prototype.modInv = function (n) {
+	        var t = bigInt.zero,
+	          newT = bigInt.one,
+	          r = parseValue(n),
+	          newR = this.abs(),
+	          q,
+	          lastT,
+	          lastR;
+	        while (!newR.isZero()) {
+	          q = r.divide(newR);
+	          lastT = t;
+	          lastR = r;
+	          t = newT;
+	          r = newR;
+	          newT = lastT.subtract(q.multiply(newT));
+	          newR = lastR.subtract(q.multiply(newR));
+	        }
+	        if (!r.isUnit()) throw new Error(this.toString() + " and " + n.toString() + " are not co-prime");
+	        if (t.compare(0) === -1) {
+	          t = t.add(n);
+	        }
+	        if (this.isNegative()) {
+	          return t.negate();
+	        }
+	        return t;
+	      };
+	      NativeBigInt.prototype.modInv = SmallInteger.prototype.modInv = BigInteger.prototype.modInv;
+	      BigInteger.prototype.next = function () {
+	        var value = this.value;
+	        if (this.sign) {
+	          return subtractSmall(value, 1, this.sign);
+	        }
+	        return new BigInteger(addSmall(value, 1), this.sign);
+	      };
+	      SmallInteger.prototype.next = function () {
+	        var value = this.value;
+	        if (value + 1 < MAX_INT) return new SmallInteger(value + 1);
+	        return new BigInteger(MAX_INT_ARR, false);
+	      };
+	      NativeBigInt.prototype.next = function () {
+	        return new NativeBigInt(this.value + BigInt(1));
+	      };
+	      BigInteger.prototype.prev = function () {
+	        var value = this.value;
+	        if (this.sign) {
+	          return new BigInteger(addSmall(value, 1), true);
+	        }
+	        return subtractSmall(value, 1, this.sign);
+	      };
+	      SmallInteger.prototype.prev = function () {
+	        var value = this.value;
+	        if (value - 1 > -MAX_INT) return new SmallInteger(value - 1);
+	        return new BigInteger(MAX_INT_ARR, true);
+	      };
+	      NativeBigInt.prototype.prev = function () {
+	        return new NativeBigInt(this.value - BigInt(1));
+	      };
+	      var powersOfTwo = [1];
+	      while (2 * powersOfTwo[powersOfTwo.length - 1] <= BASE) powersOfTwo.push(2 * powersOfTwo[powersOfTwo.length - 1]);
+	      var powers2Length = powersOfTwo.length,
+	        highestPower2 = powersOfTwo[powers2Length - 1];
+	      function shift_isSmall(n) {
+	        return Math.abs(n) <= BASE;
+	      }
+	      BigInteger.prototype.shiftLeft = function (v) {
+	        var n = parseValue(v).toJSNumber();
+	        if (!shift_isSmall(n)) {
+	          throw new Error(String(n) + " is too large for shifting.");
+	        }
+	        if (n < 0) return this.shiftRight(-n);
+	        var result = this;
+	        if (result.isZero()) return result;
+	        while (n >= powers2Length) {
+	          result = result.multiply(highestPower2);
+	          n -= powers2Length - 1;
+	        }
+	        return result.multiply(powersOfTwo[n]);
+	      };
+	      NativeBigInt.prototype.shiftLeft = SmallInteger.prototype.shiftLeft = BigInteger.prototype.shiftLeft;
+	      BigInteger.prototype.shiftRight = function (v) {
+	        var remQuo;
+	        var n = parseValue(v).toJSNumber();
+	        if (!shift_isSmall(n)) {
+	          throw new Error(String(n) + " is too large for shifting.");
+	        }
+	        if (n < 0) return this.shiftLeft(-n);
+	        var result = this;
+	        while (n >= powers2Length) {
+	          if (result.isZero() || result.isNegative() && result.isUnit()) return result;
+	          remQuo = divModAny(result, highestPower2);
+	          result = remQuo[1].isNegative() ? remQuo[0].prev() : remQuo[0];
+	          n -= powers2Length - 1;
+	        }
+	        remQuo = divModAny(result, powersOfTwo[n]);
+	        return remQuo[1].isNegative() ? remQuo[0].prev() : remQuo[0];
+	      };
+	      NativeBigInt.prototype.shiftRight = SmallInteger.prototype.shiftRight = BigInteger.prototype.shiftRight;
+	      function bitwise(x, y, fn) {
+	        y = parseValue(y);
+	        var xSign = x.isNegative(),
+	          ySign = y.isNegative();
+	        var xRem = xSign ? x.not() : x,
+	          yRem = ySign ? y.not() : y;
+	        var xDigit = 0,
+	          yDigit = 0;
+	        var xDivMod = null,
+	          yDivMod = null;
+	        var result = [];
+	        while (!xRem.isZero() || !yRem.isZero()) {
+	          xDivMod = divModAny(xRem, highestPower2);
+	          xDigit = xDivMod[1].toJSNumber();
+	          if (xSign) {
+	            xDigit = highestPower2 - 1 - xDigit; // two's complement for negative numbers
+	          }
+	          yDivMod = divModAny(yRem, highestPower2);
+	          yDigit = yDivMod[1].toJSNumber();
+	          if (ySign) {
+	            yDigit = highestPower2 - 1 - yDigit; // two's complement for negative numbers
+	          }
+	          xRem = xDivMod[0];
+	          yRem = yDivMod[0];
+	          result.push(fn(xDigit, yDigit));
+	        }
+	        var sum = fn(xSign ? 1 : 0, ySign ? 1 : 0) !== 0 ? bigInt(-1) : bigInt(0);
+	        for (var i = result.length - 1; i >= 0; i -= 1) {
+	          sum = sum.multiply(highestPower2).add(bigInt(result[i]));
+	        }
+	        return sum;
+	      }
+	      BigInteger.prototype.not = function () {
+	        return this.negate().prev();
+	      };
+	      NativeBigInt.prototype.not = SmallInteger.prototype.not = BigInteger.prototype.not;
+	      BigInteger.prototype.and = function (n) {
+	        return bitwise(this, n, function (a, b) {
+	          return a & b;
+	        });
+	      };
+	      NativeBigInt.prototype.and = SmallInteger.prototype.and = BigInteger.prototype.and;
+	      BigInteger.prototype.or = function (n) {
+	        return bitwise(this, n, function (a, b) {
+	          return a | b;
+	        });
+	      };
+	      NativeBigInt.prototype.or = SmallInteger.prototype.or = BigInteger.prototype.or;
+	      BigInteger.prototype.xor = function (n) {
+	        return bitwise(this, n, function (a, b) {
+	          return a ^ b;
+	        });
+	      };
+	      NativeBigInt.prototype.xor = SmallInteger.prototype.xor = BigInteger.prototype.xor;
+	      var LOBMASK_I = 1 << 30,
+	        LOBMASK_BI = (BASE & -BASE) * (BASE & -BASE) | LOBMASK_I;
+	      function roughLOB(n) {
+	        // get lowestOneBit (rough)
+	        // SmallInteger: return Min(lowestOneBit(n), 1 << 30)
+	        // BigInteger: return Min(lowestOneBit(n), 1 << 14) [BASE=1e7]
+	        var v = n.value,
+	          x = typeof v === "number" ? v | LOBMASK_I : typeof v === "bigint" ? v | BigInt(LOBMASK_I) : v[0] + v[1] * BASE | LOBMASK_BI;
+	        return x & -x;
+	      }
+	      function integerLogarithm(value, base) {
+	        if (base.compareTo(value) <= 0) {
+	          var tmp = integerLogarithm(value, base.square(base));
+	          var p = tmp.p;
+	          var e = tmp.e;
+	          var t = p.multiply(base);
+	          return t.compareTo(value) <= 0 ? {
+	            p: t,
+	            e: e * 2 + 1
+	          } : {
+	            p: p,
+	            e: e * 2
+	          };
+	        }
 	        return {
-	          value: Array.apply(null, Array(n.toJSNumber())).map(Number.prototype.valueOf, 1),
+	          p: bigInt(1),
+	          e: 0
+	        };
+	      }
+	      BigInteger.prototype.bitLength = function () {
+	        var n = this;
+	        if (n.compareTo(bigInt(0)) < 0) {
+	          n = n.negate().subtract(bigInt(1));
+	        }
+	        if (n.compareTo(bigInt(0)) === 0) {
+	          return bigInt(0);
+	        }
+	        return bigInt(integerLogarithm(n, bigInt(2)).e).add(bigInt(1));
+	      };
+	      NativeBigInt.prototype.bitLength = SmallInteger.prototype.bitLength = BigInteger.prototype.bitLength;
+	      function max(a, b) {
+	        a = parseValue(a);
+	        b = parseValue(b);
+	        return a.greater(b) ? a : b;
+	      }
+	      function min(a, b) {
+	        a = parseValue(a);
+	        b = parseValue(b);
+	        return a.lesser(b) ? a : b;
+	      }
+	      function gcd(a, b) {
+	        a = parseValue(a).abs();
+	        b = parseValue(b).abs();
+	        if (a.equals(b)) return a;
+	        if (a.isZero()) return b;
+	        if (b.isZero()) return a;
+	        var c = Integer[1],
+	          d,
+	          t;
+	        while (a.isEven() && b.isEven()) {
+	          d = min(roughLOB(a), roughLOB(b));
+	          a = a.divide(d);
+	          b = b.divide(d);
+	          c = c.multiply(d);
+	        }
+	        while (a.isEven()) {
+	          a = a.divide(roughLOB(a));
+	        }
+	        do {
+	          while (b.isEven()) {
+	            b = b.divide(roughLOB(b));
+	          }
+	          if (a.greater(b)) {
+	            t = b;
+	            b = a;
+	            a = t;
+	          }
+	          b = b.subtract(a);
+	        } while (!b.isZero());
+	        return c.isUnit() ? a : a.multiply(c);
+	      }
+	      function lcm(a, b) {
+	        a = parseValue(a).abs();
+	        b = parseValue(b).abs();
+	        return a.divide(gcd(a, b)).multiply(b);
+	      }
+	      function randBetween(a, b, rng) {
+	        a = parseValue(a);
+	        b = parseValue(b);
+	        var usedRNG = rng || Math.random;
+	        var low = min(a, b),
+	          high = max(a, b);
+	        var range = high.subtract(low).add(1);
+	        if (range.isSmall) return low.add(Math.floor(usedRNG() * range));
+	        var digits = toBase(range, BASE).value;
+	        var result = [],
+	          restricted = true;
+	        for (var i = 0; i < digits.length; i++) {
+	          var top = restricted ? digits[i] + (i + 1 < digits.length ? digits[i + 1] / BASE : 0) : BASE;
+	          var digit = truncate(usedRNG() * top);
+	          result.push(digit);
+	          if (digit < digits[i]) restricted = false;
+	        }
+	        return low.add(Integer.fromArray(result, BASE, false));
+	      }
+	      var parseBase = function (text, base, alphabet, caseSensitive) {
+	        alphabet = alphabet || DEFAULT_ALPHABET;
+	        text = String(text);
+	        if (!caseSensitive) {
+	          text = text.toLowerCase();
+	          alphabet = alphabet.toLowerCase();
+	        }
+	        var length = text.length;
+	        var i;
+	        var absBase = Math.abs(base);
+	        var alphabetValues = {};
+	        for (i = 0; i < alphabet.length; i++) {
+	          alphabetValues[alphabet[i]] = i;
+	        }
+	        for (i = 0; i < length; i++) {
+	          var c = text[i];
+	          if (c === "-") continue;
+	          if (c in alphabetValues) {
+	            if (alphabetValues[c] >= absBase) {
+	              if (c === "1" && absBase === 1) continue;
+	              throw new Error(c + " is not a valid digit in base " + base + ".");
+	            }
+	          }
+	        }
+	        base = parseValue(base);
+	        var digits = [];
+	        var isNegative = text[0] === "-";
+	        for (i = isNegative ? 1 : 0; i < text.length; i++) {
+	          var c = text[i];
+	          if (c in alphabetValues) digits.push(parseValue(alphabetValues[c]));else if (c === "<") {
+	            var start = i;
+	            do {
+	              i++;
+	            } while (text[i] !== ">" && i < text.length);
+	            digits.push(parseValue(text.slice(start + 1, i)));
+	          } else throw new Error(c + " is not a valid character");
+	        }
+	        return parseBaseFromArray(digits, base, isNegative);
+	      };
+	      function parseBaseFromArray(digits, base, isNegative) {
+	        var val = Integer[0],
+	          pow = Integer[1],
+	          i;
+	        for (i = digits.length - 1; i >= 0; i--) {
+	          val = val.add(digits[i].times(pow));
+	          pow = pow.times(base);
+	        }
+	        return isNegative ? val.negate() : val;
+	      }
+	      function stringify(digit, alphabet) {
+	        alphabet = alphabet || DEFAULT_ALPHABET;
+	        if (digit < alphabet.length) {
+	          return alphabet[digit];
+	        }
+	        return "<" + digit + ">";
+	      }
+	      function toBase(n, base) {
+	        base = bigInt(base);
+	        if (base.isZero()) {
+	          if (n.isZero()) return {
+	            value: [0],
+	            isNegative: false
+	          };
+	          throw new Error("Cannot convert nonzero numbers to base 0.");
+	        }
+	        if (base.equals(-1)) {
+	          if (n.isZero()) return {
+	            value: [0],
+	            isNegative: false
+	          };
+	          if (n.isNegative()) return {
+	            value: [].concat.apply([], Array.apply(null, Array(-n.toJSNumber())).map(Array.prototype.valueOf, [1, 0])),
+	            isNegative: false
+	          };
+	          var arr = Array.apply(null, Array(n.toJSNumber() - 1)).map(Array.prototype.valueOf, [0, 1]);
+	          arr.unshift([1]);
+	          return {
+	            value: [].concat.apply([], arr),
+	            isNegative: false
+	          };
+	        }
+	        var neg = false;
+	        if (n.isNegative() && base.isPositive()) {
+	          neg = true;
+	          n = n.abs();
+	        }
+	        if (base.isUnit()) {
+	          if (n.isZero()) return {
+	            value: [0],
+	            isNegative: false
+	          };
+	          return {
+	            value: Array.apply(null, Array(n.toJSNumber())).map(Number.prototype.valueOf, 1),
+	            isNegative: neg
+	          };
+	        }
+	        var out = [];
+	        var left = n,
+	          divmod;
+	        while (left.isNegative() || left.compareAbs(base) >= 0) {
+	          divmod = left.divmod(base);
+	          left = divmod.quotient;
+	          var digit = divmod.remainder;
+	          if (digit.isNegative()) {
+	            digit = base.minus(digit).abs();
+	            left = left.next();
+	          }
+	          out.push(digit.toJSNumber());
+	        }
+	        out.push(left.toJSNumber());
+	        return {
+	          value: out.reverse(),
 	          isNegative: neg
 	        };
 	      }
-	      var out = [];
-	      var left = n,
-	        divmod;
-	      while (left.isNegative() || left.compareAbs(base) >= 0) {
-	        divmod = left.divmod(base);
-	        left = divmod.quotient;
-	        var digit = divmod.remainder;
-	        if (digit.isNegative()) {
-	          digit = base.minus(digit).abs();
-	          left = left.next();
-	        }
-	        out.push(digit.toJSNumber());
+	      function toBaseString(n, base, alphabet) {
+	        var arr = toBase(n, base);
+	        return (arr.isNegative ? "-" : "") + arr.value.map(function (x) {
+	          return stringify(x, alphabet);
+	        }).join('');
 	      }
-	      out.push(left.toJSNumber());
-	      return {
-	        value: out.reverse(),
-	        isNegative: neg
+	      BigInteger.prototype.toArray = function (radix) {
+	        return toBase(this, radix);
 	      };
-	    }
-	    function toBaseString(n, base, alphabet) {
-	      var arr = toBase(n, base);
-	      return (arr.isNegative ? "-" : "") + arr.value.map(function (x) {
-	        return stringify(x, alphabet);
-	      }).join('');
-	    }
-	    BigInteger.prototype.toArray = function (radix) {
-	      return toBase(this, radix);
-	    };
-	    SmallInteger.prototype.toArray = function (radix) {
-	      return toBase(this, radix);
-	    };
-	    NativeBigInt.prototype.toArray = function (radix) {
-	      return toBase(this, radix);
-	    };
-	    BigInteger.prototype.toString = function (radix, alphabet) {
-	      if (radix === undefined$1) radix = 10;
-	      if (radix !== 10) return toBaseString(this, radix, alphabet);
-	      var v = this.value,
-	        l = v.length,
-	        str = String(v[--l]),
-	        zeros = "0000000",
-	        digit;
-	      while (--l >= 0) {
-	        digit = String(v[l]);
-	        str += zeros.slice(digit.length) + digit;
-	      }
-	      var sign = this.sign ? "-" : "";
-	      return sign + str;
-	    };
-	    SmallInteger.prototype.toString = function (radix, alphabet) {
-	      if (radix === undefined$1) radix = 10;
-	      if (radix != 10) return toBaseString(this, radix, alphabet);
-	      return String(this.value);
-	    };
-	    NativeBigInt.prototype.toString = SmallInteger.prototype.toString;
-	    NativeBigInt.prototype.toJSON = BigInteger.prototype.toJSON = SmallInteger.prototype.toJSON = function () {
-	      return this.toString();
-	    };
-	    BigInteger.prototype.valueOf = function () {
-	      return parseInt(this.toString(), 10);
-	    };
-	    BigInteger.prototype.toJSNumber = BigInteger.prototype.valueOf;
-	    SmallInteger.prototype.valueOf = function () {
-	      return this.value;
-	    };
-	    SmallInteger.prototype.toJSNumber = SmallInteger.prototype.valueOf;
-	    NativeBigInt.prototype.valueOf = NativeBigInt.prototype.toJSNumber = function () {
-	      return parseInt(this.toString(), 10);
-	    };
-	    function parseStringValue(v) {
-	      if (isPrecise(+v)) {
-	        var x = +v;
-	        if (x === truncate(x)) return supportsNativeBigInt ? new NativeBigInt(BigInt(x)) : new SmallInteger(x);
-	        throw new Error("Invalid integer: " + v);
-	      }
-	      var sign = v[0] === "-";
-	      if (sign) v = v.slice(1);
-	      var split = v.split(/e/i);
-	      if (split.length > 2) throw new Error("Invalid integer: " + split.join("e"));
-	      if (split.length === 2) {
-	        var exp = split[1];
-	        if (exp[0] === "+") exp = exp.slice(1);
-	        exp = +exp;
-	        if (exp !== truncate(exp) || !isPrecise(exp)) throw new Error("Invalid integer: " + exp + " is not a valid exponent.");
-	        var text = split[0];
-	        var decimalPlace = text.indexOf(".");
-	        if (decimalPlace >= 0) {
-	          exp -= text.length - decimalPlace - 1;
-	          text = text.slice(0, decimalPlace) + text.slice(decimalPlace + 1);
+	      SmallInteger.prototype.toArray = function (radix) {
+	        return toBase(this, radix);
+	      };
+	      NativeBigInt.prototype.toArray = function (radix) {
+	        return toBase(this, radix);
+	      };
+	      BigInteger.prototype.toString = function (radix, alphabet) {
+	        if (radix === undefined$1) radix = 10;
+	        if (radix !== 10) return toBaseString(this, radix, alphabet);
+	        var v = this.value,
+	          l = v.length,
+	          str = String(v[--l]),
+	          zeros = "0000000",
+	          digit;
+	        while (--l >= 0) {
+	          digit = String(v[l]);
+	          str += zeros.slice(digit.length) + digit;
 	        }
-	        if (exp < 0) throw new Error("Cannot include negative exponent part for integers");
-	        text += new Array(exp + 1).join("0");
-	        v = text;
+	        var sign = this.sign ? "-" : "";
+	        return sign + str;
+	      };
+	      SmallInteger.prototype.toString = function (radix, alphabet) {
+	        if (radix === undefined$1) radix = 10;
+	        if (radix != 10) return toBaseString(this, radix, alphabet);
+	        return String(this.value);
+	      };
+	      NativeBigInt.prototype.toString = SmallInteger.prototype.toString;
+	      NativeBigInt.prototype.toJSON = BigInteger.prototype.toJSON = SmallInteger.prototype.toJSON = function () {
+	        return this.toString();
+	      };
+	      BigInteger.prototype.valueOf = function () {
+	        return parseInt(this.toString(), 10);
+	      };
+	      BigInteger.prototype.toJSNumber = BigInteger.prototype.valueOf;
+	      SmallInteger.prototype.valueOf = function () {
+	        return this.value;
+	      };
+	      SmallInteger.prototype.toJSNumber = SmallInteger.prototype.valueOf;
+	      NativeBigInt.prototype.valueOf = NativeBigInt.prototype.toJSNumber = function () {
+	        return parseInt(this.toString(), 10);
+	      };
+	      function parseStringValue(v) {
+	        if (isPrecise(+v)) {
+	          var x = +v;
+	          if (x === truncate(x)) return supportsNativeBigInt ? new NativeBigInt(BigInt(x)) : new SmallInteger(x);
+	          throw new Error("Invalid integer: " + v);
+	        }
+	        var sign = v[0] === "-";
+	        if (sign) v = v.slice(1);
+	        var split = v.split(/e/i);
+	        if (split.length > 2) throw new Error("Invalid integer: " + split.join("e"));
+	        if (split.length === 2) {
+	          var exp = split[1];
+	          if (exp[0] === "+") exp = exp.slice(1);
+	          exp = +exp;
+	          if (exp !== truncate(exp) || !isPrecise(exp)) throw new Error("Invalid integer: " + exp + " is not a valid exponent.");
+	          var text = split[0];
+	          var decimalPlace = text.indexOf(".");
+	          if (decimalPlace >= 0) {
+	            exp -= text.length - decimalPlace - 1;
+	            text = text.slice(0, decimalPlace) + text.slice(decimalPlace + 1);
+	          }
+	          if (exp < 0) throw new Error("Cannot include negative exponent part for integers");
+	          text += new Array(exp + 1).join("0");
+	          v = text;
+	        }
+	        var isValid = /^([0-9][0-9]*)$/.test(v);
+	        if (!isValid) throw new Error("Invalid integer: " + v);
+	        if (supportsNativeBigInt) {
+	          return new NativeBigInt(BigInt(sign ? "-" + v : v));
+	        }
+	        var r = [],
+	          max = v.length,
+	          l = LOG_BASE,
+	          min = max - l;
+	        while (max > 0) {
+	          r.push(+v.slice(min, max));
+	          min -= l;
+	          if (min < 0) min = 0;
+	          max -= l;
+	        }
+	        trim(r);
+	        return new BigInteger(r, sign);
 	      }
-	      var isValid = /^([0-9][0-9]*)$/.test(v);
-	      if (!isValid) throw new Error("Invalid integer: " + v);
-	      if (supportsNativeBigInt) {
-	        return new NativeBigInt(BigInt(sign ? "-" + v : v));
+	      function parseNumberValue(v) {
+	        if (supportsNativeBigInt) {
+	          return new NativeBigInt(BigInt(v));
+	        }
+	        if (isPrecise(v)) {
+	          if (v !== truncate(v)) throw new Error(v + " is not an integer.");
+	          return new SmallInteger(v);
+	        }
+	        return parseStringValue(v.toString());
 	      }
-	      var r = [],
-	        max = v.length,
-	        l = LOG_BASE,
-	        min = max - l;
-	      while (max > 0) {
-	        r.push(+v.slice(min, max));
-	        min -= l;
-	        if (min < 0) min = 0;
-	        max -= l;
+	      function parseValue(v) {
+	        if (typeof v === "number") {
+	          return parseNumberValue(v);
+	        }
+	        if (typeof v === "string") {
+	          return parseStringValue(v);
+	        }
+	        if (typeof v === "bigint") {
+	          return new NativeBigInt(v);
+	        }
+	        return v;
 	      }
-	      trim(r);
-	      return new BigInteger(r, sign);
+	      // Pre-define numbers in range [-999,999]
+	      for (var i = 0; i < 1000; i++) {
+	        Integer[i] = parseValue(i);
+	        if (i > 0) Integer[-i] = parseValue(-i);
+	      }
+	      // Backwards compatibility
+	      Integer.one = Integer[1];
+	      Integer.zero = Integer[0];
+	      Integer.minusOne = Integer[-1];
+	      Integer.max = max;
+	      Integer.min = min;
+	      Integer.gcd = gcd;
+	      Integer.lcm = lcm;
+	      Integer.isInstance = function (x) {
+	        return x instanceof BigInteger || x instanceof SmallInteger || x instanceof NativeBigInt;
+	      };
+	      Integer.randBetween = randBetween;
+	      Integer.fromArray = function (digits, base, isNegative) {
+	        return parseBaseFromArray(digits.map(parseValue), parseValue(base || 10), isNegative);
+	      };
+	      return Integer;
+	    }();
+
+	    // Node.js check
+	    if (module.hasOwnProperty("exports")) {
+	      module.exports = bigInt;
 	    }
-	    function parseNumberValue(v) {
-	      if (supportsNativeBigInt) {
-	        return new NativeBigInt(BigInt(v));
-	      }
-	      if (isPrecise(v)) {
-	        if (v !== truncate(v)) throw new Error(v + " is not an integer.");
-	        return new SmallInteger(v);
-	      }
-	      return parseStringValue(v.toString());
+	  })(BigInteger);
+	  return BigInteger.exports;
+	}
+
+	var lib;
+	var hasRequiredLib$1;
+	function requireLib$1() {
+	  if (hasRequiredLib$1) return lib;
+	  hasRequiredLib$1 = 1;
+	  const bigInt = requireBigInteger();
+	  const knownBases = {
+	    base64url: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_',
+	    base64: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/',
+	    base62: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+	    base58: '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
+	    // Bitcoin base58
+	    base36: '0123456789abcdefghijklmnopqrstuvwxyz',
+	    base32: '0123456789abcdefghjkmnpqrstvwxyz',
+	    // Crockford's base32
+	    base16: '0123456789abcdef',
+	    base10: '0123456789',
+	    base2: '01'
+	  };
+	  const caseSensitiveBases = {
+	    base64url: true,
+	    base64: true,
+	    base62: true,
+	    base58: true,
+	    base36: false,
+	    base32: false,
+	    base16: false,
+	    base10: true,
+	    base2: true
+	  };
+	  class UuidEncoder {
+	    /**
+	     * @public
+	     * @param [baseEncodingStr] A string containing all usable letters for encoding
+	     * @constructor
+	     */
+	    constructor(baseEncodingStr = 'base36') {
+	      this.setBaseEncodingStr(baseEncodingStr);
 	    }
-	    function parseValue(v) {
-	      if (typeof v === "number") {
-	        return parseNumberValue(v);
-	      }
-	      if (typeof v === "string") {
-	        return parseStringValue(v);
-	      }
-	      if (typeof v === "bigint") {
-	        return new NativeBigInt(v);
-	      }
-	      return v;
+
+	    /**
+	     * Set encoding base
+	     * @param {string} baseEncodingStr A string containing all usable letters for encoding
+	     * @public
+	     */
+	    setBaseEncodingStr(baseEncodingStr) {
+	      this.encStr = UuidEncoder.resolveEncodingStr(baseEncodingStr);
+	      this.isCaseSensitive = UuidEncoder.isCaseSensitiveBase(baseEncodingStr);
+	      this.base = this.encStr.length;
 	    }
-	    // Pre-define numbers in range [-999,999]
-	    for (var i = 0; i < 1000; i++) {
-	      Integer[i] = parseValue(i);
-	      if (i > 0) Integer[-i] = parseValue(-i);
+
+	    /**
+	     * @private
+	     * @param {string} baseEncodingStr
+	     * @returns {string}
+	     */
+	    static resolveEncodingStr(baseEncodingStr) {
+	      return Object.prototype.hasOwnProperty.call(knownBases, baseEncodingStr) ? knownBases[baseEncodingStr] : baseEncodingStr;
 	    }
-	    // Backwards compatibility
-	    Integer.one = Integer[1];
-	    Integer.zero = Integer[0];
-	    Integer.minusOne = Integer[-1];
-	    Integer.max = max;
-	    Integer.min = min;
-	    Integer.gcd = gcd;
-	    Integer.lcm = lcm;
-	    Integer.isInstance = function (x) {
-	      return x instanceof BigInteger || x instanceof SmallInteger || x instanceof NativeBigInt;
-	    };
-	    Integer.randBetween = randBetween;
-	    Integer.fromArray = function (digits, base, isNegative) {
-	      return parseBaseFromArray(digits.map(parseValue), parseValue(base || 10), isNegative);
-	    };
-	    return Integer;
-	  }();
 
-	  // Node.js check
-	  if (module.hasOwnProperty("exports")) {
-	    module.exports = bigInt;
-	  }
-	})(BigInteger);
-	var BigIntegerExports = BigInteger.exports;
-
-	const bigInt = BigIntegerExports;
-	const knownBases = {
-	  base64url: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_',
-	  base64: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/',
-	  base62: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-	  base58: '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
-	  // Bitcoin base58
-	  base36: '0123456789abcdefghijklmnopqrstuvwxyz',
-	  base32: '0123456789abcdefghjkmnpqrstvwxyz',
-	  // Crockford's base32
-	  base16: '0123456789abcdef',
-	  base10: '0123456789',
-	  base2: '01'
-	};
-	const caseSensitiveBases = {
-	  base64url: true,
-	  base64: true,
-	  base62: true,
-	  base58: true,
-	  base36: false,
-	  base32: false,
-	  base16: false,
-	  base10: true,
-	  base2: true
-	};
-	let UuidEncoder$1 = class UuidEncoder {
-	  /**
-	   * @public
-	   * @param [baseEncodingStr] A string containing all usable letters for encoding
-	   * @constructor
-	   */
-	  constructor(baseEncodingStr = 'base36') {
-	    this.setBaseEncodingStr(baseEncodingStr);
-	  }
-
-	  /**
-	   * Set encoding base
-	   * @param {string} baseEncodingStr A string containing all usable letters for encoding
-	   * @public
-	   */
-	  setBaseEncodingStr(baseEncodingStr) {
-	    this.encStr = UuidEncoder.resolveEncodingStr(baseEncodingStr);
-	    this.isCaseSensitive = UuidEncoder.isCaseSensitiveBase(baseEncodingStr);
-	    this.base = this.encStr.length;
-	  }
-
-	  /**
-	   * @private
-	   * @param {string} baseEncodingStr
-	   * @returns {string}
-	   */
-	  static resolveEncodingStr(baseEncodingStr) {
-	    return Object.prototype.hasOwnProperty.call(knownBases, baseEncodingStr) ? knownBases[baseEncodingStr] : baseEncodingStr;
-	  }
-
-	  /**
-	   * @public
-	   * @param baseEncodingStr
-	   * @returns {boolean}
-	   */
-	  static isCaseSensitiveBase(baseEncodingStr) {
-	    return Object.prototype.hasOwnProperty.call(caseSensitiveBases, baseEncodingStr) ? caseSensitiveBases[baseEncodingStr] : true;
-	  }
-
-	  /**
-	   * Encode a UUID
-	   * @param {string} uuid Properly formatted UUID
-	   * @returns {string} Encoded UUID
-	   * @public
-	   */
-	  encode(uuid) {
-	    const cleanUuid = uuid.replace(/-/g, '');
-	    const {
-	      base,
-	      encStr
-	    } = this;
-	    let iUuid = bigInt(cleanUuid, 16);
-	    let str = '';
-	    do {
-	      str = encStr.substr(iUuid.mod(base).valueOf(), 1) + str;
-	      iUuid = iUuid.divide(base);
-	    } while (iUuid.greater(0));
-	    return str;
-	  }
-
-	  /**
-	   * Decode an encoded UUID
-	   * @public
-	   * @param {string} str Previously encoded string
-	   * @returns {string} Properly formatted UUID
-	   * @throws Throws an {Error} when encountering invalid data
-	   */
-	  decode(str) {
-	    let iUuid = bigInt(0);
-	    const {
-	      base,
-	      encStr
-	    } = this;
-	    const len = str.length;
-	    const finalStr = this.isCaseSensitive ? str : str.toLowerCase();
-	    for (let pos = 0; pos < len; pos += 1) {
-	      const ch = finalStr.substr(pos, 1);
-	      const encPos = encStr.indexOf(ch);
-	      if (encPos < 0) {
-	        throw new Error('Invalid encoded data');
-	      }
-	      iUuid = iUuid.add(encPos);
-	      if (pos < len - 1) {
-	        iUuid = iUuid.multiply(base);
-	      }
+	    /**
+	     * @public
+	     * @param baseEncodingStr
+	     * @returns {boolean}
+	     */
+	    static isCaseSensitiveBase(baseEncodingStr) {
+	      return Object.prototype.hasOwnProperty.call(caseSensitiveBases, baseEncodingStr) ? caseSensitiveBases[baseEncodingStr] : true;
 	    }
-	    const uuid = iUuid.toString(16).padStart(32, '0');
-	    return `${uuid.substr(0, 8)}-${uuid.substr(8, 4)}-${uuid.substr(12, 4)}-${uuid.substr(16, 4)}-${uuid.substr(20)}`;
-	  }
-	};
-	var lib = UuidEncoder$1;
 
-	var colorName = {
-	  "aliceblue": [240, 248, 255],
-	  "antiquewhite": [250, 235, 215],
-	  "aqua": [0, 255, 255],
-	  "aquamarine": [127, 255, 212],
-	  "azure": [240, 255, 255],
-	  "beige": [245, 245, 220],
-	  "bisque": [255, 228, 196],
-	  "black": [0, 0, 0],
-	  "blanchedalmond": [255, 235, 205],
-	  "blue": [0, 0, 255],
-	  "blueviolet": [138, 43, 226],
-	  "brown": [165, 42, 42],
-	  "burlywood": [222, 184, 135],
-	  "cadetblue": [95, 158, 160],
-	  "chartreuse": [127, 255, 0],
-	  "chocolate": [210, 105, 30],
-	  "coral": [255, 127, 80],
-	  "cornflowerblue": [100, 149, 237],
-	  "cornsilk": [255, 248, 220],
-	  "crimson": [220, 20, 60],
-	  "cyan": [0, 255, 255],
-	  "darkblue": [0, 0, 139],
-	  "darkcyan": [0, 139, 139],
-	  "darkgoldenrod": [184, 134, 11],
-	  "darkgray": [169, 169, 169],
-	  "darkgreen": [0, 100, 0],
-	  "darkgrey": [169, 169, 169],
-	  "darkkhaki": [189, 183, 107],
-	  "darkmagenta": [139, 0, 139],
-	  "darkolivegreen": [85, 107, 47],
-	  "darkorange": [255, 140, 0],
-	  "darkorchid": [153, 50, 204],
-	  "darkred": [139, 0, 0],
-	  "darksalmon": [233, 150, 122],
-	  "darkseagreen": [143, 188, 143],
-	  "darkslateblue": [72, 61, 139],
-	  "darkslategray": [47, 79, 79],
-	  "darkslategrey": [47, 79, 79],
-	  "darkturquoise": [0, 206, 209],
-	  "darkviolet": [148, 0, 211],
-	  "deeppink": [255, 20, 147],
-	  "deepskyblue": [0, 191, 255],
-	  "dimgray": [105, 105, 105],
-	  "dimgrey": [105, 105, 105],
-	  "dodgerblue": [30, 144, 255],
-	  "firebrick": [178, 34, 34],
-	  "floralwhite": [255, 250, 240],
-	  "forestgreen": [34, 139, 34],
-	  "fuchsia": [255, 0, 255],
-	  "gainsboro": [220, 220, 220],
-	  "ghostwhite": [248, 248, 255],
-	  "gold": [255, 215, 0],
-	  "goldenrod": [218, 165, 32],
-	  "gray": [128, 128, 128],
-	  "green": [0, 128, 0],
-	  "greenyellow": [173, 255, 47],
-	  "grey": [128, 128, 128],
-	  "honeydew": [240, 255, 240],
-	  "hotpink": [255, 105, 180],
-	  "indianred": [205, 92, 92],
-	  "indigo": [75, 0, 130],
-	  "ivory": [255, 255, 240],
-	  "khaki": [240, 230, 140],
-	  "lavender": [230, 230, 250],
-	  "lavenderblush": [255, 240, 245],
-	  "lawngreen": [124, 252, 0],
-	  "lemonchiffon": [255, 250, 205],
-	  "lightblue": [173, 216, 230],
-	  "lightcoral": [240, 128, 128],
-	  "lightcyan": [224, 255, 255],
-	  "lightgoldenrodyellow": [250, 250, 210],
-	  "lightgray": [211, 211, 211],
-	  "lightgreen": [144, 238, 144],
-	  "lightgrey": [211, 211, 211],
-	  "lightpink": [255, 182, 193],
-	  "lightsalmon": [255, 160, 122],
-	  "lightseagreen": [32, 178, 170],
-	  "lightskyblue": [135, 206, 250],
-	  "lightslategray": [119, 136, 153],
-	  "lightslategrey": [119, 136, 153],
-	  "lightsteelblue": [176, 196, 222],
-	  "lightyellow": [255, 255, 224],
-	  "lime": [0, 255, 0],
-	  "limegreen": [50, 205, 50],
-	  "linen": [250, 240, 230],
-	  "magenta": [255, 0, 255],
-	  "maroon": [128, 0, 0],
-	  "mediumaquamarine": [102, 205, 170],
-	  "mediumblue": [0, 0, 205],
-	  "mediumorchid": [186, 85, 211],
-	  "mediumpurple": [147, 112, 219],
-	  "mediumseagreen": [60, 179, 113],
-	  "mediumslateblue": [123, 104, 238],
-	  "mediumspringgreen": [0, 250, 154],
-	  "mediumturquoise": [72, 209, 204],
-	  "mediumvioletred": [199, 21, 133],
-	  "midnightblue": [25, 25, 112],
-	  "mintcream": [245, 255, 250],
-	  "mistyrose": [255, 228, 225],
-	  "moccasin": [255, 228, 181],
-	  "navajowhite": [255, 222, 173],
-	  "navy": [0, 0, 128],
-	  "oldlace": [253, 245, 230],
-	  "olive": [128, 128, 0],
-	  "olivedrab": [107, 142, 35],
-	  "orange": [255, 165, 0],
-	  "orangered": [255, 69, 0],
-	  "orchid": [218, 112, 214],
-	  "palegoldenrod": [238, 232, 170],
-	  "palegreen": [152, 251, 152],
-	  "paleturquoise": [175, 238, 238],
-	  "palevioletred": [219, 112, 147],
-	  "papayawhip": [255, 239, 213],
-	  "peachpuff": [255, 218, 185],
-	  "peru": [205, 133, 63],
-	  "pink": [255, 192, 203],
-	  "plum": [221, 160, 221],
-	  "powderblue": [176, 224, 230],
-	  "purple": [128, 0, 128],
-	  "rebeccapurple": [102, 51, 153],
-	  "red": [255, 0, 0],
-	  "rosybrown": [188, 143, 143],
-	  "royalblue": [65, 105, 225],
-	  "saddlebrown": [139, 69, 19],
-	  "salmon": [250, 128, 114],
-	  "sandybrown": [244, 164, 96],
-	  "seagreen": [46, 139, 87],
-	  "seashell": [255, 245, 238],
-	  "sienna": [160, 82, 45],
-	  "silver": [192, 192, 192],
-	  "skyblue": [135, 206, 235],
-	  "slateblue": [106, 90, 205],
-	  "slategray": [112, 128, 144],
-	  "slategrey": [112, 128, 144],
-	  "snow": [255, 250, 250],
-	  "springgreen": [0, 255, 127],
-	  "steelblue": [70, 130, 180],
-	  "tan": [210, 180, 140],
-	  "teal": [0, 128, 128],
-	  "thistle": [216, 191, 216],
-	  "tomato": [255, 99, 71],
-	  "turquoise": [64, 224, 208],
-	  "violet": [238, 130, 238],
-	  "wheat": [245, 222, 179],
-	  "white": [255, 255, 255],
-	  "whitesmoke": [245, 245, 245],
-	  "yellow": [255, 255, 0],
-	  "yellowgreen": [154, 205, 50]
-	};
+	    /**
+	     * Encode a UUID
+	     * @param {string} uuid Properly formatted UUID
+	     * @returns {string} Encoded UUID
+	     * @public
+	     */
+	    encode(uuid) {
+	      const cleanUuid = uuid.replace(/-/g, '');
+	      const {
+	        base,
+	        encStr
+	      } = this;
+	      let iUuid = bigInt(cleanUuid, 16);
+	      let str = '';
+	      do {
+	        str = encStr.substr(iUuid.mod(base).valueOf(), 1) + str;
+	        iUuid = iUuid.divide(base);
+	      } while (iUuid.greater(0));
+	      return str;
+	    }
+
+	    /**
+	     * Decode an encoded UUID
+	     * @public
+	     * @param {string} str Previously encoded string
+	     * @returns {string} Properly formatted UUID
+	     * @throws Throws an {Error} when encountering invalid data
+	     */
+	    decode(str) {
+	      let iUuid = bigInt(0);
+	      const {
+	        base,
+	        encStr
+	      } = this;
+	      const len = str.length;
+	      const finalStr = this.isCaseSensitive ? str : str.toLowerCase();
+	      for (let pos = 0; pos < len; pos += 1) {
+	        const ch = finalStr.substr(pos, 1);
+	        const encPos = encStr.indexOf(ch);
+	        if (encPos < 0) {
+	          throw new Error('Invalid encoded data');
+	        }
+	        iUuid = iUuid.add(encPos);
+	        if (pos < len - 1) {
+	          iUuid = iUuid.multiply(base);
+	        }
+	      }
+	      const uuid = iUuid.toString(16).padStart(32, '0');
+	      return `${uuid.substr(0, 8)}-${uuid.substr(8, 4)}-${uuid.substr(12, 4)}-${uuid.substr(16, 4)}-${uuid.substr(20)}`;
+	    }
+	  }
+	  lib = UuidEncoder;
+	  return lib;
+	}
+
+	var colorName;
+	var hasRequiredColorName;
+	function requireColorName() {
+	  if (hasRequiredColorName) return colorName;
+	  hasRequiredColorName = 1;
+	  colorName = {
+	    "aliceblue": [240, 248, 255],
+	    "antiquewhite": [250, 235, 215],
+	    "aqua": [0, 255, 255],
+	    "aquamarine": [127, 255, 212],
+	    "azure": [240, 255, 255],
+	    "beige": [245, 245, 220],
+	    "bisque": [255, 228, 196],
+	    "black": [0, 0, 0],
+	    "blanchedalmond": [255, 235, 205],
+	    "blue": [0, 0, 255],
+	    "blueviolet": [138, 43, 226],
+	    "brown": [165, 42, 42],
+	    "burlywood": [222, 184, 135],
+	    "cadetblue": [95, 158, 160],
+	    "chartreuse": [127, 255, 0],
+	    "chocolate": [210, 105, 30],
+	    "coral": [255, 127, 80],
+	    "cornflowerblue": [100, 149, 237],
+	    "cornsilk": [255, 248, 220],
+	    "crimson": [220, 20, 60],
+	    "cyan": [0, 255, 255],
+	    "darkblue": [0, 0, 139],
+	    "darkcyan": [0, 139, 139],
+	    "darkgoldenrod": [184, 134, 11],
+	    "darkgray": [169, 169, 169],
+	    "darkgreen": [0, 100, 0],
+	    "darkgrey": [169, 169, 169],
+	    "darkkhaki": [189, 183, 107],
+	    "darkmagenta": [139, 0, 139],
+	    "darkolivegreen": [85, 107, 47],
+	    "darkorange": [255, 140, 0],
+	    "darkorchid": [153, 50, 204],
+	    "darkred": [139, 0, 0],
+	    "darksalmon": [233, 150, 122],
+	    "darkseagreen": [143, 188, 143],
+	    "darkslateblue": [72, 61, 139],
+	    "darkslategray": [47, 79, 79],
+	    "darkslategrey": [47, 79, 79],
+	    "darkturquoise": [0, 206, 209],
+	    "darkviolet": [148, 0, 211],
+	    "deeppink": [255, 20, 147],
+	    "deepskyblue": [0, 191, 255],
+	    "dimgray": [105, 105, 105],
+	    "dimgrey": [105, 105, 105],
+	    "dodgerblue": [30, 144, 255],
+	    "firebrick": [178, 34, 34],
+	    "floralwhite": [255, 250, 240],
+	    "forestgreen": [34, 139, 34],
+	    "fuchsia": [255, 0, 255],
+	    "gainsboro": [220, 220, 220],
+	    "ghostwhite": [248, 248, 255],
+	    "gold": [255, 215, 0],
+	    "goldenrod": [218, 165, 32],
+	    "gray": [128, 128, 128],
+	    "green": [0, 128, 0],
+	    "greenyellow": [173, 255, 47],
+	    "grey": [128, 128, 128],
+	    "honeydew": [240, 255, 240],
+	    "hotpink": [255, 105, 180],
+	    "indianred": [205, 92, 92],
+	    "indigo": [75, 0, 130],
+	    "ivory": [255, 255, 240],
+	    "khaki": [240, 230, 140],
+	    "lavender": [230, 230, 250],
+	    "lavenderblush": [255, 240, 245],
+	    "lawngreen": [124, 252, 0],
+	    "lemonchiffon": [255, 250, 205],
+	    "lightblue": [173, 216, 230],
+	    "lightcoral": [240, 128, 128],
+	    "lightcyan": [224, 255, 255],
+	    "lightgoldenrodyellow": [250, 250, 210],
+	    "lightgray": [211, 211, 211],
+	    "lightgreen": [144, 238, 144],
+	    "lightgrey": [211, 211, 211],
+	    "lightpink": [255, 182, 193],
+	    "lightsalmon": [255, 160, 122],
+	    "lightseagreen": [32, 178, 170],
+	    "lightskyblue": [135, 206, 250],
+	    "lightslategray": [119, 136, 153],
+	    "lightslategrey": [119, 136, 153],
+	    "lightsteelblue": [176, 196, 222],
+	    "lightyellow": [255, 255, 224],
+	    "lime": [0, 255, 0],
+	    "limegreen": [50, 205, 50],
+	    "linen": [250, 240, 230],
+	    "magenta": [255, 0, 255],
+	    "maroon": [128, 0, 0],
+	    "mediumaquamarine": [102, 205, 170],
+	    "mediumblue": [0, 0, 205],
+	    "mediumorchid": [186, 85, 211],
+	    "mediumpurple": [147, 112, 219],
+	    "mediumseagreen": [60, 179, 113],
+	    "mediumslateblue": [123, 104, 238],
+	    "mediumspringgreen": [0, 250, 154],
+	    "mediumturquoise": [72, 209, 204],
+	    "mediumvioletred": [199, 21, 133],
+	    "midnightblue": [25, 25, 112],
+	    "mintcream": [245, 255, 250],
+	    "mistyrose": [255, 228, 225],
+	    "moccasin": [255, 228, 181],
+	    "navajowhite": [255, 222, 173],
+	    "navy": [0, 0, 128],
+	    "oldlace": [253, 245, 230],
+	    "olive": [128, 128, 0],
+	    "olivedrab": [107, 142, 35],
+	    "orange": [255, 165, 0],
+	    "orangered": [255, 69, 0],
+	    "orchid": [218, 112, 214],
+	    "palegoldenrod": [238, 232, 170],
+	    "palegreen": [152, 251, 152],
+	    "paleturquoise": [175, 238, 238],
+	    "palevioletred": [219, 112, 147],
+	    "papayawhip": [255, 239, 213],
+	    "peachpuff": [255, 218, 185],
+	    "peru": [205, 133, 63],
+	    "pink": [255, 192, 203],
+	    "plum": [221, 160, 221],
+	    "powderblue": [176, 224, 230],
+	    "purple": [128, 0, 128],
+	    "rebeccapurple": [102, 51, 153],
+	    "red": [255, 0, 0],
+	    "rosybrown": [188, 143, 143],
+	    "royalblue": [65, 105, 225],
+	    "saddlebrown": [139, 69, 19],
+	    "salmon": [250, 128, 114],
+	    "sandybrown": [244, 164, 96],
+	    "seagreen": [46, 139, 87],
+	    "seashell": [255, 245, 238],
+	    "sienna": [160, 82, 45],
+	    "silver": [192, 192, 192],
+	    "skyblue": [135, 206, 235],
+	    "slateblue": [106, 90, 205],
+	    "slategray": [112, 128, 144],
+	    "slategrey": [112, 128, 144],
+	    "snow": [255, 250, 250],
+	    "springgreen": [0, 255, 127],
+	    "steelblue": [70, 130, 180],
+	    "tan": [210, 180, 140],
+	    "teal": [0, 128, 128],
+	    "thistle": [216, 191, 216],
+	    "tomato": [255, 99, 71],
+	    "turquoise": [64, 224, 208],
+	    "violet": [238, 130, 238],
+	    "wheat": [245, 222, 179],
+	    "white": [255, 255, 255],
+	    "whitesmoke": [245, 245, 245],
+	    "yellow": [255, 255, 0],
+	    "yellowgreen": [154, 205, 50]
+	  };
+	  return colorName;
+	}
 
 	/* MIT license */
+	var conversions;
+	var hasRequiredConversions;
+	function requireConversions() {
+	  if (hasRequiredConversions) return conversions;
+	  hasRequiredConversions = 1;
+	  /* eslint-disable no-mixed-operators */
+	  const cssKeywords = requireColorName();
 
-	/* eslint-disable no-mixed-operators */
-	const cssKeywords = colorName;
+	  // NOTE: conversions should only return primitive values (i.e. arrays, or
+	  //       values that give correct `typeof` results).
+	  //       do not use box values types (i.e. Number(), String(), etc.)
 
-	// NOTE: conversions should only return primitive values (i.e. arrays, or
-	//       values that give correct `typeof` results).
-	//       do not use box values types (i.e. Number(), String(), etc.)
-
-	const reverseKeywords = {};
-	for (const key of Object.keys(cssKeywords)) {
-	  reverseKeywords[cssKeywords[key]] = key;
-	}
-	const convert$2 = {
-	  rgb: {
-	    channels: 3,
-	    labels: 'rgb'
-	  },
-	  hsl: {
-	    channels: 3,
-	    labels: 'hsl'
-	  },
-	  hsv: {
-	    channels: 3,
-	    labels: 'hsv'
-	  },
-	  hwb: {
-	    channels: 3,
-	    labels: 'hwb'
-	  },
-	  cmyk: {
-	    channels: 4,
-	    labels: 'cmyk'
-	  },
-	  xyz: {
-	    channels: 3,
-	    labels: 'xyz'
-	  },
-	  lab: {
-	    channels: 3,
-	    labels: 'lab'
-	  },
-	  lch: {
-	    channels: 3,
-	    labels: 'lch'
-	  },
-	  hex: {
-	    channels: 1,
-	    labels: ['hex']
-	  },
-	  keyword: {
-	    channels: 1,
-	    labels: ['keyword']
-	  },
-	  ansi16: {
-	    channels: 1,
-	    labels: ['ansi16']
-	  },
-	  ansi256: {
-	    channels: 1,
-	    labels: ['ansi256']
-	  },
-	  hcg: {
-	    channels: 3,
-	    labels: ['h', 'c', 'g']
-	  },
-	  apple: {
-	    channels: 3,
-	    labels: ['r16', 'g16', 'b16']
-	  },
-	  gray: {
-	    channels: 1,
-	    labels: ['gray']
+	  const reverseKeywords = {};
+	  for (const key of Object.keys(cssKeywords)) {
+	    reverseKeywords[cssKeywords[key]] = key;
 	  }
-	};
-	var conversions$2 = convert$2;
-
-	// Hide .channels and .labels properties
-	for (const model of Object.keys(convert$2)) {
-	  if (!('channels' in convert$2[model])) {
-	    throw new Error('missing channels property: ' + model);
-	  }
-	  if (!('labels' in convert$2[model])) {
-	    throw new Error('missing channel labels property: ' + model);
-	  }
-	  if (convert$2[model].labels.length !== convert$2[model].channels) {
-	    throw new Error('channel and label counts mismatch: ' + model);
-	  }
-	  const {
-	    channels,
-	    labels
-	  } = convert$2[model];
-	  delete convert$2[model].channels;
-	  delete convert$2[model].labels;
-	  Object.defineProperty(convert$2[model], 'channels', {
-	    value: channels
-	  });
-	  Object.defineProperty(convert$2[model], 'labels', {
-	    value: labels
-	  });
-	}
-	convert$2.rgb.hsl = function (rgb) {
-	  const r = rgb[0] / 255;
-	  const g = rgb[1] / 255;
-	  const b = rgb[2] / 255;
-	  const min = Math.min(r, g, b);
-	  const max = Math.max(r, g, b);
-	  const delta = max - min;
-	  let h;
-	  let s;
-	  if (max === min) {
-	    h = 0;
-	  } else if (r === max) {
-	    h = (g - b) / delta;
-	  } else if (g === max) {
-	    h = 2 + (b - r) / delta;
-	  } else if (b === max) {
-	    h = 4 + (r - g) / delta;
-	  }
-	  h = Math.min(h * 60, 360);
-	  if (h < 0) {
-	    h += 360;
-	  }
-	  const l = (min + max) / 2;
-	  if (max === min) {
-	    s = 0;
-	  } else if (l <= 0.5) {
-	    s = delta / (max + min);
-	  } else {
-	    s = delta / (2 - max - min);
-	  }
-	  return [h, s * 100, l * 100];
-	};
-	convert$2.rgb.hsv = function (rgb) {
-	  let rdif;
-	  let gdif;
-	  let bdif;
-	  let h;
-	  let s;
-	  const r = rgb[0] / 255;
-	  const g = rgb[1] / 255;
-	  const b = rgb[2] / 255;
-	  const v = Math.max(r, g, b);
-	  const diff = v - Math.min(r, g, b);
-	  const diffc = function (c) {
-	    return (v - c) / 6 / diff + 1 / 2;
+	  const convert = {
+	    rgb: {
+	      channels: 3,
+	      labels: 'rgb'
+	    },
+	    hsl: {
+	      channels: 3,
+	      labels: 'hsl'
+	    },
+	    hsv: {
+	      channels: 3,
+	      labels: 'hsv'
+	    },
+	    hwb: {
+	      channels: 3,
+	      labels: 'hwb'
+	    },
+	    cmyk: {
+	      channels: 4,
+	      labels: 'cmyk'
+	    },
+	    xyz: {
+	      channels: 3,
+	      labels: 'xyz'
+	    },
+	    lab: {
+	      channels: 3,
+	      labels: 'lab'
+	    },
+	    lch: {
+	      channels: 3,
+	      labels: 'lch'
+	    },
+	    hex: {
+	      channels: 1,
+	      labels: ['hex']
+	    },
+	    keyword: {
+	      channels: 1,
+	      labels: ['keyword']
+	    },
+	    ansi16: {
+	      channels: 1,
+	      labels: ['ansi16']
+	    },
+	    ansi256: {
+	      channels: 1,
+	      labels: ['ansi256']
+	    },
+	    hcg: {
+	      channels: 3,
+	      labels: ['h', 'c', 'g']
+	    },
+	    apple: {
+	      channels: 3,
+	      labels: ['r16', 'g16', 'b16']
+	    },
+	    gray: {
+	      channels: 1,
+	      labels: ['gray']
+	    }
 	  };
-	  if (diff === 0) {
-	    h = 0;
-	    s = 0;
-	  } else {
-	    s = diff / v;
-	    rdif = diffc(r);
-	    gdif = diffc(g);
-	    bdif = diffc(b);
-	    if (r === v) {
-	      h = bdif - gdif;
-	    } else if (g === v) {
-	      h = 1 / 3 + rdif - bdif;
-	    } else if (b === v) {
-	      h = 2 / 3 + gdif - rdif;
+	  conversions = convert;
+
+	  // Hide .channels and .labels properties
+	  for (const model of Object.keys(convert)) {
+	    if (!('channels' in convert[model])) {
+	      throw new Error('missing channels property: ' + model);
 	    }
-	    if (h < 0) {
-	      h += 1;
-	    } else if (h > 1) {
-	      h -= 1;
+	    if (!('labels' in convert[model])) {
+	      throw new Error('missing channel labels property: ' + model);
 	    }
-	  }
-	  return [h * 360, s * 100, v * 100];
-	};
-	convert$2.rgb.hwb = function (rgb) {
-	  const r = rgb[0];
-	  const g = rgb[1];
-	  let b = rgb[2];
-	  const h = convert$2.rgb.hsl(rgb)[0];
-	  const w = 1 / 255 * Math.min(r, Math.min(g, b));
-	  b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
-	  return [h, w * 100, b * 100];
-	};
-	convert$2.rgb.cmyk = function (rgb) {
-	  const r = rgb[0] / 255;
-	  const g = rgb[1] / 255;
-	  const b = rgb[2] / 255;
-	  const k = Math.min(1 - r, 1 - g, 1 - b);
-	  const c = (1 - r - k) / (1 - k) || 0;
-	  const m = (1 - g - k) / (1 - k) || 0;
-	  const y = (1 - b - k) / (1 - k) || 0;
-	  return [c * 100, m * 100, y * 100, k * 100];
-	};
-	function comparativeDistance(x, y) {
-	  /*
-	  	See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
-	  */
-	  return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
-	}
-	convert$2.rgb.keyword = function (rgb) {
-	  const reversed = reverseKeywords[rgb];
-	  if (reversed) {
-	    return reversed;
-	  }
-	  let currentClosestDistance = Infinity;
-	  let currentClosestKeyword;
-	  for (const keyword of Object.keys(cssKeywords)) {
-	    const value = cssKeywords[keyword];
-
-	    // Compute comparative distance
-	    const distance = comparativeDistance(rgb, value);
-
-	    // Check if its less, if so set as closest
-	    if (distance < currentClosestDistance) {
-	      currentClosestDistance = distance;
-	      currentClosestKeyword = keyword;
+	    if (convert[model].labels.length !== convert[model].channels) {
+	      throw new Error('channel and label counts mismatch: ' + model);
 	    }
-	  }
-	  return currentClosestKeyword;
-	};
-	convert$2.keyword.rgb = function (keyword) {
-	  return cssKeywords[keyword];
-	};
-	convert$2.rgb.xyz = function (rgb) {
-	  let r = rgb[0] / 255;
-	  let g = rgb[1] / 255;
-	  let b = rgb[2] / 255;
-
-	  // Assume sRGB
-	  r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
-	  g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
-	  b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
-	  const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
-	  const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
-	  const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-	  return [x * 100, y * 100, z * 100];
-	};
-	convert$2.rgb.lab = function (rgb) {
-	  const xyz = convert$2.rgb.xyz(rgb);
-	  let x = xyz[0];
-	  let y = xyz[1];
-	  let z = xyz[2];
-	  x /= 95.047;
-	  y /= 100;
-	  z /= 108.883;
-	  x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-	  y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-	  z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-	  const l = 116 * y - 16;
-	  const a = 500 * (x - y);
-	  const b = 200 * (y - z);
-	  return [l, a, b];
-	};
-	convert$2.hsl.rgb = function (hsl) {
-	  const h = hsl[0] / 360;
-	  const s = hsl[1] / 100;
-	  const l = hsl[2] / 100;
-	  let t2;
-	  let t3;
-	  let val;
-	  if (s === 0) {
-	    val = l * 255;
-	    return [val, val, val];
-	  }
-	  if (l < 0.5) {
-	    t2 = l * (1 + s);
-	  } else {
-	    t2 = l + s - l * s;
-	  }
-	  const t1 = 2 * l - t2;
-	  const rgb = [0, 0, 0];
-	  for (let i = 0; i < 3; i++) {
-	    t3 = h + 1 / 3 * -(i - 1);
-	    if (t3 < 0) {
-	      t3++;
-	    }
-	    if (t3 > 1) {
-	      t3--;
-	    }
-	    if (6 * t3 < 1) {
-	      val = t1 + (t2 - t1) * 6 * t3;
-	    } else if (2 * t3 < 1) {
-	      val = t2;
-	    } else if (3 * t3 < 2) {
-	      val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
-	    } else {
-	      val = t1;
-	    }
-	    rgb[i] = val * 255;
-	  }
-	  return rgb;
-	};
-	convert$2.hsl.hsv = function (hsl) {
-	  const h = hsl[0];
-	  let s = hsl[1] / 100;
-	  let l = hsl[2] / 100;
-	  let smin = s;
-	  const lmin = Math.max(l, 0.01);
-	  l *= 2;
-	  s *= l <= 1 ? l : 2 - l;
-	  smin *= lmin <= 1 ? lmin : 2 - lmin;
-	  const v = (l + s) / 2;
-	  const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
-	  return [h, sv * 100, v * 100];
-	};
-	convert$2.hsv.rgb = function (hsv) {
-	  const h = hsv[0] / 60;
-	  const s = hsv[1] / 100;
-	  let v = hsv[2] / 100;
-	  const hi = Math.floor(h) % 6;
-	  const f = h - Math.floor(h);
-	  const p = 255 * v * (1 - s);
-	  const q = 255 * v * (1 - s * f);
-	  const t = 255 * v * (1 - s * (1 - f));
-	  v *= 255;
-	  switch (hi) {
-	    case 0:
-	      return [v, t, p];
-	    case 1:
-	      return [q, v, p];
-	    case 2:
-	      return [p, v, t];
-	    case 3:
-	      return [p, q, v];
-	    case 4:
-	      return [t, p, v];
-	    case 5:
-	      return [v, p, q];
-	  }
-	};
-	convert$2.hsv.hsl = function (hsv) {
-	  const h = hsv[0];
-	  const s = hsv[1] / 100;
-	  const v = hsv[2] / 100;
-	  const vmin = Math.max(v, 0.01);
-	  let sl;
-	  let l;
-	  l = (2 - s) * v;
-	  const lmin = (2 - s) * vmin;
-	  sl = s * vmin;
-	  sl /= lmin <= 1 ? lmin : 2 - lmin;
-	  sl = sl || 0;
-	  l /= 2;
-	  return [h, sl * 100, l * 100];
-	};
-
-	// http://dev.w3.org/csswg/css-color/#hwb-to-rgb
-	convert$2.hwb.rgb = function (hwb) {
-	  const h = hwb[0] / 360;
-	  let wh = hwb[1] / 100;
-	  let bl = hwb[2] / 100;
-	  const ratio = wh + bl;
-	  let f;
-
-	  // Wh + bl cant be > 1
-	  if (ratio > 1) {
-	    wh /= ratio;
-	    bl /= ratio;
-	  }
-	  const i = Math.floor(6 * h);
-	  const v = 1 - bl;
-	  f = 6 * h - i;
-	  if ((i & 0x01) !== 0) {
-	    f = 1 - f;
-	  }
-	  const n = wh + f * (v - wh); // Linear interpolation
-
-	  let r;
-	  let g;
-	  let b;
-	  /* eslint-disable max-statements-per-line,no-multi-spaces */
-	  switch (i) {
-	    default:
-	    case 6:
-	    case 0:
-	      r = v;
-	      g = n;
-	      b = wh;
-	      break;
-	    case 1:
-	      r = n;
-	      g = v;
-	      b = wh;
-	      break;
-	    case 2:
-	      r = wh;
-	      g = v;
-	      b = n;
-	      break;
-	    case 3:
-	      r = wh;
-	      g = n;
-	      b = v;
-	      break;
-	    case 4:
-	      r = n;
-	      g = wh;
-	      b = v;
-	      break;
-	    case 5:
-	      r = v;
-	      g = wh;
-	      b = n;
-	      break;
-	  }
-	  /* eslint-enable max-statements-per-line,no-multi-spaces */
-
-	  return [r * 255, g * 255, b * 255];
-	};
-	convert$2.cmyk.rgb = function (cmyk) {
-	  const c = cmyk[0] / 100;
-	  const m = cmyk[1] / 100;
-	  const y = cmyk[2] / 100;
-	  const k = cmyk[3] / 100;
-	  const r = 1 - Math.min(1, c * (1 - k) + k);
-	  const g = 1 - Math.min(1, m * (1 - k) + k);
-	  const b = 1 - Math.min(1, y * (1 - k) + k);
-	  return [r * 255, g * 255, b * 255];
-	};
-	convert$2.xyz.rgb = function (xyz) {
-	  const x = xyz[0] / 100;
-	  const y = xyz[1] / 100;
-	  const z = xyz[2] / 100;
-	  let r;
-	  let g;
-	  let b;
-	  r = x * 3.2406 + y * -1.5372 + z * -0.4986;
-	  g = x * -0.9689 + y * 1.8758 + z * 0.0415;
-	  b = x * 0.0557 + y * -0.2040 + z * 1.0570;
-
-	  // Assume sRGB
-	  r = r > 0.0031308 ? 1.055 * r ** (1.0 / 2.4) - 0.055 : r * 12.92;
-	  g = g > 0.0031308 ? 1.055 * g ** (1.0 / 2.4) - 0.055 : g * 12.92;
-	  b = b > 0.0031308 ? 1.055 * b ** (1.0 / 2.4) - 0.055 : b * 12.92;
-	  r = Math.min(Math.max(0, r), 1);
-	  g = Math.min(Math.max(0, g), 1);
-	  b = Math.min(Math.max(0, b), 1);
-	  return [r * 255, g * 255, b * 255];
-	};
-	convert$2.xyz.lab = function (xyz) {
-	  let x = xyz[0];
-	  let y = xyz[1];
-	  let z = xyz[2];
-	  x /= 95.047;
-	  y /= 100;
-	  z /= 108.883;
-	  x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-	  y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-	  z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-	  const l = 116 * y - 16;
-	  const a = 500 * (x - y);
-	  const b = 200 * (y - z);
-	  return [l, a, b];
-	};
-	convert$2.lab.xyz = function (lab) {
-	  const l = lab[0];
-	  const a = lab[1];
-	  const b = lab[2];
-	  let x;
-	  let y;
-	  let z;
-	  y = (l + 16) / 116;
-	  x = a / 500 + y;
-	  z = y - b / 200;
-	  const y2 = y ** 3;
-	  const x2 = x ** 3;
-	  const z2 = z ** 3;
-	  y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
-	  x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
-	  z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
-	  x *= 95.047;
-	  y *= 100;
-	  z *= 108.883;
-	  return [x, y, z];
-	};
-	convert$2.lab.lch = function (lab) {
-	  const l = lab[0];
-	  const a = lab[1];
-	  const b = lab[2];
-	  let h;
-	  const hr = Math.atan2(b, a);
-	  h = hr * 360 / 2 / Math.PI;
-	  if (h < 0) {
-	    h += 360;
-	  }
-	  const c = Math.sqrt(a * a + b * b);
-	  return [l, c, h];
-	};
-	convert$2.lch.lab = function (lch) {
-	  const l = lch[0];
-	  const c = lch[1];
-	  const h = lch[2];
-	  const hr = h / 360 * 2 * Math.PI;
-	  const a = c * Math.cos(hr);
-	  const b = c * Math.sin(hr);
-	  return [l, a, b];
-	};
-	convert$2.rgb.ansi16 = function (args, saturation = null) {
-	  const [r, g, b] = args;
-	  let value = saturation === null ? convert$2.rgb.hsv(args)[2] : saturation; // Hsv -> ansi16 optimization
-
-	  value = Math.round(value / 50);
-	  if (value === 0) {
-	    return 30;
-	  }
-	  let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
-	  if (value === 2) {
-	    ansi += 60;
-	  }
-	  return ansi;
-	};
-	convert$2.hsv.ansi16 = function (args) {
-	  // Optimization here; we already know the value and don't need to get
-	  // it converted for us.
-	  return convert$2.rgb.ansi16(convert$2.hsv.rgb(args), args[2]);
-	};
-	convert$2.rgb.ansi256 = function (args) {
-	  const r = args[0];
-	  const g = args[1];
-	  const b = args[2];
-
-	  // We use the extended greyscale palette here, with the exception of
-	  // black and white. normal palette only has 4 greyscale shades.
-	  if (r === g && g === b) {
-	    if (r < 8) {
-	      return 16;
-	    }
-	    if (r > 248) {
-	      return 231;
-	    }
-	    return Math.round((r - 8) / 247 * 24) + 232;
-	  }
-	  const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
-	  return ansi;
-	};
-	convert$2.ansi16.rgb = function (args) {
-	  let color = args % 10;
-
-	  // Handle greyscale
-	  if (color === 0 || color === 7) {
-	    if (args > 50) {
-	      color += 3.5;
-	    }
-	    color = color / 10.5 * 255;
-	    return [color, color, color];
-	  }
-	  const mult = (~~(args > 50) + 1) * 0.5;
-	  const r = (color & 1) * mult * 255;
-	  const g = (color >> 1 & 1) * mult * 255;
-	  const b = (color >> 2 & 1) * mult * 255;
-	  return [r, g, b];
-	};
-	convert$2.ansi256.rgb = function (args) {
-	  // Handle greyscale
-	  if (args >= 232) {
-	    const c = (args - 232) * 10 + 8;
-	    return [c, c, c];
-	  }
-	  args -= 16;
-	  let rem;
-	  const r = Math.floor(args / 36) / 5 * 255;
-	  const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
-	  const b = rem % 6 / 5 * 255;
-	  return [r, g, b];
-	};
-	convert$2.rgb.hex = function (args) {
-	  const integer = ((Math.round(args[0]) & 0xFF) << 16) + ((Math.round(args[1]) & 0xFF) << 8) + (Math.round(args[2]) & 0xFF);
-	  const string = integer.toString(16).toUpperCase();
-	  return '000000'.substring(string.length) + string;
-	};
-	convert$2.hex.rgb = function (args) {
-	  const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
-	  if (!match) {
-	    return [0, 0, 0];
-	  }
-	  let colorString = match[0];
-	  if (match[0].length === 3) {
-	    colorString = colorString.split('').map(char => {
-	      return char + char;
-	    }).join('');
-	  }
-	  const integer = parseInt(colorString, 16);
-	  const r = integer >> 16 & 0xFF;
-	  const g = integer >> 8 & 0xFF;
-	  const b = integer & 0xFF;
-	  return [r, g, b];
-	};
-	convert$2.rgb.hcg = function (rgb) {
-	  const r = rgb[0] / 255;
-	  const g = rgb[1] / 255;
-	  const b = rgb[2] / 255;
-	  const max = Math.max(Math.max(r, g), b);
-	  const min = Math.min(Math.min(r, g), b);
-	  const chroma = max - min;
-	  let grayscale;
-	  let hue;
-	  if (chroma < 1) {
-	    grayscale = min / (1 - chroma);
-	  } else {
-	    grayscale = 0;
-	  }
-	  if (chroma <= 0) {
-	    hue = 0;
-	  } else if (max === r) {
-	    hue = (g - b) / chroma % 6;
-	  } else if (max === g) {
-	    hue = 2 + (b - r) / chroma;
-	  } else {
-	    hue = 4 + (r - g) / chroma;
-	  }
-	  hue /= 6;
-	  hue %= 1;
-	  return [hue * 360, chroma * 100, grayscale * 100];
-	};
-	convert$2.hsl.hcg = function (hsl) {
-	  const s = hsl[1] / 100;
-	  const l = hsl[2] / 100;
-	  const c = l < 0.5 ? 2.0 * s * l : 2.0 * s * (1.0 - l);
-	  let f = 0;
-	  if (c < 1.0) {
-	    f = (l - 0.5 * c) / (1.0 - c);
-	  }
-	  return [hsl[0], c * 100, f * 100];
-	};
-	convert$2.hsv.hcg = function (hsv) {
-	  const s = hsv[1] / 100;
-	  const v = hsv[2] / 100;
-	  const c = s * v;
-	  let f = 0;
-	  if (c < 1.0) {
-	    f = (v - c) / (1 - c);
-	  }
-	  return [hsv[0], c * 100, f * 100];
-	};
-	convert$2.hcg.rgb = function (hcg) {
-	  const h = hcg[0] / 360;
-	  const c = hcg[1] / 100;
-	  const g = hcg[2] / 100;
-	  if (c === 0.0) {
-	    return [g * 255, g * 255, g * 255];
-	  }
-	  const pure = [0, 0, 0];
-	  const hi = h % 1 * 6;
-	  const v = hi % 1;
-	  const w = 1 - v;
-	  let mg = 0;
-
-	  /* eslint-disable max-statements-per-line */
-	  switch (Math.floor(hi)) {
-	    case 0:
-	      pure[0] = 1;
-	      pure[1] = v;
-	      pure[2] = 0;
-	      break;
-	    case 1:
-	      pure[0] = w;
-	      pure[1] = 1;
-	      pure[2] = 0;
-	      break;
-	    case 2:
-	      pure[0] = 0;
-	      pure[1] = 1;
-	      pure[2] = v;
-	      break;
-	    case 3:
-	      pure[0] = 0;
-	      pure[1] = w;
-	      pure[2] = 1;
-	      break;
-	    case 4:
-	      pure[0] = v;
-	      pure[1] = 0;
-	      pure[2] = 1;
-	      break;
-	    default:
-	      pure[0] = 1;
-	      pure[1] = 0;
-	      pure[2] = w;
-	  }
-	  /* eslint-enable max-statements-per-line */
-
-	  mg = (1.0 - c) * g;
-	  return [(c * pure[0] + mg) * 255, (c * pure[1] + mg) * 255, (c * pure[2] + mg) * 255];
-	};
-	convert$2.hcg.hsv = function (hcg) {
-	  const c = hcg[1] / 100;
-	  const g = hcg[2] / 100;
-	  const v = c + g * (1.0 - c);
-	  let f = 0;
-	  if (v > 0.0) {
-	    f = c / v;
-	  }
-	  return [hcg[0], f * 100, v * 100];
-	};
-	convert$2.hcg.hsl = function (hcg) {
-	  const c = hcg[1] / 100;
-	  const g = hcg[2] / 100;
-	  const l = g * (1.0 - c) + 0.5 * c;
-	  let s = 0;
-	  if (l > 0.0 && l < 0.5) {
-	    s = c / (2 * l);
-	  } else if (l >= 0.5 && l < 1.0) {
-	    s = c / (2 * (1 - l));
-	  }
-	  return [hcg[0], s * 100, l * 100];
-	};
-	convert$2.hcg.hwb = function (hcg) {
-	  const c = hcg[1] / 100;
-	  const g = hcg[2] / 100;
-	  const v = c + g * (1.0 - c);
-	  return [hcg[0], (v - c) * 100, (1 - v) * 100];
-	};
-	convert$2.hwb.hcg = function (hwb) {
-	  const w = hwb[1] / 100;
-	  const b = hwb[2] / 100;
-	  const v = 1 - b;
-	  const c = v - w;
-	  let g = 0;
-	  if (c < 1) {
-	    g = (v - c) / (1 - c);
-	  }
-	  return [hwb[0], c * 100, g * 100];
-	};
-	convert$2.apple.rgb = function (apple) {
-	  return [apple[0] / 65535 * 255, apple[1] / 65535 * 255, apple[2] / 65535 * 255];
-	};
-	convert$2.rgb.apple = function (rgb) {
-	  return [rgb[0] / 255 * 65535, rgb[1] / 255 * 65535, rgb[2] / 255 * 65535];
-	};
-	convert$2.gray.rgb = function (args) {
-	  return [args[0] / 100 * 255, args[0] / 100 * 255, args[0] / 100 * 255];
-	};
-	convert$2.gray.hsl = function (args) {
-	  return [0, 0, args[0]];
-	};
-	convert$2.gray.hsv = convert$2.gray.hsl;
-	convert$2.gray.hwb = function (gray) {
-	  return [0, 100, gray[0]];
-	};
-	convert$2.gray.cmyk = function (gray) {
-	  return [0, 0, 0, gray[0]];
-	};
-	convert$2.gray.lab = function (gray) {
-	  return [gray[0], 0, 0];
-	};
-	convert$2.gray.hex = function (gray) {
-	  const val = Math.round(gray[0] / 100 * 255) & 0xFF;
-	  const integer = (val << 16) + (val << 8) + val;
-	  const string = integer.toString(16).toUpperCase();
-	  return '000000'.substring(string.length) + string;
-	};
-	convert$2.rgb.gray = function (rgb) {
-	  const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
-	  return [val / 255 * 100];
-	};
-
-	const conversions$1 = conversions$2;
-
-	/*
-		This function routes a model to all other models.
-
-		all functions that are routed have a property `.conversion` attached
-		to the returned synthetic function. This property is an array
-		of strings, each with the steps in between the 'from' and 'to'
-		color models (inclusive).
-
-		conversions that are not possible simply are not included.
-	*/
-
-	function buildGraph() {
-	  const graph = {};
-	  // https://jsperf.com/object-keys-vs-for-in-with-closure/3
-	  const models = Object.keys(conversions$1);
-	  for (let len = models.length, i = 0; i < len; i++) {
-	    graph[models[i]] = {
-	      // http://jsperf.com/1-vs-infinity
-	      // micro-opt, but this is simple.
-	      distance: -1,
-	      parent: null
-	    };
-	  }
-	  return graph;
-	}
-
-	// https://en.wikipedia.org/wiki/Breadth-first_search
-	function deriveBFS(fromModel) {
-	  const graph = buildGraph();
-	  const queue = [fromModel]; // Unshift -> queue -> pop
-
-	  graph[fromModel].distance = 0;
-	  while (queue.length) {
-	    const current = queue.pop();
-	    const adjacents = Object.keys(conversions$1[current]);
-	    for (let len = adjacents.length, i = 0; i < len; i++) {
-	      const adjacent = adjacents[i];
-	      const node = graph[adjacent];
-	      if (node.distance === -1) {
-	        node.distance = graph[current].distance + 1;
-	        node.parent = current;
-	        queue.unshift(adjacent);
-	      }
-	    }
-	  }
-	  return graph;
-	}
-	function link(from, to) {
-	  return function (args) {
-	    return to(from(args));
-	  };
-	}
-	function wrapConversion(toModel, graph) {
-	  const path = [graph[toModel].parent, toModel];
-	  let fn = conversions$1[graph[toModel].parent][toModel];
-	  let cur = graph[toModel].parent;
-	  while (graph[cur].parent) {
-	    path.unshift(graph[cur].parent);
-	    fn = link(conversions$1[graph[cur].parent][cur], fn);
-	    cur = graph[cur].parent;
-	  }
-	  fn.conversion = path;
-	  return fn;
-	}
-	var route$1 = function (fromModel) {
-	  const graph = deriveBFS(fromModel);
-	  const conversion = {};
-	  const models = Object.keys(graph);
-	  for (let len = models.length, i = 0; i < len; i++) {
-	    const toModel = models[i];
-	    const node = graph[toModel];
-	    if (node.parent === null) {
-	      // No possible conversion, or this node is the source model.
-	      continue;
-	    }
-	    conversion[toModel] = wrapConversion(toModel, graph);
-	  }
-	  return conversion;
-	};
-
-	const conversions = conversions$2;
-	const route = route$1;
-	const convert$1 = {};
-	const models = Object.keys(conversions);
-	function wrapRaw(fn) {
-	  const wrappedFn = function (...args) {
-	    const arg0 = args[0];
-	    if (arg0 === undefined || arg0 === null) {
-	      return arg0;
-	    }
-	    if (arg0.length > 1) {
-	      args = arg0;
-	    }
-	    return fn(args);
-	  };
-
-	  // Preserve .conversion property if there is one
-	  if ('conversion' in fn) {
-	    wrappedFn.conversion = fn.conversion;
-	  }
-	  return wrappedFn;
-	}
-	function wrapRounded(fn) {
-	  const wrappedFn = function (...args) {
-	    const arg0 = args[0];
-	    if (arg0 === undefined || arg0 === null) {
-	      return arg0;
-	    }
-	    if (arg0.length > 1) {
-	      args = arg0;
-	    }
-	    const result = fn(args);
-
-	    // We're assuming the result is an array here.
-	    // see notice in conversions.js; don't use box types
-	    // in conversion functions.
-	    if (typeof result === 'object') {
-	      for (let len = result.length, i = 0; i < len; i++) {
-	        result[i] = Math.round(result[i]);
-	      }
-	    }
-	    return result;
-	  };
-
-	  // Preserve .conversion property if there is one
-	  if ('conversion' in fn) {
-	    wrappedFn.conversion = fn.conversion;
-	  }
-	  return wrappedFn;
-	}
-	models.forEach(fromModel => {
-	  convert$1[fromModel] = {};
-	  Object.defineProperty(convert$1[fromModel], 'channels', {
-	    value: conversions[fromModel].channels
-	  });
-	  Object.defineProperty(convert$1[fromModel], 'labels', {
-	    value: conversions[fromModel].labels
-	  });
-	  const routes = route(fromModel);
-	  const routeModels = Object.keys(routes);
-	  routeModels.forEach(toModel => {
-	    const fn = routes[toModel];
-	    convert$1[fromModel][toModel] = wrapRounded(fn);
-	    convert$1[fromModel][toModel].raw = wrapRaw(fn);
-	  });
-	});
-	var colorConvert = convert$1;
-
-	var __spreadArray = commonjsGlobal && commonjsGlobal.__spreadArray || function (to, from, pack) {
-	  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-	    if (ar || !(i in from)) {
-	      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-	      ar[i] = from[i];
-	    }
-	  }
-	  return to.concat(ar || Array.prototype.slice.call(from));
-	};
-	Object.defineProperty(lib$1, "__esModule", {
-	  value: true
-	});
-	var colorFromUuid_1 = lib$1.colorFromUuid = void 0;
-	var uuid_1 = esmBrowser;
-	var UuidEncoder = lib;
-	var convert = colorConvert;
-	var DEFAULT_COLOR_FORMAT = "hex";
-	var DEFAULT_IS_RAW = false;
-	var encoder = new UuidEncoder("base10");
-	/**
-	 * Returns the generated color associated with the given uuid.
-	 *
-	 * @param uuid - The uuid for which to generate a color
-	 * @param options - An optional object to configure the color generation, and attach callbacks that directly receive the generated color code or components in various formats
-	 * @returns The generated color as a CSS `<color>` notation string
-	 *
-	 * @throws {@link https://developer.mozilla.org/en-US/docs/web/javascript/reference/global_objects/error | Error}
-	 * This exception is thrown if the input uuid string is not a valid UUID.
-	 *
-	 * @public
-	 */
-	function colorFromUuid(uuid, options) {
-	  if (options === void 0) {
-	    options = {};
-	  }
-	  if (!(0, uuid_1.validate)(uuid)) {
-	    throw new Error("Given string is not a valid UUID.");
-	  }
-	  var encodedUuid = BigInt(encoder.encode(uuid));
-	  var colorCode = Number(encodedUuid % BigInt(0x1000000));
-	  var red = colorCode >> 16;
-	  var green = colorCode >> 8 & 0xff;
-	  var blue = colorCode & 0xff;
-	  var receivers = {};
-	  if (options.hasOwnProperty("receivers")) {
-	    ["rgb", "hsl", "hex"].forEach(function (format) {
-	      if (options.receivers.hasOwnProperty(format)) {
-	        receivers[format] = options.receivers[format]; // link to callbacks
-	      }
+	    const {
+	      channels,
+	      labels
+	    } = convert[model];
+	    delete convert[model].channels;
+	    delete convert[model].labels;
+	    Object.defineProperty(convert[model], 'channels', {
+	      value: channels
+	    });
+	    Object.defineProperty(convert[model], 'labels', {
+	      value: labels
 	    });
 	  }
-	  var isRaw = DEFAULT_IS_RAW;
-	  if (options.hasOwnProperty("raw")) {
-	    isRaw = options.raw;
-	  }
-	  var alpha;
-	  if (options.hasOwnProperty("alpha")) {
-	    alpha = Math.min(Math.max(options.alpha, 0), 1); // clamp to [0; 1]
-	  }
-	  if ("rgb" in receivers) {
-	    if (alpha === undefined) {
-	      receivers.rgb(red, green, blue);
-	    } else {
-	      receivers.rgb(red, green, blue, alpha);
+	  convert.rgb.hsl = function (rgb) {
+	    const r = rgb[0] / 255;
+	    const g = rgb[1] / 255;
+	    const b = rgb[2] / 255;
+	    const min = Math.min(r, g, b);
+	    const max = Math.max(r, g, b);
+	    const delta = max - min;
+	    let h;
+	    let s;
+	    if (max === min) {
+	      h = 0;
+	    } else if (r === max) {
+	      h = (g - b) / delta;
+	    } else if (g === max) {
+	      h = 2 + (b - r) / delta;
+	    } else if (b === max) {
+	      h = 4 + (r - g) / delta;
 	    }
-	  }
-	  if ("hsl" in receivers) {
-	    var hsl = isRaw ? convert.rgb.hsl.raw(red, green, blue) : convert.rgb.hsl(red, green, blue);
-	    if (alpha === undefined) {
-	      receivers.hsl.apply(receivers, hsl);
-	    } else {
-	      receivers.hsl.apply(receivers, __spreadArray(__spreadArray([], hsl, true), [alpha], false));
+	    h = Math.min(h * 60, 360);
+	    if (h < 0) {
+	      h += 360;
 	    }
-	  }
-	  if ("hex" in receivers) {
-	    var hexColorCode = convert.rgb.hex(red, green, blue).toLowerCase();
-	    if (alpha === undefined) {
-	      receivers.hex(hexColorCode);
+	    const l = (min + max) / 2;
+	    if (max === min) {
+	      s = 0;
+	    } else if (l <= 0.5) {
+	      s = delta / (max + min);
 	    } else {
-	      var hexAlphaCode = Math.floor(alpha * 255).toString(16);
-	      receivers.hex(hexColorCode + hexAlphaCode);
+	      s = delta / (2 - max - min);
 	    }
+	    return [h, s * 100, l * 100];
+	  };
+	  convert.rgb.hsv = function (rgb) {
+	    let rdif;
+	    let gdif;
+	    let bdif;
+	    let h;
+	    let s;
+	    const r = rgb[0] / 255;
+	    const g = rgb[1] / 255;
+	    const b = rgb[2] / 255;
+	    const v = Math.max(r, g, b);
+	    const diff = v - Math.min(r, g, b);
+	    const diffc = function (c) {
+	      return (v - c) / 6 / diff + 1 / 2;
+	    };
+	    if (diff === 0) {
+	      h = 0;
+	      s = 0;
+	    } else {
+	      s = diff / v;
+	      rdif = diffc(r);
+	      gdif = diffc(g);
+	      bdif = diffc(b);
+	      if (r === v) {
+	        h = bdif - gdif;
+	      } else if (g === v) {
+	        h = 1 / 3 + rdif - bdif;
+	      } else if (b === v) {
+	        h = 2 / 3 + gdif - rdif;
+	      }
+	      if (h < 0) {
+	        h += 1;
+	      } else if (h > 1) {
+	        h -= 1;
+	      }
+	    }
+	    return [h * 360, s * 100, v * 100];
+	  };
+	  convert.rgb.hwb = function (rgb) {
+	    const r = rgb[0];
+	    const g = rgb[1];
+	    let b = rgb[2];
+	    const h = convert.rgb.hsl(rgb)[0];
+	    const w = 1 / 255 * Math.min(r, Math.min(g, b));
+	    b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
+	    return [h, w * 100, b * 100];
+	  };
+	  convert.rgb.cmyk = function (rgb) {
+	    const r = rgb[0] / 255;
+	    const g = rgb[1] / 255;
+	    const b = rgb[2] / 255;
+	    const k = Math.min(1 - r, 1 - g, 1 - b);
+	    const c = (1 - r - k) / (1 - k) || 0;
+	    const m = (1 - g - k) / (1 - k) || 0;
+	    const y = (1 - b - k) / (1 - k) || 0;
+	    return [c * 100, m * 100, y * 100, k * 100];
+	  };
+	  function comparativeDistance(x, y) {
+	    /*
+	    	See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
+	    */
+	    return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
 	  }
-	  var format = DEFAULT_COLOR_FORMAT;
-	  if (options.hasOwnProperty("format")) {
-	    format = options.format;
-	  }
-	  switch (format) {
-	    case "rgb":
-	      return alpha === undefined ? "rgb(".concat(red, ", ").concat(green, ", ").concat(blue, ")") : "rgb(".concat(red, ", ").concat(green, ", ").concat(blue, ", ").concat(alpha, ")");
-	    case "hsl":
-	      var hsl = isRaw ? convert.rgb.hsl.raw(red, green, blue) : convert.rgb.hsl(red, green, blue);
-	      return alpha === undefined ? "hsl(".concat(hsl[0], ", ").concat(hsl[1], "%, ").concat(hsl[2], "%)") : "hsl(".concat(hsl[0], ", ").concat(hsl[1], "%, ").concat(hsl[2], "%, ").concat(alpha, ")");
-	    default: // don't error
-	    case "hex":
-	      var hexColorCode = convert.rgb.hex(red, green, blue).toLowerCase();
-	      var hexAlphaCode = Math.floor(alpha * 255).toString(16);
-	      return alpha === undefined ? "#".concat(hexColorCode) : "#".concat(hexColorCode).concat(hexAlphaCode);
-	  }
+	  convert.rgb.keyword = function (rgb) {
+	    const reversed = reverseKeywords[rgb];
+	    if (reversed) {
+	      return reversed;
+	    }
+	    let currentClosestDistance = Infinity;
+	    let currentClosestKeyword;
+	    for (const keyword of Object.keys(cssKeywords)) {
+	      const value = cssKeywords[keyword];
+
+	      // Compute comparative distance
+	      const distance = comparativeDistance(rgb, value);
+
+	      // Check if its less, if so set as closest
+	      if (distance < currentClosestDistance) {
+	        currentClosestDistance = distance;
+	        currentClosestKeyword = keyword;
+	      }
+	    }
+	    return currentClosestKeyword;
+	  };
+	  convert.keyword.rgb = function (keyword) {
+	    return cssKeywords[keyword];
+	  };
+	  convert.rgb.xyz = function (rgb) {
+	    let r = rgb[0] / 255;
+	    let g = rgb[1] / 255;
+	    let b = rgb[2] / 255;
+
+	    // Assume sRGB
+	    r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
+	    g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
+	    b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
+	    const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
+	    const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+	    const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
+	    return [x * 100, y * 100, z * 100];
+	  };
+	  convert.rgb.lab = function (rgb) {
+	    const xyz = convert.rgb.xyz(rgb);
+	    let x = xyz[0];
+	    let y = xyz[1];
+	    let z = xyz[2];
+	    x /= 95.047;
+	    y /= 100;
+	    z /= 108.883;
+	    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+	    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+	    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+	    const l = 116 * y - 16;
+	    const a = 500 * (x - y);
+	    const b = 200 * (y - z);
+	    return [l, a, b];
+	  };
+	  convert.hsl.rgb = function (hsl) {
+	    const h = hsl[0] / 360;
+	    const s = hsl[1] / 100;
+	    const l = hsl[2] / 100;
+	    let t2;
+	    let t3;
+	    let val;
+	    if (s === 0) {
+	      val = l * 255;
+	      return [val, val, val];
+	    }
+	    if (l < 0.5) {
+	      t2 = l * (1 + s);
+	    } else {
+	      t2 = l + s - l * s;
+	    }
+	    const t1 = 2 * l - t2;
+	    const rgb = [0, 0, 0];
+	    for (let i = 0; i < 3; i++) {
+	      t3 = h + 1 / 3 * -(i - 1);
+	      if (t3 < 0) {
+	        t3++;
+	      }
+	      if (t3 > 1) {
+	        t3--;
+	      }
+	      if (6 * t3 < 1) {
+	        val = t1 + (t2 - t1) * 6 * t3;
+	      } else if (2 * t3 < 1) {
+	        val = t2;
+	      } else if (3 * t3 < 2) {
+	        val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+	      } else {
+	        val = t1;
+	      }
+	      rgb[i] = val * 255;
+	    }
+	    return rgb;
+	  };
+	  convert.hsl.hsv = function (hsl) {
+	    const h = hsl[0];
+	    let s = hsl[1] / 100;
+	    let l = hsl[2] / 100;
+	    let smin = s;
+	    const lmin = Math.max(l, 0.01);
+	    l *= 2;
+	    s *= l <= 1 ? l : 2 - l;
+	    smin *= lmin <= 1 ? lmin : 2 - lmin;
+	    const v = (l + s) / 2;
+	    const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
+	    return [h, sv * 100, v * 100];
+	  };
+	  convert.hsv.rgb = function (hsv) {
+	    const h = hsv[0] / 60;
+	    const s = hsv[1] / 100;
+	    let v = hsv[2] / 100;
+	    const hi = Math.floor(h) % 6;
+	    const f = h - Math.floor(h);
+	    const p = 255 * v * (1 - s);
+	    const q = 255 * v * (1 - s * f);
+	    const t = 255 * v * (1 - s * (1 - f));
+	    v *= 255;
+	    switch (hi) {
+	      case 0:
+	        return [v, t, p];
+	      case 1:
+	        return [q, v, p];
+	      case 2:
+	        return [p, v, t];
+	      case 3:
+	        return [p, q, v];
+	      case 4:
+	        return [t, p, v];
+	      case 5:
+	        return [v, p, q];
+	    }
+	  };
+	  convert.hsv.hsl = function (hsv) {
+	    const h = hsv[0];
+	    const s = hsv[1] / 100;
+	    const v = hsv[2] / 100;
+	    const vmin = Math.max(v, 0.01);
+	    let sl;
+	    let l;
+	    l = (2 - s) * v;
+	    const lmin = (2 - s) * vmin;
+	    sl = s * vmin;
+	    sl /= lmin <= 1 ? lmin : 2 - lmin;
+	    sl = sl || 0;
+	    l /= 2;
+	    return [h, sl * 100, l * 100];
+	  };
+
+	  // http://dev.w3.org/csswg/css-color/#hwb-to-rgb
+	  convert.hwb.rgb = function (hwb) {
+	    const h = hwb[0] / 360;
+	    let wh = hwb[1] / 100;
+	    let bl = hwb[2] / 100;
+	    const ratio = wh + bl;
+	    let f;
+
+	    // Wh + bl cant be > 1
+	    if (ratio > 1) {
+	      wh /= ratio;
+	      bl /= ratio;
+	    }
+	    const i = Math.floor(6 * h);
+	    const v = 1 - bl;
+	    f = 6 * h - i;
+	    if ((i & 0x01) !== 0) {
+	      f = 1 - f;
+	    }
+	    const n = wh + f * (v - wh); // Linear interpolation
+
+	    let r;
+	    let g;
+	    let b;
+	    /* eslint-disable max-statements-per-line,no-multi-spaces */
+	    switch (i) {
+	      default:
+	      case 6:
+	      case 0:
+	        r = v;
+	        g = n;
+	        b = wh;
+	        break;
+	      case 1:
+	        r = n;
+	        g = v;
+	        b = wh;
+	        break;
+	      case 2:
+	        r = wh;
+	        g = v;
+	        b = n;
+	        break;
+	      case 3:
+	        r = wh;
+	        g = n;
+	        b = v;
+	        break;
+	      case 4:
+	        r = n;
+	        g = wh;
+	        b = v;
+	        break;
+	      case 5:
+	        r = v;
+	        g = wh;
+	        b = n;
+	        break;
+	    }
+	    /* eslint-enable max-statements-per-line,no-multi-spaces */
+
+	    return [r * 255, g * 255, b * 255];
+	  };
+	  convert.cmyk.rgb = function (cmyk) {
+	    const c = cmyk[0] / 100;
+	    const m = cmyk[1] / 100;
+	    const y = cmyk[2] / 100;
+	    const k = cmyk[3] / 100;
+	    const r = 1 - Math.min(1, c * (1 - k) + k);
+	    const g = 1 - Math.min(1, m * (1 - k) + k);
+	    const b = 1 - Math.min(1, y * (1 - k) + k);
+	    return [r * 255, g * 255, b * 255];
+	  };
+	  convert.xyz.rgb = function (xyz) {
+	    const x = xyz[0] / 100;
+	    const y = xyz[1] / 100;
+	    const z = xyz[2] / 100;
+	    let r;
+	    let g;
+	    let b;
+	    r = x * 3.2406 + y * -1.5372 + z * -0.4986;
+	    g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+	    b = x * 0.0557 + y * -0.2040 + z * 1.0570;
+
+	    // Assume sRGB
+	    r = r > 0.0031308 ? 1.055 * r ** (1.0 / 2.4) - 0.055 : r * 12.92;
+	    g = g > 0.0031308 ? 1.055 * g ** (1.0 / 2.4) - 0.055 : g * 12.92;
+	    b = b > 0.0031308 ? 1.055 * b ** (1.0 / 2.4) - 0.055 : b * 12.92;
+	    r = Math.min(Math.max(0, r), 1);
+	    g = Math.min(Math.max(0, g), 1);
+	    b = Math.min(Math.max(0, b), 1);
+	    return [r * 255, g * 255, b * 255];
+	  };
+	  convert.xyz.lab = function (xyz) {
+	    let x = xyz[0];
+	    let y = xyz[1];
+	    let z = xyz[2];
+	    x /= 95.047;
+	    y /= 100;
+	    z /= 108.883;
+	    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+	    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+	    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+	    const l = 116 * y - 16;
+	    const a = 500 * (x - y);
+	    const b = 200 * (y - z);
+	    return [l, a, b];
+	  };
+	  convert.lab.xyz = function (lab) {
+	    const l = lab[0];
+	    const a = lab[1];
+	    const b = lab[2];
+	    let x;
+	    let y;
+	    let z;
+	    y = (l + 16) / 116;
+	    x = a / 500 + y;
+	    z = y - b / 200;
+	    const y2 = y ** 3;
+	    const x2 = x ** 3;
+	    const z2 = z ** 3;
+	    y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
+	    x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
+	    z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
+	    x *= 95.047;
+	    y *= 100;
+	    z *= 108.883;
+	    return [x, y, z];
+	  };
+	  convert.lab.lch = function (lab) {
+	    const l = lab[0];
+	    const a = lab[1];
+	    const b = lab[2];
+	    let h;
+	    const hr = Math.atan2(b, a);
+	    h = hr * 360 / 2 / Math.PI;
+	    if (h < 0) {
+	      h += 360;
+	    }
+	    const c = Math.sqrt(a * a + b * b);
+	    return [l, c, h];
+	  };
+	  convert.lch.lab = function (lch) {
+	    const l = lch[0];
+	    const c = lch[1];
+	    const h = lch[2];
+	    const hr = h / 360 * 2 * Math.PI;
+	    const a = c * Math.cos(hr);
+	    const b = c * Math.sin(hr);
+	    return [l, a, b];
+	  };
+	  convert.rgb.ansi16 = function (args, saturation = null) {
+	    const [r, g, b] = args;
+	    let value = saturation === null ? convert.rgb.hsv(args)[2] : saturation; // Hsv -> ansi16 optimization
+
+	    value = Math.round(value / 50);
+	    if (value === 0) {
+	      return 30;
+	    }
+	    let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
+	    if (value === 2) {
+	      ansi += 60;
+	    }
+	    return ansi;
+	  };
+	  convert.hsv.ansi16 = function (args) {
+	    // Optimization here; we already know the value and don't need to get
+	    // it converted for us.
+	    return convert.rgb.ansi16(convert.hsv.rgb(args), args[2]);
+	  };
+	  convert.rgb.ansi256 = function (args) {
+	    const r = args[0];
+	    const g = args[1];
+	    const b = args[2];
+
+	    // We use the extended greyscale palette here, with the exception of
+	    // black and white. normal palette only has 4 greyscale shades.
+	    if (r === g && g === b) {
+	      if (r < 8) {
+	        return 16;
+	      }
+	      if (r > 248) {
+	        return 231;
+	      }
+	      return Math.round((r - 8) / 247 * 24) + 232;
+	    }
+	    const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
+	    return ansi;
+	  };
+	  convert.ansi16.rgb = function (args) {
+	    let color = args % 10;
+
+	    // Handle greyscale
+	    if (color === 0 || color === 7) {
+	      if (args > 50) {
+	        color += 3.5;
+	      }
+	      color = color / 10.5 * 255;
+	      return [color, color, color];
+	    }
+	    const mult = (~~(args > 50) + 1) * 0.5;
+	    const r = (color & 1) * mult * 255;
+	    const g = (color >> 1 & 1) * mult * 255;
+	    const b = (color >> 2 & 1) * mult * 255;
+	    return [r, g, b];
+	  };
+	  convert.ansi256.rgb = function (args) {
+	    // Handle greyscale
+	    if (args >= 232) {
+	      const c = (args - 232) * 10 + 8;
+	      return [c, c, c];
+	    }
+	    args -= 16;
+	    let rem;
+	    const r = Math.floor(args / 36) / 5 * 255;
+	    const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
+	    const b = rem % 6 / 5 * 255;
+	    return [r, g, b];
+	  };
+	  convert.rgb.hex = function (args) {
+	    const integer = ((Math.round(args[0]) & 0xFF) << 16) + ((Math.round(args[1]) & 0xFF) << 8) + (Math.round(args[2]) & 0xFF);
+	    const string = integer.toString(16).toUpperCase();
+	    return '000000'.substring(string.length) + string;
+	  };
+	  convert.hex.rgb = function (args) {
+	    const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
+	    if (!match) {
+	      return [0, 0, 0];
+	    }
+	    let colorString = match[0];
+	    if (match[0].length === 3) {
+	      colorString = colorString.split('').map(char => {
+	        return char + char;
+	      }).join('');
+	    }
+	    const integer = parseInt(colorString, 16);
+	    const r = integer >> 16 & 0xFF;
+	    const g = integer >> 8 & 0xFF;
+	    const b = integer & 0xFF;
+	    return [r, g, b];
+	  };
+	  convert.rgb.hcg = function (rgb) {
+	    const r = rgb[0] / 255;
+	    const g = rgb[1] / 255;
+	    const b = rgb[2] / 255;
+	    const max = Math.max(Math.max(r, g), b);
+	    const min = Math.min(Math.min(r, g), b);
+	    const chroma = max - min;
+	    let grayscale;
+	    let hue;
+	    if (chroma < 1) {
+	      grayscale = min / (1 - chroma);
+	    } else {
+	      grayscale = 0;
+	    }
+	    if (chroma <= 0) {
+	      hue = 0;
+	    } else if (max === r) {
+	      hue = (g - b) / chroma % 6;
+	    } else if (max === g) {
+	      hue = 2 + (b - r) / chroma;
+	    } else {
+	      hue = 4 + (r - g) / chroma;
+	    }
+	    hue /= 6;
+	    hue %= 1;
+	    return [hue * 360, chroma * 100, grayscale * 100];
+	  };
+	  convert.hsl.hcg = function (hsl) {
+	    const s = hsl[1] / 100;
+	    const l = hsl[2] / 100;
+	    const c = l < 0.5 ? 2.0 * s * l : 2.0 * s * (1.0 - l);
+	    let f = 0;
+	    if (c < 1.0) {
+	      f = (l - 0.5 * c) / (1.0 - c);
+	    }
+	    return [hsl[0], c * 100, f * 100];
+	  };
+	  convert.hsv.hcg = function (hsv) {
+	    const s = hsv[1] / 100;
+	    const v = hsv[2] / 100;
+	    const c = s * v;
+	    let f = 0;
+	    if (c < 1.0) {
+	      f = (v - c) / (1 - c);
+	    }
+	    return [hsv[0], c * 100, f * 100];
+	  };
+	  convert.hcg.rgb = function (hcg) {
+	    const h = hcg[0] / 360;
+	    const c = hcg[1] / 100;
+	    const g = hcg[2] / 100;
+	    if (c === 0.0) {
+	      return [g * 255, g * 255, g * 255];
+	    }
+	    const pure = [0, 0, 0];
+	    const hi = h % 1 * 6;
+	    const v = hi % 1;
+	    const w = 1 - v;
+	    let mg = 0;
+
+	    /* eslint-disable max-statements-per-line */
+	    switch (Math.floor(hi)) {
+	      case 0:
+	        pure[0] = 1;
+	        pure[1] = v;
+	        pure[2] = 0;
+	        break;
+	      case 1:
+	        pure[0] = w;
+	        pure[1] = 1;
+	        pure[2] = 0;
+	        break;
+	      case 2:
+	        pure[0] = 0;
+	        pure[1] = 1;
+	        pure[2] = v;
+	        break;
+	      case 3:
+	        pure[0] = 0;
+	        pure[1] = w;
+	        pure[2] = 1;
+	        break;
+	      case 4:
+	        pure[0] = v;
+	        pure[1] = 0;
+	        pure[2] = 1;
+	        break;
+	      default:
+	        pure[0] = 1;
+	        pure[1] = 0;
+	        pure[2] = w;
+	    }
+	    /* eslint-enable max-statements-per-line */
+
+	    mg = (1.0 - c) * g;
+	    return [(c * pure[0] + mg) * 255, (c * pure[1] + mg) * 255, (c * pure[2] + mg) * 255];
+	  };
+	  convert.hcg.hsv = function (hcg) {
+	    const c = hcg[1] / 100;
+	    const g = hcg[2] / 100;
+	    const v = c + g * (1.0 - c);
+	    let f = 0;
+	    if (v > 0.0) {
+	      f = c / v;
+	    }
+	    return [hcg[0], f * 100, v * 100];
+	  };
+	  convert.hcg.hsl = function (hcg) {
+	    const c = hcg[1] / 100;
+	    const g = hcg[2] / 100;
+	    const l = g * (1.0 - c) + 0.5 * c;
+	    let s = 0;
+	    if (l > 0.0 && l < 0.5) {
+	      s = c / (2 * l);
+	    } else if (l >= 0.5 && l < 1.0) {
+	      s = c / (2 * (1 - l));
+	    }
+	    return [hcg[0], s * 100, l * 100];
+	  };
+	  convert.hcg.hwb = function (hcg) {
+	    const c = hcg[1] / 100;
+	    const g = hcg[2] / 100;
+	    const v = c + g * (1.0 - c);
+	    return [hcg[0], (v - c) * 100, (1 - v) * 100];
+	  };
+	  convert.hwb.hcg = function (hwb) {
+	    const w = hwb[1] / 100;
+	    const b = hwb[2] / 100;
+	    const v = 1 - b;
+	    const c = v - w;
+	    let g = 0;
+	    if (c < 1) {
+	      g = (v - c) / (1 - c);
+	    }
+	    return [hwb[0], c * 100, g * 100];
+	  };
+	  convert.apple.rgb = function (apple) {
+	    return [apple[0] / 65535 * 255, apple[1] / 65535 * 255, apple[2] / 65535 * 255];
+	  };
+	  convert.rgb.apple = function (rgb) {
+	    return [rgb[0] / 255 * 65535, rgb[1] / 255 * 65535, rgb[2] / 255 * 65535];
+	  };
+	  convert.gray.rgb = function (args) {
+	    return [args[0] / 100 * 255, args[0] / 100 * 255, args[0] / 100 * 255];
+	  };
+	  convert.gray.hsl = function (args) {
+	    return [0, 0, args[0]];
+	  };
+	  convert.gray.hsv = convert.gray.hsl;
+	  convert.gray.hwb = function (gray) {
+	    return [0, 100, gray[0]];
+	  };
+	  convert.gray.cmyk = function (gray) {
+	    return [0, 0, 0, gray[0]];
+	  };
+	  convert.gray.lab = function (gray) {
+	    return [gray[0], 0, 0];
+	  };
+	  convert.gray.hex = function (gray) {
+	    const val = Math.round(gray[0] / 100 * 255) & 0xFF;
+	    const integer = (val << 16) + (val << 8) + val;
+	    const string = integer.toString(16).toUpperCase();
+	    return '000000'.substring(string.length) + string;
+	  };
+	  convert.rgb.gray = function (rgb) {
+	    const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
+	    return [val / 255 * 100];
+	  };
+	  return conversions;
 	}
-	colorFromUuid_1 = lib$1.colorFromUuid = colorFromUuid;
+
+	var route;
+	var hasRequiredRoute;
+	function requireRoute() {
+	  if (hasRequiredRoute) return route;
+	  hasRequiredRoute = 1;
+	  const conversions = requireConversions();
+
+	  /*
+	  	This function routes a model to all other models.
+	  		all functions that are routed have a property `.conversion` attached
+	  	to the returned synthetic function. This property is an array
+	  	of strings, each with the steps in between the 'from' and 'to'
+	  	color models (inclusive).
+	  		conversions that are not possible simply are not included.
+	  */
+
+	  function buildGraph() {
+	    const graph = {};
+	    // https://jsperf.com/object-keys-vs-for-in-with-closure/3
+	    const models = Object.keys(conversions);
+	    for (let len = models.length, i = 0; i < len; i++) {
+	      graph[models[i]] = {
+	        // http://jsperf.com/1-vs-infinity
+	        // micro-opt, but this is simple.
+	        distance: -1,
+	        parent: null
+	      };
+	    }
+	    return graph;
+	  }
+
+	  // https://en.wikipedia.org/wiki/Breadth-first_search
+	  function deriveBFS(fromModel) {
+	    const graph = buildGraph();
+	    const queue = [fromModel]; // Unshift -> queue -> pop
+
+	    graph[fromModel].distance = 0;
+	    while (queue.length) {
+	      const current = queue.pop();
+	      const adjacents = Object.keys(conversions[current]);
+	      for (let len = adjacents.length, i = 0; i < len; i++) {
+	        const adjacent = adjacents[i];
+	        const node = graph[adjacent];
+	        if (node.distance === -1) {
+	          node.distance = graph[current].distance + 1;
+	          node.parent = current;
+	          queue.unshift(adjacent);
+	        }
+	      }
+	    }
+	    return graph;
+	  }
+	  function link(from, to) {
+	    return function (args) {
+	      return to(from(args));
+	    };
+	  }
+	  function wrapConversion(toModel, graph) {
+	    const path = [graph[toModel].parent, toModel];
+	    let fn = conversions[graph[toModel].parent][toModel];
+	    let cur = graph[toModel].parent;
+	    while (graph[cur].parent) {
+	      path.unshift(graph[cur].parent);
+	      fn = link(conversions[graph[cur].parent][cur], fn);
+	      cur = graph[cur].parent;
+	    }
+	    fn.conversion = path;
+	    return fn;
+	  }
+	  route = function (fromModel) {
+	    const graph = deriveBFS(fromModel);
+	    const conversion = {};
+	    const models = Object.keys(graph);
+	    for (let len = models.length, i = 0; i < len; i++) {
+	      const toModel = models[i];
+	      const node = graph[toModel];
+	      if (node.parent === null) {
+	        // No possible conversion, or this node is the source model.
+	        continue;
+	      }
+	      conversion[toModel] = wrapConversion(toModel, graph);
+	    }
+	    return conversion;
+	  };
+	  return route;
+	}
+
+	var colorConvert;
+	var hasRequiredColorConvert;
+	function requireColorConvert() {
+	  if (hasRequiredColorConvert) return colorConvert;
+	  hasRequiredColorConvert = 1;
+	  const conversions = requireConversions();
+	  const route = requireRoute();
+	  const convert = {};
+	  const models = Object.keys(conversions);
+	  function wrapRaw(fn) {
+	    const wrappedFn = function (...args) {
+	      const arg0 = args[0];
+	      if (arg0 === undefined || arg0 === null) {
+	        return arg0;
+	      }
+	      if (arg0.length > 1) {
+	        args = arg0;
+	      }
+	      return fn(args);
+	    };
+
+	    // Preserve .conversion property if there is one
+	    if ('conversion' in fn) {
+	      wrappedFn.conversion = fn.conversion;
+	    }
+	    return wrappedFn;
+	  }
+	  function wrapRounded(fn) {
+	    const wrappedFn = function (...args) {
+	      const arg0 = args[0];
+	      if (arg0 === undefined || arg0 === null) {
+	        return arg0;
+	      }
+	      if (arg0.length > 1) {
+	        args = arg0;
+	      }
+	      const result = fn(args);
+
+	      // We're assuming the result is an array here.
+	      // see notice in conversions.js; don't use box types
+	      // in conversion functions.
+	      if (typeof result === 'object') {
+	        for (let len = result.length, i = 0; i < len; i++) {
+	          result[i] = Math.round(result[i]);
+	        }
+	      }
+	      return result;
+	    };
+
+	    // Preserve .conversion property if there is one
+	    if ('conversion' in fn) {
+	      wrappedFn.conversion = fn.conversion;
+	    }
+	    return wrappedFn;
+	  }
+	  models.forEach(fromModel => {
+	    convert[fromModel] = {};
+	    Object.defineProperty(convert[fromModel], 'channels', {
+	      value: conversions[fromModel].channels
+	    });
+	    Object.defineProperty(convert[fromModel], 'labels', {
+	      value: conversions[fromModel].labels
+	    });
+	    const routes = route(fromModel);
+	    const routeModels = Object.keys(routes);
+	    routeModels.forEach(toModel => {
+	      const fn = routes[toModel];
+	      convert[fromModel][toModel] = wrapRounded(fn);
+	      convert[fromModel][toModel].raw = wrapRaw(fn);
+	    });
+	  });
+	  colorConvert = convert;
+	  return colorConvert;
+	}
+
+	var hasRequiredLib;
+	function requireLib() {
+	  if (hasRequiredLib) return lib$1;
+	  hasRequiredLib = 1;
+	  var __spreadArray = lib$1 && lib$1.__spreadArray || function (to, from, pack) {
+	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+	      if (ar || !(i in from)) {
+	        if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+	        ar[i] = from[i];
+	      }
+	    }
+	    return to.concat(ar || Array.prototype.slice.call(from));
+	  };
+	  Object.defineProperty(lib$1, "__esModule", {
+	    value: true
+	  });
+	  lib$1.colorFromUuid = void 0;
+	  var uuid_1 = esmBrowser;
+	  var UuidEncoder = requireLib$1();
+	  var convert = requireColorConvert();
+	  var DEFAULT_COLOR_FORMAT = "hex";
+	  var DEFAULT_IS_RAW = false;
+	  var encoder = new UuidEncoder("base10");
+	  /**
+	   * Returns the generated color associated with the given uuid.
+	   *
+	   * @param uuid - The uuid for which to generate a color
+	   * @param options - An optional object to configure the color generation, and attach callbacks that directly receive the generated color code or components in various formats
+	   * @returns The generated color as a CSS `<color>` notation string
+	   *
+	   * @throws {@link https://developer.mozilla.org/en-US/docs/web/javascript/reference/global_objects/error | Error}
+	   * This exception is thrown if the input uuid string is not a valid UUID.
+	   *
+	   * @public
+	   */
+	  function colorFromUuid(uuid, options) {
+	    if (options === void 0) {
+	      options = {};
+	    }
+	    if (!(0, uuid_1.validate)(uuid)) {
+	      throw new Error("Given string is not a valid UUID.");
+	    }
+	    var encodedUuid = BigInt(encoder.encode(uuid));
+	    var colorCode = Number(encodedUuid % BigInt(0x1000000));
+	    var red = colorCode >> 16;
+	    var green = colorCode >> 8 & 0xff;
+	    var blue = colorCode & 0xff;
+	    var receivers = {};
+	    if (options.hasOwnProperty("receivers")) {
+	      ["rgb", "hsl", "hex"].forEach(function (format) {
+	        if (options.receivers.hasOwnProperty(format)) {
+	          receivers[format] = options.receivers[format]; // link to callbacks
+	        }
+	      });
+	    }
+	    var isRaw = DEFAULT_IS_RAW;
+	    if (options.hasOwnProperty("raw")) {
+	      isRaw = options.raw;
+	    }
+	    var alpha;
+	    if (options.hasOwnProperty("alpha")) {
+	      alpha = Math.min(Math.max(options.alpha, 0), 1); // clamp to [0; 1]
+	    }
+	    if ("rgb" in receivers) {
+	      if (alpha === undefined) {
+	        receivers.rgb(red, green, blue);
+	      } else {
+	        receivers.rgb(red, green, blue, alpha);
+	      }
+	    }
+	    if ("hsl" in receivers) {
+	      var hsl = isRaw ? convert.rgb.hsl.raw(red, green, blue) : convert.rgb.hsl(red, green, blue);
+	      if (alpha === undefined) {
+	        receivers.hsl.apply(receivers, hsl);
+	      } else {
+	        receivers.hsl.apply(receivers, __spreadArray(__spreadArray([], hsl, true), [alpha], false));
+	      }
+	    }
+	    if ("hex" in receivers) {
+	      var hexColorCode = convert.rgb.hex(red, green, blue).toLowerCase();
+	      if (alpha === undefined) {
+	        receivers.hex(hexColorCode);
+	      } else {
+	        var hexAlphaCode = Math.floor(alpha * 255).toString(16);
+	        receivers.hex(hexColorCode + hexAlphaCode);
+	      }
+	    }
+	    var format = DEFAULT_COLOR_FORMAT;
+	    if (options.hasOwnProperty("format")) {
+	      format = options.format;
+	    }
+	    switch (format) {
+	      case "rgb":
+	        return alpha === undefined ? "rgb(".concat(red, ", ").concat(green, ", ").concat(blue, ")") : "rgb(".concat(red, ", ").concat(green, ", ").concat(blue, ", ").concat(alpha, ")");
+	      case "hsl":
+	        var hsl = isRaw ? convert.rgb.hsl.raw(red, green, blue) : convert.rgb.hsl(red, green, blue);
+	        return alpha === undefined ? "hsl(".concat(hsl[0], ", ").concat(hsl[1], "%, ").concat(hsl[2], "%)") : "hsl(".concat(hsl[0], ", ").concat(hsl[1], "%, ").concat(hsl[2], "%, ").concat(alpha, ")");
+	      default: // don't error
+	      case "hex":
+	        var hexColorCode = convert.rgb.hex(red, green, blue).toLowerCase();
+	        var hexAlphaCode = Math.floor(alpha * 255).toString(16);
+	        return alpha === undefined ? "#".concat(hexColorCode) : "#".concat(hexColorCode).concat(hexAlphaCode);
+	    }
+	  }
+	  lib$1.colorFromUuid = colorFromUuid;
+	  return lib$1;
+	}
+
+	var libExports = /*@__PURE__*/ requireLib();
 
 	class Playground {
 	  camera;
@@ -10204,7 +10247,7 @@ void main() {
 	      this.boxes = this.boxes.concat(boxMesh);
 	      this.scene.add(boxMesh);
 	      for (const item of box.items) {
-	        const color = colorFromUuid_1(item.id);
+	        const color = libExports.colorFromUuid(item.id);
 	        const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
 	        const itemMesh = new Mesh(itemGeometry, new MeshPhongMaterial({
 	          color: color,
@@ -10224,7 +10267,7 @@ void main() {
 	      z: zMax + delta
 	    };
 	    for (const item of request.items) {
-	      const color = colorFromUuid_1(item.id);
+	      const color = libExports.colorFromUuid(item.id);
 	      const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
 	      const itemMesh = new Mesh(itemGeometry, new MeshPhongMaterial({
 	        color: color,
