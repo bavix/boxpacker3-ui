@@ -5509,10 +5509,10 @@ void main() {
 	    this.animations = [];
 	    this.userData = {};
 	  }
-	  onBeforeShadow( /* renderer, object, camera, shadowCamera, geometry, depthMaterial, group */) {}
-	  onAfterShadow( /* renderer, object, camera, shadowCamera, geometry, depthMaterial, group */) {}
-	  onBeforeRender( /* renderer, scene, camera, geometry, material, group */) {}
-	  onAfterRender( /* renderer, scene, camera, geometry, material, group */) {}
+	  onBeforeShadow(/* renderer, object, camera, shadowCamera, geometry, depthMaterial, group */) {}
+	  onAfterShadow(/* renderer, object, camera, shadowCamera, geometry, depthMaterial, group */) {}
+	  onBeforeRender(/* renderer, scene, camera, geometry, material, group */) {}
+	  onAfterRender(/* renderer, scene, camera, geometry, material, group */) {}
 	  applyMatrix4(matrix) {
 	    if (this.matrixAutoUpdate) this.updateMatrix();
 	    this.matrix.premultiply(matrix);
@@ -5732,7 +5732,7 @@ void main() {
 	    const e = this.matrixWorld.elements;
 	    return target.set(e[8], e[9], e[10]).normalize();
 	  }
-	  raycast( /* raycaster, intersects */) {}
+	  raycast(/* raycaster, intersects */) {}
 	  traverse(callback) {
 	    callback(this);
 	    const children = this.children;
@@ -11553,7 +11553,7 @@ void main() {
 	 *
 	 * @returns {Object} Result of all merge properties
 	 */
-	function merge( /* obj1, obj2, obj3, ... */
+	function merge(/* obj1, obj2, obj3, ... */
 	) {
 	  const {
 	    caseless
@@ -12683,7 +12683,7 @@ void main() {
 	 *
 	 * @returns {Object} Headers parsed into an object
 	 */
-	var parseHeaders = (rawHeaders => {
+	var parseHeaders = rawHeaders => {
 	  const parsed = {};
 	  let key;
 	  let val;
@@ -12706,7 +12706,7 @@ void main() {
 	    }
 	  });
 	  return parsed;
-	});
+	};
 
 	const $internals = Symbol('internals');
 	function normalizeHeader(header) {
@@ -13337,7 +13337,7 @@ void main() {
 	  return config;
 	}
 
-	var resolveConfig = (config => {
+	var resolveConfig = config => {
 	  const newConfig = mergeConfig({}, config);
 	  let {
 	    data,
@@ -13380,7 +13380,7 @@ void main() {
 	    }
 	  }
 	  return newConfig;
-	});
+	};
 
 	const isXHRAdapterSupported = typeof XMLHttpRequest !== 'undefined';
 	var xhrAdapter = isXHRAdapterSupported && function (config) {
@@ -14666,7 +14666,7 @@ void main() {
 	}
 
 	const playground = new Playground(document.getElementById('bp3'));
-	Rn.render( /*#__PURE__*/Rn.createElement(ItemComponent, {
+	Rn.render(/*#__PURE__*/Rn.createElement(ItemComponent, {
 	  playground: playground
 	}), document.getElementById('bp3-input'));
 
