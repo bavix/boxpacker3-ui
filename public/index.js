@@ -5,17 +5,30 @@
 	 * @license
 	 * Copyright 2010-2024 Three.js Authors
 	 * SPDX-License-Identifier: MIT
-	 */const REVISION='170';const MOUSE={ROTATE:0,DOLLY:1,PAN:2};const TOUCH={ROTATE:0,PAN:1,DOLLY_PAN:2,DOLLY_ROTATE:3};const CullFaceNone=0;const CullFaceBack=1;const CullFaceFront=2;const PCFShadowMap=1;const PCFSoftShadowMap=2;const VSMShadowMap=3;const FrontSide=0;const BackSide=1;const DoubleSide=2;const NoBlending=0;const NormalBlending=1;const AdditiveBlending=2;const SubtractiveBlending=3;const MultiplyBlending=4;const CustomBlending=5;const AddEquation=100;const SubtractEquation=101;const ReverseSubtractEquation=102;const MinEquation=103;const MaxEquation=104;const ZeroFactor=200;const OneFactor=201;const SrcColorFactor=202;const OneMinusSrcColorFactor=203;const SrcAlphaFactor=204;const OneMinusSrcAlphaFactor=205;const DstAlphaFactor=206;const OneMinusDstAlphaFactor=207;const DstColorFactor=208;const OneMinusDstColorFactor=209;const SrcAlphaSaturateFactor=210;const ConstantColorFactor=211;const OneMinusConstantColorFactor=212;const ConstantAlphaFactor=213;const OneMinusConstantAlphaFactor=214;const NeverDepth=0;const AlwaysDepth=1;const LessDepth=2;const LessEqualDepth=3;const EqualDepth=4;const GreaterEqualDepth=5;const GreaterDepth=6;const NotEqualDepth=7;const MultiplyOperation=0;const MixOperation=1;const AddOperation=2;const NoToneMapping=0;const LinearToneMapping=1;const ReinhardToneMapping=2;const CineonToneMapping=3;const ACESFilmicToneMapping=4;const CustomToneMapping=5;const AgXToneMapping=6;const NeutralToneMapping=7;const UVMapping=300;const CubeReflectionMapping=301;const CubeRefractionMapping=302;const EquirectangularReflectionMapping=303;const EquirectangularRefractionMapping=304;const CubeUVReflectionMapping=306;const RepeatWrapping=1000;const ClampToEdgeWrapping=1001;const MirroredRepeatWrapping=1002;const NearestFilter=1003;const NearestMipmapNearestFilter=1004;const NearestMipmapLinearFilter=1005;const LinearFilter=1006;const LinearMipmapNearestFilter=1007;const LinearMipmapLinearFilter=1008;const UnsignedByteType=1009;const ByteType=1010;const ShortType=1011;const UnsignedShortType=1012;const IntType=1013;const UnsignedIntType=1014;const FloatType$1=1015;const HalfFloatType=1016;const UnsignedShort4444Type=1017;const UnsignedShort5551Type=1018;const UnsignedInt248Type=1020;const UnsignedInt5999Type=35902;const AlphaFormat=1021;const RGBFormat=1022;const RGBAFormat=1023;const LuminanceFormat=1024;const LuminanceAlphaFormat=1025;const DepthFormat=1026;const DepthStencilFormat=1027;const RedFormat=1028;const RedIntegerFormat=1029;const RGFormat=1030;const RGIntegerFormat=1031;const RGBAIntegerFormat=1033;const RGB_S3TC_DXT1_Format=33776;const RGBA_S3TC_DXT1_Format=33777;const RGBA_S3TC_DXT3_Format=33778;const RGBA_S3TC_DXT5_Format=33779;const RGB_PVRTC_4BPPV1_Format=35840;const RGB_PVRTC_2BPPV1_Format=35841;const RGBA_PVRTC_4BPPV1_Format=35842;const RGBA_PVRTC_2BPPV1_Format=35843;const RGB_ETC1_Format=36196;const RGB_ETC2_Format=37492;const RGBA_ETC2_EAC_Format=37496;const RGBA_ASTC_4x4_Format=37808;const RGBA_ASTC_5x4_Format=37809;const RGBA_ASTC_5x5_Format=37810;const RGBA_ASTC_6x5_Format=37811;const RGBA_ASTC_6x6_Format=37812;const RGBA_ASTC_8x5_Format=37813;const RGBA_ASTC_8x6_Format=37814;const RGBA_ASTC_8x8_Format=37815;const RGBA_ASTC_10x5_Format=37816;const RGBA_ASTC_10x6_Format=37817;const RGBA_ASTC_10x8_Format=37818;const RGBA_ASTC_10x10_Format=37819;const RGBA_ASTC_12x10_Format=37820;const RGBA_ASTC_12x12_Format=37821;const RGBA_BPTC_Format=36492;const RGB_BPTC_SIGNED_Format=36494;const RGB_BPTC_UNSIGNED_Format=36495;const RED_RGTC1_Format=36283;const SIGNED_RED_RGTC1_Format=36284;const RED_GREEN_RGTC2_Format=36285;const SIGNED_RED_GREEN_RGTC2_Format=36286;const BasicDepthPacking=3200;const RGBADepthPacking=3201;const TangentSpaceNormalMap=0;const ObjectSpaceNormalMap=1;// Color space string identifiers, matching CSS Color Module Level 4 and WebGPU names where available.
+	 */const REVISION='170';const MOUSE={LEFT:0,MIDDLE:1,RIGHT:2,ROTATE:0,DOLLY:1,PAN:2};const TOUCH={ROTATE:0,PAN:1,DOLLY_PAN:2,DOLLY_ROTATE:3};const CullFaceNone=0;const CullFaceBack=1;const CullFaceFront=2;const PCFShadowMap=1;const PCFSoftShadowMap=2;const VSMShadowMap=3;const FrontSide=0;const BackSide=1;const DoubleSide=2;const NoBlending=0;const NormalBlending=1;const AdditiveBlending=2;const SubtractiveBlending=3;const MultiplyBlending=4;const CustomBlending=5;const AddEquation=100;const SubtractEquation=101;const ReverseSubtractEquation=102;const MinEquation=103;const MaxEquation=104;const ZeroFactor=200;const OneFactor=201;const SrcColorFactor=202;const OneMinusSrcColorFactor=203;const SrcAlphaFactor=204;const OneMinusSrcAlphaFactor=205;const DstAlphaFactor=206;const OneMinusDstAlphaFactor=207;const DstColorFactor=208;const OneMinusDstColorFactor=209;const SrcAlphaSaturateFactor=210;const ConstantColorFactor=211;const OneMinusConstantColorFactor=212;const ConstantAlphaFactor=213;const OneMinusConstantAlphaFactor=214;const NeverDepth=0;const AlwaysDepth=1;const LessDepth=2;const LessEqualDepth=3;const EqualDepth=4;const GreaterEqualDepth=5;const GreaterDepth=6;const NotEqualDepth=7;const MultiplyOperation=0;const MixOperation=1;const AddOperation=2;const NoToneMapping=0;const LinearToneMapping=1;const ReinhardToneMapping=2;const CineonToneMapping=3;const ACESFilmicToneMapping=4;const CustomToneMapping=5;const AgXToneMapping=6;const NeutralToneMapping=7;const UVMapping=300;const CubeReflectionMapping=301;const CubeRefractionMapping=302;const EquirectangularReflectionMapping=303;const EquirectangularRefractionMapping=304;const CubeUVReflectionMapping=306;const RepeatWrapping=1000;const ClampToEdgeWrapping=1001;const MirroredRepeatWrapping=1002;const NearestFilter=1003;const NearestMipmapNearestFilter=1004;const NearestMipmapLinearFilter=1005;const LinearFilter=1006;const LinearMipmapNearestFilter=1007;const LinearMipmapLinearFilter=1008;const UnsignedByteType=1009;const ByteType=1010;const ShortType=1011;const UnsignedShortType=1012;const IntType=1013;const UnsignedIntType=1014;const FloatType$1=1015;const HalfFloatType=1016;const UnsignedShort4444Type=1017;const UnsignedShort5551Type=1018;const UnsignedInt248Type=1020;const UnsignedInt5999Type=35902;const AlphaFormat=1021;const RGBFormat=1022;const RGBAFormat=1023;const LuminanceFormat=1024;const LuminanceAlphaFormat=1025;const DepthFormat=1026;const DepthStencilFormat=1027;const RedFormat=1028;const RedIntegerFormat=1029;const RGFormat=1030;const RGIntegerFormat=1031;const RGBAIntegerFormat=1033;const RGB_S3TC_DXT1_Format=33776;const RGBA_S3TC_DXT1_Format=33777;const RGBA_S3TC_DXT3_Format=33778;const RGBA_S3TC_DXT5_Format=33779;const RGB_PVRTC_4BPPV1_Format=35840;const RGB_PVRTC_2BPPV1_Format=35841;const RGBA_PVRTC_4BPPV1_Format=35842;const RGBA_PVRTC_2BPPV1_Format=35843;const RGB_ETC1_Format=36196;const RGB_ETC2_Format=37492;const RGBA_ETC2_EAC_Format=37496;const RGBA_ASTC_4x4_Format=37808;const RGBA_ASTC_5x4_Format=37809;const RGBA_ASTC_5x5_Format=37810;const RGBA_ASTC_6x5_Format=37811;const RGBA_ASTC_6x6_Format=37812;const RGBA_ASTC_8x5_Format=37813;const RGBA_ASTC_8x6_Format=37814;const RGBA_ASTC_8x8_Format=37815;const RGBA_ASTC_10x5_Format=37816;const RGBA_ASTC_10x6_Format=37817;const RGBA_ASTC_10x8_Format=37818;const RGBA_ASTC_10x10_Format=37819;const RGBA_ASTC_12x10_Format=37820;const RGBA_ASTC_12x12_Format=37821;const RGBA_BPTC_Format=36492;const RGB_BPTC_SIGNED_Format=36494;const RGB_BPTC_UNSIGNED_Format=36495;const RED_RGTC1_Format=36283;const SIGNED_RED_RGTC1_Format=36284;const RED_GREEN_RGTC2_Format=36285;const SIGNED_RED_GREEN_RGTC2_Format=36286;const BasicDepthPacking=3200;const RGBADepthPacking=3201;const TangentSpaceNormalMap=0;const ObjectSpaceNormalMap=1;// Color space string identifiers, matching CSS Color Module Level 4 and WebGPU names where available.
 	const NoColorSpace='';const SRGBColorSpace='srgb';const LinearSRGBColorSpace='srgb-linear';const LinearTransfer='linear';const SRGBTransfer='srgb';const KeepStencilOp=7680;const AlwaysStencilFunc=519;const NeverCompare=512;const LessCompare=513;const EqualCompare=514;const LessEqualCompare=515;const GreaterCompare=516;const NotEqualCompare=517;const GreaterEqualCompare=518;const AlwaysCompare=519;const StaticDrawUsage$1=35044;const GLSL3='300 es';const WebGLCoordinateSystem$1=2000;const WebGPUCoordinateSystem$1=2001;/**
 	 * https://github.com/mrdoob/eventdispatcher.js/
 	 */let EventDispatcher$1 = class EventDispatcher{addEventListener(type,listener){if(this._listeners===undefined)this._listeners={};const listeners=this._listeners;if(listeners[type]===undefined){listeners[type]=[];}if(listeners[type].indexOf(listener)===-1){listeners[type].push(listener);}}hasEventListener(type,listener){if(this._listeners===undefined)return false;const listeners=this._listeners;return listeners[type]!==undefined&&listeners[type].indexOf(listener)!==-1;}removeEventListener(type,listener){if(this._listeners===undefined)return;const listeners=this._listeners;const listenerArray=listeners[type];if(listenerArray!==undefined){const index=listenerArray.indexOf(listener);if(index!==-1){listenerArray.splice(index,1);}}}dispatchEvent(event){if(this._listeners===undefined)return;const listeners=this._listeners;const listenerArray=listeners[event.type];if(listenerArray!==undefined){event.target=this;// Make a copy, in case listeners are removed while iterating.
-	const array=listenerArray.slice(0);for(let i=0,l=array.length;i<l;i++){array[i].call(this,event);}event.target=null;}}};const _lut$1=['00','01','02','03','04','05','06','07','08','09','0a','0b','0c','0d','0e','0f','10','11','12','13','14','15','16','17','18','19','1a','1b','1c','1d','1e','1f','20','21','22','23','24','25','26','27','28','29','2a','2b','2c','2d','2e','2f','30','31','32','33','34','35','36','37','38','39','3a','3b','3c','3d','3e','3f','40','41','42','43','44','45','46','47','48','49','4a','4b','4c','4d','4e','4f','50','51','52','53','54','55','56','57','58','59','5a','5b','5c','5d','5e','5f','60','61','62','63','64','65','66','67','68','69','6a','6b','6c','6d','6e','6f','70','71','72','73','74','75','76','77','78','79','7a','7b','7c','7d','7e','7f','80','81','82','83','84','85','86','87','88','89','8a','8b','8c','8d','8e','8f','90','91','92','93','94','95','96','97','98','99','9a','9b','9c','9d','9e','9f','a0','a1','a2','a3','a4','a5','a6','a7','a8','a9','aa','ab','ac','ad','ae','af','b0','b1','b2','b3','b4','b5','b6','b7','b8','b9','ba','bb','bc','bd','be','bf','c0','c1','c2','c3','c4','c5','c6','c7','c8','c9','ca','cb','cc','cd','ce','cf','d0','d1','d2','d3','d4','d5','d6','d7','d8','d9','da','db','dc','dd','de','df','e0','e1','e2','e3','e4','e5','e6','e7','e8','e9','ea','eb','ec','ed','ee','ef','f0','f1','f2','f3','f4','f5','f6','f7','f8','f9','fa','fb','fc','fd','fe','ff'];const DEG2RAD=Math.PI/180;const RAD2DEG=180/Math.PI;// http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
+	const array=listenerArray.slice(0);for(let i=0,l=array.length;i<l;i++){array[i].call(this,event);}event.target=null;}}};const _lut$1=['00','01','02','03','04','05','06','07','08','09','0a','0b','0c','0d','0e','0f','10','11','12','13','14','15','16','17','18','19','1a','1b','1c','1d','1e','1f','20','21','22','23','24','25','26','27','28','29','2a','2b','2c','2d','2e','2f','30','31','32','33','34','35','36','37','38','39','3a','3b','3c','3d','3e','3f','40','41','42','43','44','45','46','47','48','49','4a','4b','4c','4d','4e','4f','50','51','52','53','54','55','56','57','58','59','5a','5b','5c','5d','5e','5f','60','61','62','63','64','65','66','67','68','69','6a','6b','6c','6d','6e','6f','70','71','72','73','74','75','76','77','78','79','7a','7b','7c','7d','7e','7f','80','81','82','83','84','85','86','87','88','89','8a','8b','8c','8d','8e','8f','90','91','92','93','94','95','96','97','98','99','9a','9b','9c','9d','9e','9f','a0','a1','a2','a3','a4','a5','a6','a7','a8','a9','aa','ab','ac','ad','ae','af','b0','b1','b2','b3','b4','b5','b6','b7','b8','b9','ba','bb','bc','bd','be','bf','c0','c1','c2','c3','c4','c5','c6','c7','c8','c9','ca','cb','cc','cd','ce','cf','d0','d1','d2','d3','d4','d5','d6','d7','d8','d9','da','db','dc','dd','de','df','e0','e1','e2','e3','e4','e5','e6','e7','e8','e9','ea','eb','ec','ed','ee','ef','f0','f1','f2','f3','f4','f5','f6','f7','f8','f9','fa','fb','fc','fd','fe','ff'];let _seed=1234567;const DEG2RAD=Math.PI/180;const RAD2DEG=180/Math.PI;// http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
 	function generateUUID$1(){const d0=Math.random()*0xffffffff|0;const d1=Math.random()*0xffffffff|0;const d2=Math.random()*0xffffffff|0;const d3=Math.random()*0xffffffff|0;const uuid=_lut$1[d0&0xff]+_lut$1[d0>>8&0xff]+_lut$1[d0>>16&0xff]+_lut$1[d0>>24&0xff]+'-'+_lut$1[d1&0xff]+_lut$1[d1>>8&0xff]+'-'+_lut$1[d1>>16&0x0f|0x40]+_lut$1[d1>>24&0xff]+'-'+_lut$1[d2&0x3f|0x80]+_lut$1[d2>>8&0xff]+'-'+_lut$1[d2>>16&0xff]+_lut$1[d2>>24&0xff]+_lut$1[d3&0xff]+_lut$1[d3>>8&0xff]+_lut$1[d3>>16&0xff]+_lut$1[d3>>24&0xff];// .toLowerCase() here flattens concatenated strings to save heap memory space.
 	return uuid.toLowerCase();}function clamp$1(value,min,max){return Math.max(min,Math.min(max,value));}// compute euclidean modulo of m % n
 	// https://en.wikipedia.org/wiki/Modulo_operation
 	function euclideanModulo(n,m){return (n%m+m)%m;}// Linear mapping from range <a1, a2> to range <b1, b2>
+	function mapLinear(x,a1,a2,b1,b2){return b1+(x-a1)*(b2-b1)/(a2-a1);}// https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/inverse-lerp-a-super-useful-yet-often-overlooked-function-r5230/
+	function inverseLerp(x,y,value){if(x!==y){return (value-x)/(y-x);}else {return 0;}}// https://en.wikipedia.org/wiki/Linear_interpolation
 	function lerp(x,y,t){return (1-t)*x+t*y;}// http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
-	function denormalize$1(value,array){switch(array.constructor){case Float32Array:return value;case Uint32Array:return value/4294967295.0;case Uint16Array:return value/65535.0;case Uint8Array:return value/255.0;case Int32Array:return Math.max(value/2147483647.0,-1.0);case Int16Array:return Math.max(value/32767.0,-1.0);case Int8Array:return Math.max(value/127.0,-1.0);default:throw new Error('Invalid component type.');}}function normalize$1(value,array){switch(array.constructor){case Float32Array:return value;case Uint32Array:return Math.round(value*4294967295.0);case Uint16Array:return Math.round(value*65535.0);case Uint8Array:return Math.round(value*255.0);case Int32Array:return Math.round(value*2147483647.0);case Int16Array:return Math.round(value*32767.0);case Int8Array:return Math.round(value*127.0);default:throw new Error('Invalid component type.');}}const MathUtils={DEG2RAD:DEG2RAD};let Vector2$1 = class Vector2{constructor(x=0,y=0){Vector2.prototype.isVector2=true;this.x=x;this.y=y;}get width(){return this.x;}set width(value){this.x=value;}get height(){return this.y;}set height(value){this.y=value;}set(x,y){this.x=x;this.y=y;return this;}setScalar(scalar){this.x=scalar;this.y=scalar;return this;}setX(x){this.x=x;return this;}setY(y){this.y=y;return this;}setComponent(index,value){switch(index){case 0:this.x=value;break;case 1:this.y=value;break;default:throw new Error('index is out of range: '+index);}return this;}getComponent(index){switch(index){case 0:return this.x;case 1:return this.y;default:throw new Error('index is out of range: '+index);}}clone(){return new this.constructor(this.x,this.y);}copy(v){this.x=v.x;this.y=v.y;return this;}add(v){this.x+=v.x;this.y+=v.y;return this;}addScalar(s){this.x+=s;this.y+=s;return this;}addVectors(a,b){this.x=a.x+b.x;this.y=a.y+b.y;return this;}addScaledVector(v,s){this.x+=v.x*s;this.y+=v.y*s;return this;}sub(v){this.x-=v.x;this.y-=v.y;return this;}subScalar(s){this.x-=s;this.y-=s;return this;}subVectors(a,b){this.x=a.x-b.x;this.y=a.y-b.y;return this;}multiply(v){this.x*=v.x;this.y*=v.y;return this;}multiplyScalar(scalar){this.x*=scalar;this.y*=scalar;return this;}divide(v){this.x/=v.x;this.y/=v.y;return this;}divideScalar(scalar){return this.multiplyScalar(1/scalar);}applyMatrix3(m){const x=this.x,y=this.y;const e=m.elements;this.x=e[0]*x+e[3]*y+e[6];this.y=e[1]*x+e[4]*y+e[7];return this;}min(v){this.x=Math.min(this.x,v.x);this.y=Math.min(this.y,v.y);return this;}max(v){this.x=Math.max(this.x,v.x);this.y=Math.max(this.y,v.y);return this;}clamp(min,max){// assumes min < max, componentwise
+	function damp(x,y,lambda,dt){return lerp(x,y,1-Math.exp(-lambda*dt));}// https://www.desmos.com/calculator/vcsjnyz7x4
+	function pingpong(x,length=1){return length-Math.abs(euclideanModulo(x,length*2)-length);}// http://en.wikipedia.org/wiki/Smoothstep
+	function smoothstep(x,min,max){if(x<=min)return 0;if(x>=max)return 1;x=(x-min)/(max-min);return x*x*(3-2*x);}function smootherstep(x,min,max){if(x<=min)return 0;if(x>=max)return 1;x=(x-min)/(max-min);return x*x*x*(x*(x*6-15)+10);}// Random integer from <low, high> interval
+	function randInt(low,high){return low+Math.floor(Math.random()*(high-low+1));}// Random float from <low, high> interval
+	function randFloat(low,high){return low+Math.random()*(high-low);}// Random float from <-range/2, range/2> interval
+	function randFloatSpread(range){return range*(0.5-Math.random());}// Deterministic pseudo-random float in the interval [ 0, 1 ]
+	function seededRandom(s){if(s!==undefined)_seed=s;// Mulberry32 generator
+	let t=_seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;}function degToRad(degrees){return degrees*DEG2RAD;}function radToDeg(radians){return radians*RAD2DEG;}function isPowerOfTwo(value){return (value&value-1)===0&&value!==0;}function ceilPowerOfTwo(value){return Math.pow(2,Math.ceil(Math.log(value)/Math.LN2));}function floorPowerOfTwo(value){return Math.pow(2,Math.floor(Math.log(value)/Math.LN2));}function setQuaternionFromProperEuler(q,a,b,c,order){// Intrinsic Proper Euler Angles - see https://en.wikipedia.org/wiki/Euler_angles
+	// rotations are applied to the axes in the order specified by 'order'
+	// rotation by angle 'a' is applied first, then by angle 'b', then by angle 'c'
+	// angles are in radians
+	const cos=Math.cos;const sin=Math.sin;const c2=cos(b/2);const s2=sin(b/2);const c13=cos((a+c)/2);const s13=sin((a+c)/2);const c1_3=cos((a-c)/2);const s1_3=sin((a-c)/2);const c3_1=cos((c-a)/2);const s3_1=sin((c-a)/2);switch(order){case'XYX':q.set(c2*s13,s2*c1_3,s2*s1_3,c2*c13);break;case'YZY':q.set(s2*s1_3,c2*s13,s2*c1_3,c2*c13);break;case'ZXZ':q.set(s2*c1_3,s2*s1_3,c2*s13,c2*c13);break;case'XZX':q.set(c2*s13,s2*s3_1,s2*c3_1,c2*c13);break;case'YXY':q.set(s2*c3_1,c2*s13,s2*s3_1,c2*c13);break;case'ZYZ':q.set(s2*s3_1,s2*c3_1,c2*s13,c2*c13);break;default:console.warn('THREE.MathUtils: .setQuaternionFromProperEuler() encountered an unknown order: '+order);}}function denormalize$1(value,array){switch(array.constructor){case Float32Array:return value;case Uint32Array:return value/4294967295.0;case Uint16Array:return value/65535.0;case Uint8Array:return value/255.0;case Int32Array:return Math.max(value/2147483647.0,-1.0);case Int16Array:return Math.max(value/32767.0,-1.0);case Int8Array:return Math.max(value/127.0,-1.0);default:throw new Error('Invalid component type.');}}function normalize$1(value,array){switch(array.constructor){case Float32Array:return value;case Uint32Array:return Math.round(value*4294967295.0);case Uint16Array:return Math.round(value*65535.0);case Uint8Array:return Math.round(value*255.0);case Int32Array:return Math.round(value*2147483647.0);case Int16Array:return Math.round(value*32767.0);case Int8Array:return Math.round(value*127.0);default:throw new Error('Invalid component type.');}}const MathUtils={DEG2RAD:DEG2RAD,RAD2DEG:RAD2DEG,generateUUID:generateUUID$1,clamp:clamp$1,euclideanModulo:euclideanModulo,mapLinear:mapLinear,inverseLerp:inverseLerp,lerp:lerp,damp:damp,pingpong:pingpong,smoothstep:smoothstep,smootherstep:smootherstep,randInt:randInt,randFloat:randFloat,randFloatSpread:randFloatSpread,seededRandom:seededRandom,degToRad:degToRad,radToDeg:radToDeg,isPowerOfTwo:isPowerOfTwo,ceilPowerOfTwo:ceilPowerOfTwo,floorPowerOfTwo:floorPowerOfTwo,setQuaternionFromProperEuler:setQuaternionFromProperEuler,normalize:normalize$1,denormalize:denormalize$1};let Vector2$1 = class Vector2{constructor(x=0,y=0){Vector2.prototype.isVector2=true;this.x=x;this.y=y;}get width(){return this.x;}set width(value){this.x=value;}get height(){return this.y;}set height(value){this.y=value;}set(x,y){this.x=x;this.y=y;return this;}setScalar(scalar){this.x=scalar;this.y=scalar;return this;}setX(x){this.x=x;return this;}setY(y){this.y=y;return this;}setComponent(index,value){switch(index){case 0:this.x=value;break;case 1:this.y=value;break;default:throw new Error('index is out of range: '+index);}return this;}getComponent(index){switch(index){case 0:return this.x;case 1:return this.y;default:throw new Error('index is out of range: '+index);}}clone(){return new this.constructor(this.x,this.y);}copy(v){this.x=v.x;this.y=v.y;return this;}add(v){this.x+=v.x;this.y+=v.y;return this;}addScalar(s){this.x+=s;this.y+=s;return this;}addVectors(a,b){this.x=a.x+b.x;this.y=a.y+b.y;return this;}addScaledVector(v,s){this.x+=v.x*s;this.y+=v.y*s;return this;}sub(v){this.x-=v.x;this.y-=v.y;return this;}subScalar(s){this.x-=s;this.y-=s;return this;}subVectors(a,b){this.x=a.x-b.x;this.y=a.y-b.y;return this;}multiply(v){this.x*=v.x;this.y*=v.y;return this;}multiplyScalar(scalar){this.x*=scalar;this.y*=scalar;return this;}divide(v){this.x/=v.x;this.y/=v.y;return this;}divideScalar(scalar){return this.multiplyScalar(1/scalar);}applyMatrix3(m){const x=this.x,y=this.y;const e=m.elements;this.x=e[0]*x+e[3]*y+e[6];this.y=e[1]*x+e[4]*y+e[7];return this;}min(v){this.x=Math.min(this.x,v.x);this.y=Math.min(this.y,v.y);return this;}max(v){this.x=Math.max(this.x,v.x);this.y=Math.max(this.y,v.y);return this;}clamp(min,max){// assumes min < max, componentwise
 	this.x=Math.max(min.x,Math.min(max.x,this.x));this.y=Math.max(min.y,Math.min(max.y,this.y));return this;}clampScalar(minVal,maxVal){this.x=Math.max(minVal,Math.min(maxVal,this.x));this.y=Math.max(minVal,Math.min(maxVal,this.y));return this;}clampLength(min,max){const length=this.length();return this.divideScalar(length||1).multiplyScalar(Math.max(min,Math.min(max,length)));}floor(){this.x=Math.floor(this.x);this.y=Math.floor(this.y);return this;}ceil(){this.x=Math.ceil(this.x);this.y=Math.ceil(this.y);return this;}round(){this.x=Math.round(this.x);this.y=Math.round(this.y);return this;}roundToZero(){this.x=Math.trunc(this.x);this.y=Math.trunc(this.y);return this;}negate(){this.x=-this.x;this.y=-this.y;return this;}dot(v){return this.x*v.x+this.y*v.y;}cross(v){return this.x*v.y-this.y*v.x;}lengthSq(){return this.x*this.x+this.y*this.y;}length(){return Math.sqrt(this.x*this.x+this.y*this.y);}manhattanLength(){return Math.abs(this.x)+Math.abs(this.y);}normalize(){return this.divideScalar(this.length()||1);}angle(){// computes the angle in radians with respect to the positive x-axis
 	const angle=Math.atan2(-this.y,-this.x)+Math.PI;return angle;}angleTo(v){const denominator=Math.sqrt(this.lengthSq()*v.lengthSq());if(denominator===0)return Math.PI/2;const theta=this.dot(v)/denominator;// clamp, to handle numerical problems
 	return Math.acos(clamp$1(theta,-1,1));}distanceTo(v){return Math.sqrt(this.distanceToSquared(v));}distanceToSquared(v){const dx=this.x-v.x,dy=this.y-v.y;return dx*dx+dy*dy;}manhattanDistanceTo(v){return Math.abs(this.x-v.x)+Math.abs(this.y-v.y);}setLength(length){return this.normalize().multiplyScalar(length);}lerp(v,alpha){this.x+=(v.x-this.x)*alpha;this.y+=(v.y-this.y)*alpha;return this;}lerpVectors(v1,v2,alpha){this.x=v1.x+(v2.x-v1.x)*alpha;this.y=v1.y+(v2.y-v1.y)*alpha;return this;}equals(v){return v.x===this.x&&v.y===this.y;}fromArray(array,offset=0){this.x=array[offset];this.y=array[offset+1];return this;}toArray(array=[],offset=0){array[offset]=this.x;array[offset+1]=this.y;return array;}fromBufferAttribute(attribute,index){this.x=attribute.getX(index);this.y=attribute.getY(index);return this;}rotateAround(center,angle){const c=Math.cos(angle),s=Math.sin(angle);const x=this.x-center.x;const y=this.y-center.y;this.x=x*c-y*s+center.x;this.y=x*s+y*c+center.y;return this;}random(){this.x=Math.random();this.y=Math.random();return this;}*[Symbol.iterator](){yield this.x;yield this.y;}};let Matrix3$1 = class Matrix3{constructor(n11,n12,n13,n21,n22,n23,n31,n32,n33){Matrix3.prototype.isMatrix3=true;this.elements=[1,0,0,0,1,0,0,0,1];if(n11!==undefined){this.set(n11,n12,n13,n21,n22,n23,n31,n32,n33);}}set(n11,n12,n13,n21,n22,n23,n31,n32,n33){const te=this.elements;te[0]=n11;te[1]=n21;te[2]=n31;te[3]=n12;te[4]=n22;te[5]=n32;te[6]=n13;te[7]=n23;te[8]=n33;return this;}identity(){this.set(1,0,0,0,1,0,0,0,1);return this;}copy(m){const te=this.elements;const me=m.elements;te[0]=me[0];te[1]=me[1];te[2]=me[2];te[3]=me[3];te[4]=me[4];te[5]=me[5];te[6]=me[6];te[7]=me[7];te[8]=me[8];return this;}extractBasis(xAxis,yAxis,zAxis){xAxis.setFromMatrix3Column(this,0);yAxis.setFromMatrix3Column(this,1);zAxis.setFromMatrix3Column(this,2);return this;}setFromMatrix4(m){const me=m.elements;this.set(me[0],me[4],me[8],me[1],me[5],me[9],me[2],me[6],me[10]);return this;}multiply(m){return this.multiplyMatrices(this,m);}premultiply(m){return this.multiplyMatrices(m,this);}multiplyMatrices(a,b){const ae=a.elements;const be=b.elements;const te=this.elements;const a11=ae[0],a12=ae[3],a13=ae[6];const a21=ae[1],a22=ae[4],a23=ae[7];const a31=ae[2],a32=ae[5],a33=ae[8];const b11=be[0],b12=be[3],b13=be[6];const b21=be[1],b22=be[4],b23=be[7];const b31=be[2],b32=be[5],b33=be[8];te[0]=a11*b11+a12*b21+a13*b31;te[3]=a11*b12+a12*b22+a13*b32;te[6]=a11*b13+a12*b23+a13*b33;te[1]=a21*b11+a22*b21+a23*b31;te[4]=a21*b12+a22*b22+a23*b32;te[7]=a21*b13+a22*b23+a23*b33;te[2]=a31*b11+a32*b21+a33*b31;te[5]=a31*b12+a32*b22+a33*b32;te[8]=a31*b13+a32*b23+a33*b33;return this;}multiplyScalar(s){const te=this.elements;te[0]*=s;te[3]*=s;te[6]*=s;te[1]*=s;te[4]*=s;te[7]*=s;te[2]*=s;te[5]*=s;te[8]*=s;return this;}determinant(){const te=this.elements;const a=te[0],b=te[1],c=te[2],d=te[3],e=te[4],f=te[5],g=te[6],h=te[7],i=te[8];return a*e*i-a*f*h-b*d*i+b*f*g+c*d*h-c*e*g;}invert(){const te=this.elements,n11=te[0],n21=te[1],n31=te[2],n12=te[3],n22=te[4],n32=te[5],n13=te[6],n23=te[7],n33=te[8],t11=n33*n22-n32*n23,t12=n32*n13-n33*n12,t13=n23*n12-n22*n13,det=n11*t11+n21*t12+n31*t13;if(det===0)return this.set(0,0,0,0,0,0,0,0,0);const detInv=1/det;te[0]=t11*detInv;te[1]=(n31*n23-n33*n21)*detInv;te[2]=(n32*n21-n31*n22)*detInv;te[3]=t12*detInv;te[4]=(n33*n11-n31*n13)*detInv;te[5]=(n31*n12-n32*n11)*detInv;te[6]=t13*detInv;te[7]=(n21*n13-n23*n11)*detInv;te[8]=(n22*n11-n21*n12)*detInv;return this;}transpose(){let tmp;const m=this.elements;tmp=m[1];m[1]=m[3];m[3]=tmp;tmp=m[2];m[2]=m[6];m[6]=tmp;tmp=m[5];m[5]=m[7];m[7]=tmp;return this;}getNormalMatrix(matrix4){return this.setFromMatrix4(matrix4).invert().transpose();}transposeIntoArray(r){const m=this.elements;r[0]=m[0];r[1]=m[3];r[2]=m[6];r[3]=m[1];r[4]=m[4];r[5]=m[7];r[6]=m[2];r[7]=m[5];r[8]=m[8];return this;}setUvTransform(tx,ty,sx,sy,rotation,cx,cy){const c=Math.cos(rotation);const s=Math.sin(rotation);this.set(sx*c,sx*s,-sx*(c*cx+s*cy)+cx+tx,-sy*s,sy*c,-sy*(-s*cx+c*cy)+cy+ty,0,0,1);return this;}//
@@ -12000,7 +12013,7 @@ void main() {
 	 *
 	 * @returns {Error} The created error.
 	 */
-	function AxiosError$1(message, code, config, request, response) {
+	function AxiosError(message, code, config, request, response) {
 	  Error.call(this);
 	  if (Error.captureStackTrace) {
 	    Error.captureStackTrace(this, this.constructor);
@@ -12017,7 +12030,7 @@ void main() {
 	    this.status = response.status ? response.status : null;
 	  }
 	}
-	utils$1.inherits(AxiosError$1, Error, {
+	utils$1.inherits(AxiosError, Error, {
 	  toJSON: function toJSON() {
 	    return {
 	      // Standard
@@ -12038,7 +12051,7 @@ void main() {
 	    };
 	  }
 	});
-	const prototype$1 = AxiosError$1.prototype;
+	const prototype$1 = AxiosError.prototype;
 	const descriptors = {};
 	['ERR_BAD_OPTION_VALUE', 'ERR_BAD_OPTION', 'ECONNABORTED', 'ETIMEDOUT', 'ERR_NETWORK', 'ERR_FR_TOO_MANY_REDIRECTS', 'ERR_DEPRECATED', 'ERR_BAD_RESPONSE', 'ERR_BAD_REQUEST', 'ERR_CANCELED', 'ERR_NOT_SUPPORT', 'ERR_INVALID_URL'
 	// eslint-disable-next-line func-names
@@ -12047,20 +12060,20 @@ void main() {
 	    value: code
 	  };
 	});
-	Object.defineProperties(AxiosError$1, descriptors);
+	Object.defineProperties(AxiosError, descriptors);
 	Object.defineProperty(prototype$1, 'isAxiosError', {
 	  value: true
 	});
 
 	// eslint-disable-next-line func-names
-	AxiosError$1.from = (error, code, config, request, response, customProps) => {
+	AxiosError.from = (error, code, config, request, response, customProps) => {
 	  const axiosError = Object.create(prototype$1);
 	  utils$1.toFlatObject(error, axiosError, function filter(obj) {
 	    return obj !== Error.prototype;
 	  }, prop => {
 	    return prop !== 'isAxiosError';
 	  });
-	  AxiosError$1.call(axiosError, error.message, code, config, request, response);
+	  AxiosError.call(axiosError, error.message, code, config, request, response);
 	  axiosError.cause = error;
 	  axiosError.name = error.name;
 	  customProps && Object.assign(axiosError, customProps);
@@ -12147,7 +12160,7 @@ void main() {
 	 *
 	 * @returns
 	 */
-	function toFormData$1(obj, formData, options) {
+	function toFormData(obj, formData, options) {
 	  if (!utils$1.isObject(obj)) {
 	    throw new TypeError('target must be an object');
 	  }
@@ -12180,7 +12193,7 @@ void main() {
 	      return value.toISOString();
 	    }
 	    if (!useBlob && utils$1.isBlob(value)) {
-	      throw new AxiosError$1('Blob is not supported. Use a Buffer instead.');
+	      throw new AxiosError('Blob is not supported. Use a Buffer instead.');
 	    }
 	    if (utils$1.isArrayBuffer(value) || utils$1.isTypedArray(value)) {
 	      return useBlob && typeof Blob === 'function' ? new Blob([value]) : Buffer.from(value);
@@ -12283,7 +12296,7 @@ void main() {
 	 */
 	function AxiosURLSearchParams(params, options) {
 	  this._pairs = [];
-	  params && toFormData$1(params, this, options);
+	  params && toFormData(params, this, options);
 	}
 	const prototype = AxiosURLSearchParams.prototype;
 	prototype.append = function append(name, value) {
@@ -12483,7 +12496,7 @@ void main() {
 	};
 
 	function toURLEncodedForm(data, options) {
-	  return toFormData$1(data, new platform.classes.URLSearchParams(), Object.assign({
+	  return toFormData(data, new platform.classes.URLSearchParams(), Object.assign({
 	    visitor: function (value, key, path, helpers) {
 	      if (platform.isNode && utils$1.isBuffer(value)) {
 	        this.append(key, value.toString('base64'));
@@ -12593,7 +12606,7 @@ void main() {
 	      }
 	    }
 	  }
-	  return (encoder || JSON.stringify)(rawValue);
+	  return (0, JSON.stringify)(rawValue);
 	}
 	const defaults = {
 	  transitional: transitionalDefaults,
@@ -12626,7 +12639,7 @@ void main() {
 	      }
 	      if ((isFileList = utils$1.isFileList(data)) || contentType.indexOf('multipart/form-data') > -1) {
 	        const _FormData = this.env && this.env.FormData;
-	        return toFormData$1(isFileList ? {
+	        return toFormData(isFileList ? {
 	          'files[]': data
 	        } : data, _FormData && new _FormData(), this.formSerializer);
 	      }
@@ -12652,7 +12665,7 @@ void main() {
 	      } catch (e) {
 	        if (strictJSONParsing) {
 	          if (e.name === 'SyntaxError') {
-	            throw AxiosError$1.from(e, AxiosError$1.ERR_BAD_RESPONSE, this, null, this.response);
+	            throw AxiosError.from(e, AxiosError.ERR_BAD_RESPONSE, this, null, this.response);
 	          }
 	          throw e;
 	        }
@@ -12781,7 +12794,7 @@ void main() {
 	    });
 	  });
 	}
-	let AxiosHeaders$1 = class AxiosHeaders {
+	class AxiosHeaders {
 	  constructor(headers) {
 	    headers && this.set(headers);
 	  }
@@ -12936,11 +12949,11 @@ void main() {
 	    utils$1.isArray(header) ? header.forEach(defineAccessor) : defineAccessor(header);
 	    return this;
 	  }
-	};
-	AxiosHeaders$1.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
+	}
+	AxiosHeaders.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
 
 	// reserved names hotfix
-	utils$1.reduceDescriptors(AxiosHeaders$1.prototype, ({
+	utils$1.reduceDescriptors(AxiosHeaders.prototype, ({
 	  value
 	}, key) => {
 	  let mapped = key[0].toUpperCase() + key.slice(1); // map `set` => `Set`
@@ -12951,7 +12964,7 @@ void main() {
 	    }
 	  };
 	});
-	utils$1.freezeMethods(AxiosHeaders$1);
+	utils$1.freezeMethods(AxiosHeaders);
 
 	/**
 	 * Transform the data for a request or a response
@@ -12964,7 +12977,7 @@ void main() {
 	function transformData(fns, response) {
 	  const config = this || defaults;
 	  const context = response || config;
-	  const headers = AxiosHeaders$1.from(context.headers);
+	  const headers = AxiosHeaders.from(context.headers);
 	  let data = context.data;
 	  utils$1.forEach(fns, function transform(fn) {
 	    data = fn.call(config, data, headers.normalize(), response ? response.status : undefined);
@@ -12973,7 +12986,7 @@ void main() {
 	  return data;
 	}
 
-	function isCancel$1(value) {
+	function isCancel(value) {
 	  return !!(value && value.__CANCEL__);
 	}
 
@@ -12986,12 +12999,12 @@ void main() {
 	 *
 	 * @returns {CanceledError} The created error.
 	 */
-	function CanceledError$1(message, config, request) {
+	function CanceledError(message, config, request) {
 	  // eslint-disable-next-line no-eq-null,eqeqeq
-	  AxiosError$1.call(this, message == null ? 'canceled' : message, AxiosError$1.ERR_CANCELED, config, request);
+	  AxiosError.call(this, message == null ? 'canceled' : message, AxiosError.ERR_CANCELED, config, request);
 	  this.name = 'CanceledError';
 	}
-	utils$1.inherits(CanceledError$1, AxiosError$1, {
+	utils$1.inherits(CanceledError, AxiosError, {
 	  __CANCEL__: true
 	});
 
@@ -13009,7 +13022,7 @@ void main() {
 	  if (!response.status || !validateStatus || validateStatus(response.status)) {
 	    resolve(response);
 	  } else {
-	    reject(new AxiosError$1('Request failed with status code ' + response.status, [AxiosError$1.ERR_BAD_REQUEST, AxiosError$1.ERR_BAD_RESPONSE][Math.floor(response.status / 100) - 4], response.config, response.request, response));
+	    reject(new AxiosError('Request failed with status code ' + response.status, [AxiosError.ERR_BAD_REQUEST, AxiosError.ERR_BAD_RESPONSE][Math.floor(response.status / 100) - 4], response.config, response.request, response));
 	  }
 	}
 
@@ -13257,7 +13270,7 @@ void main() {
 	  return requestedURL;
 	}
 
-	const headersToObject = thing => thing instanceof AxiosHeaders$1 ? {
+	const headersToObject = thing => thing instanceof AxiosHeaders ? {
 	  ...thing
 	} : thing;
 
@@ -13270,7 +13283,7 @@ void main() {
 	 *
 	 * @returns {Object} New object resulting from merging config2 to config1
 	 */
-	function mergeConfig$1(config1, config2) {
+	function mergeConfig(config1, config2) {
 	  // eslint-disable-next-line no-param-reassign
 	  config2 = config2 || {};
 	  const config = {};
@@ -13360,7 +13373,7 @@ void main() {
 	}
 
 	var resolveConfig = config => {
-	  const newConfig = mergeConfig$1({}, config);
+	  const newConfig = mergeConfig({}, config);
 	  let {
 	    data,
 	    withXSRFToken,
@@ -13369,7 +13382,7 @@ void main() {
 	    headers,
 	    auth
 	  } = newConfig;
-	  newConfig.headers = headers = AxiosHeaders$1.from(headers);
+	  newConfig.headers = headers = AxiosHeaders.from(headers);
 	  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
 
 	  // HTTP basic authentication
@@ -13409,7 +13422,7 @@ void main() {
 	  return new Promise(function dispatchXhrRequest(resolve, reject) {
 	    const _config = resolveConfig(config);
 	    let requestData = _config.data;
-	    const requestHeaders = AxiosHeaders$1.from(_config.headers).normalize();
+	    const requestHeaders = AxiosHeaders.from(_config.headers).normalize();
 	    let {
 	      responseType,
 	      onUploadProgress,
@@ -13435,7 +13448,7 @@ void main() {
 	        return;
 	      }
 	      // Prepare the response
-	      const responseHeaders = AxiosHeaders$1.from('getAllResponseHeaders' in request && request.getAllResponseHeaders());
+	      const responseHeaders = AxiosHeaders.from('getAllResponseHeaders' in request && request.getAllResponseHeaders());
 	      const responseData = !responseType || responseType === 'text' || responseType === 'json' ? request.responseText : request.response;
 	      const response = {
 	        data: responseData,
@@ -13484,7 +13497,7 @@ void main() {
 	      if (!request) {
 	        return;
 	      }
-	      reject(new AxiosError$1('Request aborted', AxiosError$1.ECONNABORTED, config, request));
+	      reject(new AxiosError('Request aborted', AxiosError.ECONNABORTED, config, request));
 
 	      // Clean up request
 	      request = null;
@@ -13494,7 +13507,7 @@ void main() {
 	    request.onerror = function handleError() {
 	      // Real errors are hidden from us by the browser
 	      // onerror should only fire if it's a network error
-	      reject(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request));
+	      reject(new AxiosError('Network Error', AxiosError.ERR_NETWORK, config, request));
 
 	      // Clean up request
 	      request = null;
@@ -13507,7 +13520,7 @@ void main() {
 	      if (_config.timeoutErrorMessage) {
 	        timeoutErrorMessage = _config.timeoutErrorMessage;
 	      }
-	      reject(new AxiosError$1(timeoutErrorMessage, transitional.clarifyTimeoutError ? AxiosError$1.ETIMEDOUT : AxiosError$1.ECONNABORTED, config, request));
+	      reject(new AxiosError(timeoutErrorMessage, transitional.clarifyTimeoutError ? AxiosError.ETIMEDOUT : AxiosError.ECONNABORTED, config, request));
 
 	      // Clean up request
 	      request = null;
@@ -13552,7 +13565,7 @@ void main() {
 	        if (!request) {
 	          return;
 	        }
-	        reject(!cancel || cancel.type ? new CanceledError$1(null, config, request) : cancel);
+	        reject(!cancel || cancel.type ? new CanceledError(null, config, request) : cancel);
 	        request.abort();
 	        request = null;
 	      };
@@ -13563,7 +13576,7 @@ void main() {
 	    }
 	    const protocol = parseProtocol(_config.url);
 	    if (protocol && platform.protocols.indexOf(protocol) === -1) {
-	      reject(new AxiosError$1('Unsupported protocol ' + protocol + ':', AxiosError$1.ERR_BAD_REQUEST, config));
+	      reject(new AxiosError('Unsupported protocol ' + protocol + ':', AxiosError.ERR_BAD_REQUEST, config));
 	      return;
 	    }
 
@@ -13584,12 +13597,12 @@ void main() {
 	        aborted = true;
 	        unsubscribe();
 	        const err = reason instanceof Error ? reason : this.reason;
-	        controller.abort(err instanceof AxiosError$1 ? err : new CanceledError$1(err instanceof Error ? err.message : err));
+	        controller.abort(err instanceof AxiosError ? err : new CanceledError(err instanceof Error ? err.message : err));
 	      }
 	    };
 	    let timer = timeout && setTimeout(() => {
 	      timer = null;
-	      onabort(new AxiosError$1(`timeout ${timeout} of ms exceeded`, AxiosError$1.ETIMEDOUT));
+	      onabort(new AxiosError(`timeout ${timeout} of ms exceeded`, AxiosError.ETIMEDOUT));
 	    }, timeout);
 	    const unsubscribe = () => {
 	      if (signals) {
@@ -13724,7 +13737,7 @@ void main() {
 	isFetchSupported && (res => {
 	  ['text', 'arrayBuffer', 'blob', 'formData', 'stream'].forEach(type => {
 	    !resolvers[type] && (resolvers[type] = utils$1.isFunction(res[type]) ? res => res[type]() : (_, config) => {
-	      throw new AxiosError$1(`Response type '${type}' is not supported`, AxiosError$1.ERR_NOT_SUPPORT, config);
+	      throw new AxiosError(`Response type '${type}' is not supported`, AxiosError.ERR_NOT_SUPPORT, config);
 	    });
 	  });
 	})(new Response());
@@ -13830,7 +13843,7 @@ void main() {
 	    return await new Promise((resolve, reject) => {
 	      settle(resolve, reject, {
 	        data: responseData,
-	        headers: AxiosHeaders$1.from(response.headers),
+	        headers: AxiosHeaders.from(response.headers),
 	        status: response.status,
 	        statusText: response.statusText,
 	        config,
@@ -13840,11 +13853,11 @@ void main() {
 	  } catch (err) {
 	    unsubscribe && unsubscribe();
 	    if (err && err.name === 'TypeError' && /fetch/i.test(err.message)) {
-	      throw Object.assign(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request), {
+	      throw Object.assign(new AxiosError('Network Error', AxiosError.ERR_NETWORK, config, request), {
 	        cause: err.cause || err
 	      });
 	    }
-	    throw AxiosError$1.from(err, err && err.code, config, request);
+	    throw AxiosError.from(err, err && err.code, config, request);
 	  }
 	});
 
@@ -13885,7 +13898,7 @@ void main() {
 	      if (!isResolvedHandle(nameOrAdapter)) {
 	        adapter = knownAdapters[(id = String(nameOrAdapter)).toLowerCase()];
 	        if (adapter === undefined) {
-	          throw new AxiosError$1(`Unknown adapter '${id}'`);
+	          throw new AxiosError(`Unknown adapter '${id}'`);
 	        }
 	      }
 	      if (adapter) {
@@ -13896,7 +13909,7 @@ void main() {
 	    if (!adapter) {
 	      const reasons = Object.entries(rejectedReasons).map(([id, state]) => `adapter ${id} ` + (state === false ? 'is not supported by the environment' : 'is not available in the build'));
 	      let s = length ? reasons.length > 1 ? 'since :\n' + reasons.map(renderReason).join('\n') : ' ' + renderReason(reasons[0]) : 'as no adapter specified';
-	      throw new AxiosError$1(`There is no suitable adapter to dispatch the request ` + s, 'ERR_NOT_SUPPORT');
+	      throw new AxiosError(`There is no suitable adapter to dispatch the request ` + s, 'ERR_NOT_SUPPORT');
 	    }
 	    return adapter;
 	  },
@@ -13915,7 +13928,7 @@ void main() {
 	    config.cancelToken.throwIfRequested();
 	  }
 	  if (config.signal && config.signal.aborted) {
-	    throw new CanceledError$1(null, config);
+	    throw new CanceledError(null, config);
 	  }
 	}
 
@@ -13928,7 +13941,7 @@ void main() {
 	 */
 	function dispatchRequest(config) {
 	  throwIfCancellationRequested(config);
-	  config.headers = AxiosHeaders$1.from(config.headers);
+	  config.headers = AxiosHeaders.from(config.headers);
 
 	  // Transform request data
 	  config.data = transformData.call(config, config.transformRequest);
@@ -13941,23 +13954,23 @@ void main() {
 
 	    // Transform response data
 	    response.data = transformData.call(config, config.transformResponse, response);
-	    response.headers = AxiosHeaders$1.from(response.headers);
+	    response.headers = AxiosHeaders.from(response.headers);
 	    return response;
 	  }, function onAdapterRejection(reason) {
-	    if (!isCancel$1(reason)) {
+	    if (!isCancel(reason)) {
 	      throwIfCancellationRequested(config);
 
 	      // Transform response data
 	      if (reason && reason.response) {
 	        reason.response.data = transformData.call(config, config.transformResponse, reason.response);
-	        reason.response.headers = AxiosHeaders$1.from(reason.response.headers);
+	        reason.response.headers = AxiosHeaders.from(reason.response.headers);
 	      }
 	    }
 	    return Promise.reject(reason);
 	  });
 	}
 
-	const VERSION$1 = "1.7.7";
+	const VERSION = "1.7.7";
 
 	const validators$1 = {};
 
@@ -13980,13 +13993,13 @@ void main() {
 	 */
 	validators$1.transitional = function transitional(validator, version, message) {
 	  function formatMessage(opt, desc) {
-	    return '[Axios v' + VERSION$1 + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+	    return '[Axios v' + VERSION + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
 	  }
 
 	  // eslint-disable-next-line func-names
 	  return (value, opt, opts) => {
 	    if (validator === false) {
-	      throw new AxiosError$1(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')), AxiosError$1.ERR_DEPRECATED);
+	      throw new AxiosError(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')), AxiosError.ERR_DEPRECATED);
 	    }
 	    if (version && !deprecatedWarnings[opt]) {
 	      deprecatedWarnings[opt] = true;
@@ -14009,7 +14022,7 @@ void main() {
 
 	function assertOptions(options, schema, allowUnknown) {
 	  if (typeof options !== 'object') {
-	    throw new AxiosError$1('options must be an object', AxiosError$1.ERR_BAD_OPTION_VALUE);
+	    throw new AxiosError('options must be an object', AxiosError.ERR_BAD_OPTION_VALUE);
 	  }
 	  const keys = Object.keys(options);
 	  let i = keys.length;
@@ -14020,12 +14033,12 @@ void main() {
 	      const value = options[opt];
 	      const result = value === undefined || validator(value, opt, options);
 	      if (result !== true) {
-	        throw new AxiosError$1('option ' + opt + ' must be ' + result, AxiosError$1.ERR_BAD_OPTION_VALUE);
+	        throw new AxiosError('option ' + opt + ' must be ' + result, AxiosError.ERR_BAD_OPTION_VALUE);
 	      }
 	      continue;
 	    }
 	    if (allowUnknown !== true) {
-	      throw new AxiosError$1('Unknown option ' + opt, AxiosError$1.ERR_BAD_OPTION);
+	      throw new AxiosError('Unknown option ' + opt, AxiosError.ERR_BAD_OPTION);
 	    }
 	  }
 	}
@@ -14043,7 +14056,7 @@ void main() {
 	 *
 	 * @return {Axios} A new instance of Axios
 	 */
-	let Axios$1 = class Axios {
+	class Axios {
 	  constructor(instanceConfig) {
 	    this.defaults = instanceConfig;
 	    this.interceptors = {
@@ -14093,7 +14106,7 @@ void main() {
 	    } else {
 	      config = configOrUrl || {};
 	    }
-	    config = mergeConfig$1(this.defaults, config);
+	    config = mergeConfig(this.defaults, config);
 	    const {
 	      transitional,
 	      paramsSerializer,
@@ -14127,7 +14140,7 @@ void main() {
 	    headers && utils$1.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'common'], method => {
 	      delete headers[method];
 	    });
-	    config.headers = AxiosHeaders$1.concat(contextHeaders, headers);
+	    config.headers = AxiosHeaders.concat(contextHeaders, headers);
 
 	    // filter out skipped interceptors
 	    const requestInterceptorChain = [];
@@ -14183,17 +14196,17 @@ void main() {
 	    return promise;
 	  }
 	  getUri(config) {
-	    config = mergeConfig$1(this.defaults, config);
+	    config = mergeConfig(this.defaults, config);
 	    const fullPath = buildFullPath(config.baseURL, config.url);
 	    return buildURL(fullPath, config.params, config.paramsSerializer);
 	  }
-	};
+	}
 
 	// Provide aliases for supported request methods
 	utils$1.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
 	  /*eslint func-names:0*/
-	  Axios$1.prototype[method] = function (url, config) {
-	    return this.request(mergeConfig$1(config || {}, {
+	  Axios.prototype[method] = function (url, config) {
+	    return this.request(mergeConfig(config || {}, {
 	      method,
 	      url,
 	      data: (config || {}).data
@@ -14205,7 +14218,7 @@ void main() {
 
 	  function generateHTTPMethod(isForm) {
 	    return function httpMethod(url, data, config) {
-	      return this.request(mergeConfig$1(config || {}, {
+	      return this.request(mergeConfig(config || {}, {
 	        method,
 	        headers: isForm ? {
 	          'Content-Type': 'multipart/form-data'
@@ -14215,8 +14228,8 @@ void main() {
 	      }));
 	    };
 	  }
-	  Axios$1.prototype[method] = generateHTTPMethod();
-	  Axios$1.prototype[method + 'Form'] = generateHTTPMethod(true);
+	  Axios.prototype[method] = generateHTTPMethod();
+	  Axios.prototype[method + 'Form'] = generateHTTPMethod(true);
 	});
 
 	/**
@@ -14226,7 +14239,7 @@ void main() {
 	 *
 	 * @returns {CancelToken}
 	 */
-	let CancelToken$1 = class CancelToken {
+	class CancelToken {
 	  constructor(executor) {
 	    if (typeof executor !== 'function') {
 	      throw new TypeError('executor must be a function.');
@@ -14265,7 +14278,7 @@ void main() {
 	        // Cancellation has already been requested
 	        return;
 	      }
-	      token.reason = new CanceledError$1(message, config, request);
+	      token.reason = new CanceledError(message, config, request);
 	      resolvePromise(token.reason);
 	    });
 	  }
@@ -14332,7 +14345,7 @@ void main() {
 	      cancel
 	    };
 	  }
-	};
+	}
 
 	/**
 	 * Syntactic sugar for invoking a function and expanding an array for arguments.
@@ -14355,7 +14368,7 @@ void main() {
 	 *
 	 * @returns {Function}
 	 */
-	function spread$1(callback) {
+	function spread(callback) {
 	  return function wrap(arr) {
 	    return callback.apply(null, arr);
 	  };
@@ -14368,11 +14381,11 @@ void main() {
 	 *
 	 * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
 	 */
-	function isAxiosError$1(payload) {
+	function isAxiosError(payload) {
 	  return utils$1.isObject(payload) && payload.isAxiosError === true;
 	}
 
-	const HttpStatusCode$1 = {
+	const HttpStatusCode = {
 	  Continue: 100,
 	  SwitchingProtocols: 101,
 	  Processing: 102,
@@ -14437,8 +14450,8 @@ void main() {
 	  NotExtended: 510,
 	  NetworkAuthenticationRequired: 511
 	};
-	Object.entries(HttpStatusCode$1).forEach(([key, value]) => {
-	  HttpStatusCode$1[value] = key;
+	Object.entries(HttpStatusCode).forEach(([key, value]) => {
+	  HttpStatusCode[value] = key;
 	});
 
 	/**
@@ -14449,11 +14462,11 @@ void main() {
 	 * @returns {Axios} A new instance of Axios
 	 */
 	function createInstance(defaultConfig) {
-	  const context = new Axios$1(defaultConfig);
-	  const instance = bind(Axios$1.prototype.request, context);
+	  const context = new Axios(defaultConfig);
+	  const instance = bind(Axios.prototype.request, context);
 
 	  // Copy axios.prototype to instance
-	  utils$1.extend(instance, Axios$1.prototype, context, {
+	  utils$1.extend(instance, Axios.prototype, context, {
 	    allOwnKeys: true
 	  });
 
@@ -14464,7 +14477,7 @@ void main() {
 
 	  // Factory for creating new instances
 	  instance.create = function create(instanceConfig) {
-	    return createInstance(mergeConfig$1(defaultConfig, instanceConfig));
+	    return createInstance(mergeConfig(defaultConfig, instanceConfig));
 	  };
 	  return instance;
 	}
@@ -14473,17 +14486,17 @@ void main() {
 	const axios = createInstance(defaults);
 
 	// Expose Axios class to allow class inheritance
-	axios.Axios = Axios$1;
+	axios.Axios = Axios;
 
 	// Expose Cancel & CancelToken
-	axios.CanceledError = CanceledError$1;
-	axios.CancelToken = CancelToken$1;
-	axios.isCancel = isCancel$1;
-	axios.VERSION = VERSION$1;
-	axios.toFormData = toFormData$1;
+	axios.CanceledError = CanceledError;
+	axios.CancelToken = CancelToken;
+	axios.isCancel = isCancel;
+	axios.VERSION = VERSION;
+	axios.toFormData = toFormData;
 
 	// Expose AxiosError class
-	axios.AxiosError = AxiosError$1;
+	axios.AxiosError = AxiosError;
 
 	// alias for CanceledError for backward compatibility
 	axios.Cancel = axios.CanceledError;
@@ -14492,40 +14505,18 @@ void main() {
 	axios.all = function all(promises) {
 	  return Promise.all(promises);
 	};
-	axios.spread = spread$1;
+	axios.spread = spread;
 
 	// Expose isAxiosError
-	axios.isAxiosError = isAxiosError$1;
+	axios.isAxiosError = isAxiosError;
 
 	// Expose mergeConfig
-	axios.mergeConfig = mergeConfig$1;
-	axios.AxiosHeaders = AxiosHeaders$1;
+	axios.mergeConfig = mergeConfig;
+	axios.AxiosHeaders = AxiosHeaders;
 	axios.formToJSON = thing => formDataToJSON(utils$1.isHTMLForm(thing) ? new FormData(thing) : thing);
 	axios.getAdapter = adapters.getAdapter;
-	axios.HttpStatusCode = HttpStatusCode$1;
+	axios.HttpStatusCode = HttpStatusCode;
 	axios.default = axios;
-
-	// This module is intended to unwrap Axios default export as named.
-	// Keep top-level export same with static properties
-	// so that it can keep same with es module or cjs
-	const {
-	  Axios,
-	  AxiosError,
-	  CanceledError,
-	  isCancel,
-	  CancelToken,
-	  VERSION,
-	  all,
-	  Cancel,
-	  isAxiosError,
-	  spread,
-	  toFormData,
-	  AxiosHeaders,
-	  HttpStatusCode,
-	  formToJSON,
-	  getAdapter,
-	  mergeConfig
-	} = axios;
 
 	async function api (url, data) {
 	  return await axios.post(url, data).then(resp => resp.data);
