@@ -7086,7 +7086,7 @@ void main() {
 	  return bytes;
 	}
 	var DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-	var URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
+	var URL$1 = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
 	function v35 (name, version, hashfunc) {
 	  function generateUUID(value, namespace, buf, offset) {
 	    if (typeof value === 'string') {
@@ -7122,7 +7122,7 @@ void main() {
 	  } catch (err) {} // For CommonJS default export support
 
 	  generateUUID.DNS = DNS;
-	  generateUUID.URL = URL;
+	  generateUUID.URL = URL$1;
 	  return generateUUID;
 	}
 
@@ -12355,7 +12355,7 @@ void main() {
 	 *
 	 * @param {string} url The base of the url (e.g., http://www.google.com)
 	 * @param {object} [params] The params to be appended
-	 * @param {?object} options
+	 * @param {?(object|Function)} options
 	 *
 	 * @returns {string} The formatted url
 	 */
@@ -12365,6 +12365,11 @@ void main() {
 	    return url;
 	  }
 	  const _encode = options && options.encode || encode;
+	  if (utils$1.isFunction(options)) {
+	    options = {
+	      serialize: options
+	    };
+	  }
 	  const serializeFn = options && options.serialize;
 	  let serializedParams;
 	  if (serializeFn) {
@@ -13171,60 +13176,10 @@ void main() {
 	};
 	const asyncDecorator = fn => (...args) => utils$1.asap(() => fn(...args));
 
-	var isURLSameOrigin = platform.hasStandardBrowserEnv ?
-	// Standard browser envs have full support of the APIs needed to test
-	// whether the request URL is of the same origin as current location.
-	function standardBrowserEnv() {
-	  const msie = platform.navigator && /(msie|trident)/i.test(platform.navigator.userAgent);
-	  const urlParsingNode = document.createElement('a');
-	  let originURL;
-
-	  /**
-	  * Parse a URL to discover its components
-	  *
-	  * @param {String} url The URL to be parsed
-	  * @returns {Object}
-	  */
-	  function resolveURL(url) {
-	    let href = url;
-	    if (msie) {
-	      // IE needs attribute set twice to normalize properties
-	      urlParsingNode.setAttribute('href', href);
-	      href = urlParsingNode.href;
-	    }
-	    urlParsingNode.setAttribute('href', href);
-
-	    // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-	    return {
-	      href: urlParsingNode.href,
-	      protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-	      host: urlParsingNode.host,
-	      search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-	      hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-	      hostname: urlParsingNode.hostname,
-	      port: urlParsingNode.port,
-	      pathname: urlParsingNode.pathname.charAt(0) === '/' ? urlParsingNode.pathname : '/' + urlParsingNode.pathname
-	    };
-	  }
-	  originURL = resolveURL(window.location.href);
-
-	  /**
-	  * Determine if a URL shares the same origin as the current location
-	  *
-	  * @param {String} requestURL The URL to test
-	  * @returns {boolean} True if URL shares the same origin, otherwise false
-	  */
-	  return function isURLSameOrigin(requestURL) {
-	    const parsed = utils$1.isString(requestURL) ? resolveURL(requestURL) : requestURL;
-	    return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
-	  };
-	}() :
-	// Non standard browser envs (web workers, react-native) lack needed support.
-	function nonStandardBrowserEnv() {
-	  return function isURLSameOrigin() {
-	    return true;
-	  };
-	}();
+	var isURLSameOrigin = platform.hasStandardBrowserEnv ? ((origin, isMSIE) => url => {
+	  url = new URL(url, platform.origin);
+	  return origin.protocol === url.protocol && origin.host === url.host && (isMSIE || origin.port === url.port);
+	})(new URL(platform.origin), platform.navigator && /(msie|trident)/i.test(platform.navigator.userAgent)) : () => true;
 
 	var cookies = platform.hasStandardBrowserEnv ?
 	// Standard browser envs support document.cookie
@@ -13314,7 +13269,7 @@ void main() {
 	  // eslint-disable-next-line no-param-reassign
 	  config2 = config2 || {};
 	  const config = {};
-	  function getMergedValue(target, source, caseless) {
+	  function getMergedValue(target, source, prop, caseless) {
 	    if (utils$1.isPlainObject(target) && utils$1.isPlainObject(source)) {
 	      return utils$1.merge.call({
 	        caseless
@@ -13328,11 +13283,11 @@ void main() {
 	  }
 
 	  // eslint-disable-next-line consistent-return
-	  function mergeDeepProperties(a, b, caseless) {
+	  function mergeDeepProperties(a, b, prop, caseless) {
 	    if (!utils$1.isUndefined(b)) {
-	      return getMergedValue(a, b, caseless);
+	      return getMergedValue(a, b, prop, caseless);
 	    } else if (!utils$1.isUndefined(a)) {
-	      return getMergedValue(undefined, a, caseless);
+	      return getMergedValue(undefined, a, prop, caseless);
 	    }
 	  }
 
@@ -13389,7 +13344,7 @@ void main() {
 	    socketPath: defaultToConfig2,
 	    responseEncoding: defaultToConfig2,
 	    validateStatus: mergeDirectKeys,
-	    headers: (a, b) => mergeDeepProperties(headersToObject(a), headersToObject(b), true)
+	    headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
 	  };
 	  utils$1.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
 	    const merge = mergeMap[prop] || mergeDeepProperties;
@@ -13997,7 +13952,7 @@ void main() {
 	  });
 	}
 
-	const VERSION = "1.7.7";
+	const VERSION = "1.7.8";
 
 	const validators$1 = {};
 
@@ -14034,6 +13989,13 @@ void main() {
 	      console.warn(formatMessage(opt, ' has been deprecated since v' + version + ' and will be removed in the near future'));
 	    }
 	    return validator ? validator(value, opt, opts) : true;
+	  };
+	};
+	validators$1.spelling = function spelling(correctSpelling) {
+	  return (value, opt) => {
+	    // eslint-disable-next-line no-console
+	    console.warn(`${opt} is likely a misspelling of ${correctSpelling}`);
+	    return true;
 	  };
 	};
 
@@ -14105,8 +14067,8 @@ void main() {
 	      return await this._request(configOrUrl, config);
 	    } catch (err) {
 	      if (err instanceof Error) {
-	        let dummy;
-	        Error.captureStackTrace ? Error.captureStackTrace(dummy = {}) : dummy = new Error();
+	        let dummy = {};
+	        Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
 
 	        // slice off the Error: ... line
 	        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, '') : '';
@@ -14158,6 +14120,10 @@ void main() {
 	        }, true);
 	      }
 	    }
+	    validator.assertOptions(config, {
+	      baseUrl: validators.spelling('baseURL'),
+	      withXsrfToken: validators.spelling('withXSRFToken')
+	    }, true);
 
 	    // Set config.method
 	    config.method = (config.method || this.defaults.method || 'get').toLowerCase();
