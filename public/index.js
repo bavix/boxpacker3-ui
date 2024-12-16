@@ -13956,7 +13956,7 @@ void main() {
 	  });
 	}
 
-	const VERSION = "1.7.8";
+	const VERSION = "1.7.9";
 
 	const validators$1 = {};
 
