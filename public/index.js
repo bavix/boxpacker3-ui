@@ -10887,11 +10887,15 @@ void main() {
 	}
 
 	function g(n, t) {
+	  for (var e in t) n[e] = t[e];
+	  return n;
+	}
+	function E(n, t) {
 	  for (var e in n) if ("__source" !== e && !(e in t)) return !0;
 	  for (var r in t) if ("__source" !== r && n[r] !== t[r]) return !0;
 	  return !1;
 	}
-	function E(n, t) {
+	function C(n, t) {
 	  var e = t(),
 	    r = h({
 	      t: {
@@ -10902,20 +10906,20 @@ void main() {
 	    u = r[0].t,
 	    o = r[1];
 	  return _(function () {
-	    u.__ = e, u.u = t, C(u) && o({
+	    u.__ = e, u.u = t, x(u) && o({
 	      t: u
 	    });
 	  }, [n, e, t]), y(function () {
-	    return C(u) && o({
+	    return x(u) && o({
 	      t: u
 	    }), n(function () {
-	      C(u) && o({
+	      x(u) && o({
 	        t: u
 	      });
 	    });
 	  }, [n]), e;
 	}
-	function C(n) {
+	function x(n) {
 	  var t,
 	    e,
 	    r = n.u,
@@ -10927,54 +10931,51 @@ void main() {
 	    return !0;
 	  }
 	}
-	function x(n) {
+	function R(n) {
 	  n();
 	}
-	function R(n) {
+	function w(n) {
 	  return n;
 	}
-	function w() {
-	  return [!1, x];
+	function k() {
+	  return [!1, R];
 	}
-	var k = _;
-	function I(n, t) {
+	var I = _;
+	function N(n, t) {
 	  this.props = n, this.context = t;
 	}
-	function N(n, e) {
+	function M(n, e) {
 	  function r(n) {
 	    var t = this.props.ref,
 	      r = t == n.ref;
-	    return !r && t && (t.call ? t(null) : t.current = null), e ? !e(this.props, n) || !r : g(this.props, n);
+	    return !r && t && (t.call ? t(null) : t.current = null), e ? !e(this.props, n) || !r : E(this.props, n);
 	  }
 	  function u(e) {
 	    return this.shouldComponentUpdate = r, g$2(n, e);
 	  }
 	  return u.displayName = "Memo(" + (n.displayName || n.name) + ")", u.prototype.isReactComponent = !0, u.__f = !0, u;
 	}
-	(I.prototype = new x$2()).isPureReactComponent = !0, I.prototype.shouldComponentUpdate = function (n, t) {
-	  return g(this.props, n) || g(this.state, t);
+	(N.prototype = new x$2()).isPureReactComponent = !0, N.prototype.shouldComponentUpdate = function (n, t) {
+	  return E(this.props, n) || E(this.state, t);
 	};
-	var M = l$1.__b;
+	var T = l$1.__b;
 	l$1.__b = function (n) {
-	  n.type && n.type.__f && n.ref && (n.props.ref = n.ref, n.ref = null), M && M(n);
+	  n.type && n.type.__f && n.ref && (n.props.ref = n.ref, n.ref = null), T && T(n);
 	};
-	var T = "undefined" != typeof Symbol && Symbol.for && Symbol.for("react.forward_ref") || 3911;
-	function A(n) {
+	var A = "undefined" != typeof Symbol && Symbol.for && Symbol.for("react.forward_ref") || 3911;
+	function D(n) {
 	  function t(t) {
-	    if (!("ref" in t)) return n(t, null);
-	    var e = t.ref;
-	    delete t.ref;
-	    var r = n(t, e);
-	    return t.ref = e, r;
+	    var e = g({}, t);
+	    return delete e.ref, n(e, t.ref || null);
 	  }
-	  return t.$$typeof = T, t.render = t, t.prototype.isReactComponent = t.__f = !0, t.displayName = "ForwardRef(" + (n.displayName || n.name) + ")", t;
+	  return t.$$typeof = A, t.render = t, t.prototype.isReactComponent = t.__f = !0, t.displayName = "ForwardRef(" + (n.displayName || n.name) + ")", t;
 	}
-	var D = function (n, t) {
+	var L = function (n, t) {
 	    return null == n ? null : H$1(H$1(n).map(t));
 	  },
-	  L = {
-	    map: D,
-	    forEach: D,
+	  O = {
+	    map: L,
+	    forEach: L,
 	    count: function (n) {
 	      return n ? H$1(n).length : 0;
 	    },
@@ -10985,35 +10986,32 @@ void main() {
 	    },
 	    toArray: H$1
 	  },
-	  O = l$1.__e;
+	  F = l$1.__e;
 	l$1.__e = function (n, t, e, r) {
 	  if (n.then) for (var u, o = t; o = o.__;) if ((u = o.__c) && u.__c) return null == t.__e && (t.__e = e.__e, t.__k = e.__k), u.__c(n, t);
-	  O(n, t, e, r);
+	  F(n, t, e, r);
 	};
-	var F = l$1.unmount;
-	function U(n, t, e) {
+	var U = l$1.unmount;
+	function V(n, t, e) {
 	  return n && (n.__c && n.__c.__H && (n.__c.__H.__.forEach(function (n) {
 	    "function" == typeof n.__c && n.__c();
-	  }), n.__c.__H = null), null != (n = function (n, t) {
-	    for (var e in t) n[e] = t[e];
-	    return n;
-	  }({}, n)).__c && (n.__c.__P === e && (n.__c.__P = t), n.__c = null), n.__k = n.__k && n.__k.map(function (n) {
-	    return U(n, t, e);
+	  }), n.__c.__H = null), null != (n = g({}, n)).__c && (n.__c.__P === e && (n.__c.__P = t), n.__c = null), n.__k = n.__k && n.__k.map(function (n) {
+	    return V(n, t, e);
 	  })), n;
 	}
-	function V(n, t, e) {
+	function W(n, t, e) {
 	  return n && e && (n.__v = null, n.__k = n.__k && n.__k.map(function (n) {
-	    return V(n, t, e);
+	    return W(n, t, e);
 	  }), n.__c && n.__c.__P === t && (n.__e && e.appendChild(n.__e), n.__c.__e = !0, n.__c.__P = e)), n;
 	}
-	function W() {
+	function P() {
 	  this.__u = 0, this.o = null, this.__b = null;
 	}
-	function P(n) {
+	function j(n) {
 	  var t = n.__.__c;
 	  return t && t.__a && t.__a(n);
 	}
-	function j(n) {
+	function z(n) {
 	  var e, r, u;
 	  function o(o) {
 	    if (e || (e = n()).then(function (n) {
@@ -11026,17 +11024,17 @@ void main() {
 	  }
 	  return o.displayName = "Lazy", o.__f = !0, o;
 	}
-	function z() {
+	function B() {
 	  this.i = null, this.l = null;
 	}
 	l$1.unmount = function (n) {
 	  var t = n.__c;
-	  t && t.__R && t.__R(), t && 32 & n.__u && (n.type = null), F && F(n);
-	}, (W.prototype = new x$2()).__c = function (n, t) {
+	  t && t.__R && t.__R(), t && 32 & n.__u && (n.type = null), U && U(n);
+	}, (P.prototype = new x$2()).__c = function (n, t) {
 	  var e = t.__c,
 	    r = this;
 	  null == r.o && (r.o = []), r.o.push(e);
-	  var u = P(r.__v),
+	  var u = j(r.__v),
 	    o = !1,
 	    i = function () {
 	      o || (o = !0, e.__R = null, u ? u(c) : c());
@@ -11046,7 +11044,7 @@ void main() {
 	    if (! --r.__u) {
 	      if (r.state.__a) {
 	        var n = r.state.__a;
-	        r.__v.__k[0] = V(n, n.__c.__P, n.__c.__O);
+	        r.__v.__k[0] = W(n, n.__c.__P, n.__c.__O);
 	      }
 	      var t;
 	      for (r.setState({
@@ -11057,33 +11055,33 @@ void main() {
 	  r.__u++ || 32 & t.__u || r.setState({
 	    __a: r.__b = r.__v.__k[0]
 	  }), n.then(i, i);
-	}, W.prototype.componentWillUnmount = function () {
+	}, P.prototype.componentWillUnmount = function () {
 	  this.o = [];
-	}, W.prototype.render = function (n, e) {
+	}, P.prototype.render = function (n, e) {
 	  if (this.__b) {
 	    if (this.__v.__k) {
 	      var r = document.createElement("div"),
 	        o = this.__v.__k[0].__c;
-	      this.__v.__k[0] = U(this.__b, r, o.__O = o.__P);
+	      this.__v.__k[0] = V(this.__b, r, o.__O = o.__P);
 	    }
 	    this.__b = null;
 	  }
 	  var i = e.__a && g$2(k$2, null, n.fallback);
 	  return i && (i.__u &= -33), [g$2(k$2, null, e.__a ? null : n.children), i];
 	};
-	var B = function (n, t, e) {
+	var H = function (n, t, e) {
 	  if (++e[1] === e[0] && n.l.delete(t), n.props.revealOrder && ("t" !== n.props.revealOrder[0] || !n.l.size)) for (e = n.i; e;) {
 	    for (; e.length > 3;) e.pop()();
 	    if (e[1] < e[0]) break;
 	    n.i = e = e[2];
 	  }
 	};
-	function H(n) {
+	function Z(n) {
 	  return this.getChildContext = function () {
 	    return n.context;
 	  }, n.children;
 	}
-	function Z(n) {
+	function Y(n) {
 	  var e = this,
 	    r = n.h;
 	  e.componentWillUnmount = function () {
@@ -11104,51 +11102,51 @@ void main() {
 	    removeChild: function (n) {
 	      this.childNodes.splice(this.childNodes.indexOf(n) >>> 1, 1), e.h.removeChild(n);
 	    }
-	  }), D$2(g$2(H, {
+	  }), D$2(g$2(Z, {
 	    context: e.context
 	  }, n.__v), e.v);
 	}
-	function Y(n, e) {
-	  var r = g$2(Z, {
+	function $(n, e) {
+	  var r = g$2(Y, {
 	    __v: n,
 	    h: e
 	  });
 	  return r.containerInfo = e, r;
 	}
-	(z.prototype = new x$2()).__a = function (n) {
+	(B.prototype = new x$2()).__a = function (n) {
 	  var t = this,
-	    e = P(t.__v),
+	    e = j(t.__v),
 	    r = t.l.get(n);
 	  return r[0]++, function (u) {
 	    var o = function () {
-	      t.props.revealOrder ? (r.push(u), B(t, n, r)) : u();
+	      t.props.revealOrder ? (r.push(u), H(t, n, r)) : u();
 	    };
 	    e ? e(o) : o();
 	  };
-	}, z.prototype.render = function (n) {
+	}, B.prototype.render = function (n) {
 	  this.i = null, this.l = new Map();
 	  var t = H$1(n.children);
 	  n.revealOrder && "b" === n.revealOrder[0] && t.reverse();
 	  for (var e = t.length; e--;) this.l.set(t[e], this.i = [1, 0, this.i]);
 	  return n.children;
-	}, z.prototype.componentDidUpdate = z.prototype.componentDidMount = function () {
+	}, B.prototype.componentDidUpdate = B.prototype.componentDidMount = function () {
 	  var n = this;
 	  this.l.forEach(function (t, e) {
-	    B(n, e, t);
+	    H(n, e, t);
 	  });
 	};
-	var $ = "undefined" != typeof Symbol && Symbol.for && Symbol.for("react.element") || 60103,
-	  q = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,
-	  G = /^on(Ani|Tra|Tou|BeforeInp|Compo)/,
-	  J = /[A-Z0-9]/g,
-	  K = "undefined" != typeof document,
-	  Q = function (n) {
+	var q = "undefined" != typeof Symbol && Symbol.for && Symbol.for("react.element") || 60103,
+	  G = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,
+	  J = /^on(Ani|Tra|Tou|BeforeInp|Compo)/,
+	  K = /[A-Z0-9]/g,
+	  Q = "undefined" != typeof document,
+	  X = function (n) {
 	    return ("undefined" != typeof Symbol && "symbol" == typeof Symbol() ? /fil|che|rad/ : /fil|che|ra/).test(n);
 	  };
-	function X(n, t, e) {
+	function nn(n, t, e) {
 	  return null == t.__k && (t.textContent = ""), D$2(n, t), "function" == typeof e && e(), n ? n.__c : null;
 	}
-	function nn(n, t, e) {
+	function tn(n, t, e) {
 	  return E$1(n, t), "function" == typeof e && e(), n ? n.__c : null;
 	}
 	x$2.prototype.isReactComponent = {}, ["componentWillMount", "componentWillReceiveProps", "componentWillUpdate"].forEach(function (t) {
@@ -11166,19 +11164,19 @@ void main() {
 	    }
 	  });
 	});
-	var tn = l$1.event;
-	function en() {}
-	function rn() {
+	var en = l$1.event;
+	function rn() {}
+	function un() {
 	  return this.cancelBubble;
 	}
-	function un() {
+	function on() {
 	  return this.defaultPrevented;
 	}
 	l$1.event = function (n) {
-	  return tn && (n = tn(n)), n.persist = en, n.isPropagationStopped = rn, n.isDefaultPrevented = un, n.nativeEvent = n;
+	  return en && (n = en(n)), n.persist = rn, n.isPropagationStopped = un, n.isDefaultPrevented = on, n.nativeEvent = n;
 	};
-	var on,
-	  cn = {
+	var cn,
+	  ln = {
 	    enumerable: !1,
 	    configurable: !0,
 	    get: function () {
@@ -11194,93 +11192,93 @@ void main() {
 	      o = -1 === e.indexOf("-");
 	    for (var i in t) {
 	      var c = t[i];
-	      if (!("value" === i && "defaultValue" in t && null == c || K && "children" === i && "noscript" === e || "class" === i || "className" === i)) {
-	        var f = i.toLowerCase();
-	        "defaultValue" === i && "value" in t && null == t.value ? i = "value" : "download" === i && !0 === c ? c = "" : "translate" === f && "no" === c ? c = !1 : "o" === f[0] && "n" === f[1] ? "ondoubleclick" === f ? i = "ondblclick" : "onchange" !== f || "input" !== e && "textarea" !== e || Q(t.type) ? "onfocus" === f ? i = "onfocusin" : "onblur" === f ? i = "onfocusout" : G.test(i) && (i = f) : f = i = "oninput" : o && q.test(i) ? i = i.replace(J, "-$&").toLowerCase() : null === c && (c = void 0), "oninput" === f && u[i = f] && (i = "oninputCapture"), u[i] = c;
+	      if (!("value" === i && "defaultValue" in t && null == c || Q && "children" === i && "noscript" === e || "class" === i || "className" === i)) {
+	        var l = i.toLowerCase();
+	        "defaultValue" === i && "value" in t && null == t.value ? i = "value" : "download" === i && !0 === c ? c = "" : "translate" === l && "no" === c ? c = !1 : "o" === l[0] && "n" === l[1] ? "ondoubleclick" === l ? i = "ondblclick" : "onchange" !== l || "input" !== e && "textarea" !== e || X(t.type) ? "onfocus" === l ? i = "onfocusin" : "onblur" === l ? i = "onfocusout" : J.test(i) && (i = l) : l = i = "oninput" : o && G.test(i) ? i = i.replace(K, "-$&").toLowerCase() : null === c && (c = void 0), "oninput" === l && u[i = l] && (i = "oninputCapture"), u[i] = c;
 	      }
 	    }
 	    "select" == e && u.multiple && Array.isArray(u.value) && (u.value = H$1(t.children).forEach(function (n) {
 	      n.props.selected = -1 != u.value.indexOf(n.props.value);
 	    })), "select" == e && null != u.defaultValue && (u.value = H$1(t.children).forEach(function (n) {
 	      n.props.selected = u.multiple ? -1 != u.defaultValue.indexOf(n.props.value) : u.defaultValue == n.props.value;
-	    })), t.class && !t.className ? (u.class = t.class, Object.defineProperty(u, "className", cn)) : (t.className && !t.class || t.class && t.className) && (u.class = u.className = t.className), n.props = u;
-	  }(n), n.$$typeof = $, fn && fn(n);
+	    })), t.class && !t.className ? (u.class = t.class, Object.defineProperty(u, "className", ln)) : (t.className && !t.class || t.class && t.className) && (u.class = u.className = t.className), n.props = u;
+	  }(n), n.$$typeof = q, fn && fn(n);
 	};
-	var ln = l$1.__r;
+	var an = l$1.__r;
 	l$1.__r = function (n) {
-	  ln && ln(n), on = n.__c;
+	  an && an(n), cn = n.__c;
 	};
-	var an = l$1.diffed;
+	var sn = l$1.diffed;
 	l$1.diffed = function (n) {
-	  an && an(n);
+	  sn && sn(n);
 	  var t = n.props,
 	    e = n.__e;
-	  null != e && "textarea" === n.type && "value" in t && t.value !== e.value && (e.value = null == t.value ? "" : t.value), on = null;
+	  null != e && "textarea" === n.type && "value" in t && t.value !== e.value && (e.value = null == t.value ? "" : t.value), cn = null;
 	};
-	var sn = {
+	var hn = {
 	    ReactCurrentDispatcher: {
 	      current: {
 	        readContext: function (n) {
-	          return on.__n[n.__c].props.value;
+	          return cn.__n[n.__c].props.value;
 	        },
 	        useCallback: q$1,
 	        useContext: x$1,
 	        useDebugValue: P$1,
-	        useDeferredValue: R,
+	        useDeferredValue: w,
 	        useEffect: y,
 	        useId: g$1,
 	        useImperativeHandle: F$1,
-	        useInsertionEffect: k,
+	        useInsertionEffect: I,
 	        useLayoutEffect: _,
 	        useMemo: T$1,
 	        useReducer: p,
 	        useRef: A$1,
 	        useState: h,
-	        useSyncExternalStore: E,
-	        useTransition: w
+	        useSyncExternalStore: C,
+	        useTransition: k
 	      }
 	    }
 	  };
-	function vn(n) {
+	function dn(n) {
 	  return g$2.bind(null, n);
 	}
-	function dn(n) {
-	  return !!n && n.$$typeof === $;
-	}
 	function pn(n) {
-	  return dn(n) && n.type === k$2;
+	  return !!n && n.$$typeof === q;
 	}
 	function mn(n) {
-	  return !!n && !!n.displayName && ("string" == typeof n.displayName || n.displayName instanceof String) && n.displayName.startsWith("Memo(");
+	  return pn(n) && n.type === k$2;
 	}
 	function yn(n) {
-	  return dn(n) ? G$1.apply(null, arguments) : n;
+	  return !!n && !!n.displayName && ("string" == typeof n.displayName || n.displayName instanceof String) && n.displayName.startsWith("Memo(");
 	}
 	function _n(n) {
-	  return !!n.__k && (D$2(null, n), !0);
+	  return pn(n) ? G$1.apply(null, arguments) : n;
 	}
 	function bn(n) {
+	  return !!n.__k && (D$2(null, n), !0);
+	}
+	function Sn(n) {
 	  return n && (n.base || 1 === n.nodeType && n) || null;
 	}
-	var Sn = function (n, t) {
+	var gn = function (n, t) {
 	    return n(t);
 	  },
-	  gn = function (n, t) {
+	  En = function (n, t) {
 	    return n(t);
 	  },
-	  En = k$2,
-	  Cn = dn,
-	  xn = {
+	  Cn = k$2,
+	  xn = pn,
+	  Rn = {
 	    useState: h,
 	    useId: g$1,
 	    useReducer: p,
 	    useEffect: y,
 	    useLayoutEffect: _,
-	    useInsertionEffect: k,
-	    useTransition: w,
-	    useDeferredValue: R,
-	    useSyncExternalStore: E,
-	    startTransition: x,
+	    useInsertionEffect: I,
+	    useTransition: k,
+	    useDeferredValue: w,
+	    useSyncExternalStore: C,
+	    startTransition: R,
 	    useRef: A$1,
 	    useImperativeHandle: F$1,
 	    useMemo: T$1,
@@ -11288,33 +11286,33 @@ void main() {
 	    useContext: x$1,
 	    useDebugValue: P$1,
 	    version: "18.3.1",
-	    Children: L,
-	    render: X,
-	    hydrate: nn,
-	    unmountComponentAtNode: _n,
-	    createPortal: Y,
+	    Children: O,
+	    render: nn,
+	    hydrate: tn,
+	    unmountComponentAtNode: bn,
+	    createPortal: $,
 	    createElement: g$2,
 	    createContext: J$1,
-	    createFactory: vn,
-	    cloneElement: yn,
+	    createFactory: dn,
+	    cloneElement: _n,
 	    createRef: b,
 	    Fragment: k$2,
-	    isValidElement: dn,
-	    isElement: Cn,
-	    isFragment: pn,
-	    isMemo: mn,
-	    findDOMNode: bn,
+	    isValidElement: pn,
+	    isElement: xn,
+	    isFragment: mn,
+	    isMemo: yn,
+	    findDOMNode: Sn,
 	    Component: x$2,
-	    PureComponent: I,
-	    memo: N,
-	    forwardRef: A,
-	    flushSync: gn,
-	    unstable_batchedUpdates: Sn,
-	    StrictMode: En,
-	    Suspense: W,
-	    SuspenseList: z,
-	    lazy: j,
-	    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: sn
+	    PureComponent: N,
+	    memo: M,
+	    forwardRef: D,
+	    flushSync: En,
+	    unstable_batchedUpdates: gn,
+	    StrictMode: Cn,
+	    Suspense: P,
+	    SuspenseList: B,
+	    lazy: z,
+	    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: hn
 	  };
 
 	function bind(fn, thisArg) {
@@ -14538,7 +14536,7 @@ void main() {
 	    return [this.id, this.width, this.type, this.height, this.depth, this.weight].join(';');
 	  }
 	}
-	class ItemComponent extends xn.Component {
+	class ItemComponent extends Rn.Component {
 	  state = {
 	    hasError: false,
 	    text: '',
@@ -14630,65 +14628,65 @@ void main() {
 	    text,
 	    hasError
 	  }) {
-	    return /*#__PURE__*/xn.createElement("nav", {
+	    return /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel"
-	    }, /*#__PURE__*/xn.createElement("p", {
+	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-heading field"
-	    }, /*#__PURE__*/xn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level"
-	    }, /*#__PURE__*/xn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-left"
-	    }, /*#__PURE__*/xn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-item"
-	    }, /*#__PURE__*/xn.createElement("p", {
+	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "subtitle is-5"
-	    }, /*#__PURE__*/xn.createElement("strong", null, "Settings")))), /*#__PURE__*/xn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Settings")))), /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-right"
-	    }, /*#__PURE__*/xn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-item"
-	    }, /*#__PURE__*/xn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "field has-addons"
-	    }, /*#__PURE__*/xn.createElement("p", {
+	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "control"
-	    }, /*#__PURE__*/xn.createElement("a", {
+	    }, /*#__PURE__*/Rn.createElement("a", {
 	      href: "#",
 	      onClick: this.onImport,
 	      className: "button is-info is-light is-small is-rounded"
-	    }, "import")), /*#__PURE__*/xn.createElement("p", {
+	    }, "import")), /*#__PURE__*/Rn.createElement("p", {
 	      className: "control"
-	    }, /*#__PURE__*/xn.createElement("a", {
+	    }, /*#__PURE__*/Rn.createElement("a", {
 	      href: "#",
 	      onClick: this.onExport,
 	      className: "button is-success is-light is-small is-rounded"
-	    }, "export"))))))), /*#__PURE__*/xn.createElement("form", {
+	    }, "export"))))))), /*#__PURE__*/Rn.createElement("form", {
 	      onSubmit: this.addElement,
 	      action: "javascript:"
-	    }, /*#__PURE__*/xn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "panel-block"
-	    }, /*#__PURE__*/xn.createElement("p", {
+	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "control has-icons-right"
-	    }, /*#__PURE__*/xn.createElement("input", {
+	    }, /*#__PURE__*/Rn.createElement("input", {
 	      value: text,
 	      onInput: this.setText,
 	      className: "input is-primary",
 	      type: "text",
 	      placeholder: "w;h;d;wg"
-	    }), hasError && /*#__PURE__*/xn.createElement("p", {
+	    }), hasError && /*#__PURE__*/Rn.createElement("p", {
 	      className: "help is-danger"
-	    }, "Incorrect syntax"))), /*#__PURE__*/xn.createElement("p", {
+	    }, "Incorrect syntax"))), /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-tabs"
-	    }, /*#__PURE__*/xn.createElement("a", {
+	    }, /*#__PURE__*/Rn.createElement("a", {
 	      href: "#",
 	      className: type === boxType ? "is-active" : "",
 	      onClick: () => this.setType(boxType)
-	    }, "Boxes"), /*#__PURE__*/xn.createElement("a", {
+	    }, "Boxes"), /*#__PURE__*/Rn.createElement("a", {
 	      href: "#",
 	      className: type === itemType ? "is-active" : "",
 	      onClick: () => this.setType(itemType)
-	    }, "Items"))), elements.filter(datum => datum.type === type).map(datum => /*#__PURE__*/xn.createElement("label", {
+	    }, "Items"))), elements.filter(datum => datum.type === type).map(datum => /*#__PURE__*/Rn.createElement("label", {
 	      key: datum.id,
 	      className: "panel-block"
-	    }, /*#__PURE__*/xn.createElement("input", {
+	    }, /*#__PURE__*/Rn.createElement("input", {
 	      type: "checkbox",
 	      checked: datum.enabled,
 	      onChange: () => this.switchEnabled(datum.id)
@@ -14697,7 +14695,7 @@ void main() {
 	}
 
 	const playground = new Playground(document.getElementById('bp3'));
-	xn.render(/*#__PURE__*/xn.createElement(ItemComponent, {
+	Rn.render(/*#__PURE__*/Rn.createElement(ItemComponent, {
 	  playground: playground
 	}), document.getElementById('bp3-input'));
 
