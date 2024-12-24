@@ -10081,7 +10081,7 @@ void main() {
 	function requireLib() {
 	  if (hasRequiredLib) return lib$1;
 	  hasRequiredLib = 1;
-	  var __spreadArray = lib$1 && lib$1.__spreadArray || function (to, from, pack) {
+	  var __spreadArray = lib$1.__spreadArray || function (to, from, pack) {
 	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
 	      if (ar || !(i in from)) {
 	        if (!ar) ar = Array.prototype.slice.call(from, 0, i);
