@@ -11935,23 +11935,6 @@ void main() {
 	const toFiniteNumber = (value, defaultValue) => {
 	  return value != null && Number.isFinite(value = +value) ? value : defaultValue;
 	};
-	const ALPHA = 'abcdefghijklmnopqrstuvwxyz';
-	const DIGIT = '0123456789';
-	const ALPHABET = {
-	  DIGIT,
-	  ALPHA,
-	  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
-	};
-	const generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
-	  let str = '';
-	  const {
-	    length
-	  } = alphabet;
-	  while (size--) {
-	    str += alphabet[Math.random() * length | 0];
-	  }
-	  return str;
-	};
 
 	/**
 	 * If the thing is a FormData object, return true, otherwise return false.
@@ -12065,8 +12048,6 @@ void main() {
 	  findKey,
 	  global: _global,
 	  isContextDefined,
-	  ALPHABET,
-	  generateString,
 	  isSpecCompliantForm,
 	  toJSONObject,
 	  isAsyncFn,
@@ -13291,8 +13272,9 @@ void main() {
 	 *
 	 * @returns {string} The combined full path
 	 */
-	function buildFullPath(baseURL, requestedURL) {
-	  if (baseURL && !isAbsoluteURL(requestedURL)) {
+	function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
+	  let isRelativeUrl = !isAbsoluteURL(requestedURL);
+	  if (baseURL && isRelativeUrl || allowAbsoluteUrls == false) {
 	    return combineURLs(baseURL, requestedURL);
 	  }
 	  return requestedURL;
@@ -13998,7 +13980,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.7.9";
+	const VERSION$1 = "1.8.1";
 
 	const validators$1 = {};
 
@@ -14166,6 +14148,13 @@ void main() {
 	        }, true);
 	      }
 	    }
+
+	    // Set config.allowAbsoluteUrls
+	    if (config.allowAbsoluteUrls !== undefined) ; else if (this.defaults.allowAbsoluteUrls !== undefined) {
+	      config.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
+	    } else {
+	      config.allowAbsoluteUrls = true;
+	    }
 	    validator.assertOptions(config, {
 	      baseUrl: validators.spelling('baseURL'),
 	      withXsrfToken: validators.spelling('withXSRFToken')
@@ -14236,7 +14225,7 @@ void main() {
 	  }
 	  getUri(config) {
 	    config = mergeConfig$1(this.defaults, config);
-	    const fullPath = buildFullPath(config.baseURL, config.url);
+	    const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
 	    return buildURL(fullPath, config.params, config.paramsSerializer);
 	  }
 	};
