@@ -10497,7 +10497,7 @@ void main() {
 	    h = 0;
 	  for (n.__k = new Array(i), r = 0; r < i; r++) null != (o = l[r]) && "boolean" != typeof o && "function" != typeof o ? (f = r + h, (o = n.__k[r] = "string" == typeof o || "number" == typeof o || "bigint" == typeof o || o.constructor == String ? m$1(null, o, null, null, null) : d$1(o) ? m$1(k$2, {
 	    children: o
-	  }, null, null, null) : void 0 === o.constructor && o.__b > 0 ? m$1(o.type, o.props, o.key, o.ref ? o.ref : null, o.__v) : o).__ = n, o.__b = n.__b + 1, e = null, -1 !== (c = o.__i = L$1(o, u, f, a)) && (a--, (e = u[c]) && (e.__u |= 2)), null == e || null === e.__v ? (-1 == c && h--, "function" != typeof o.type && (o.__u |= 4)) : c != f && (c == f - 1 ? h-- : c == f + 1 ? h++ : (c > f ? h-- : h++, o.__u |= 4))) : n.__k[r] = null;
+	  }, null, null, null) : void 0 === o.constructor && o.__b > 0 ? m$1(o.type, o.props, o.key, o.ref ? o.ref : null, o.__v) : o).__ = n, o.__b = n.__b + 1, e = null, -1 !== (c = o.__i = L$1(o, u, f, a)) && (a--, (e = u[c]) && (e.__u |= 2)), null == e || null === e.__v ? (-1 == c && (i > s ? h-- : i < s && h++), "function" != typeof o.type && (o.__u |= 4)) : c != f && (c == f - 1 ? h-- : c == f + 1 ? h++ : (c > f ? h-- : h++, o.__u |= 4))) : n.__k[r] = null;
 	  if (a) for (r = 0; r < s; r++) null != (e = u[r]) && 0 == (2 & e.__u) && (e.__e == t && (t = S(e)), q$2(e, e));
 	  return t;
 	}
@@ -10524,7 +10524,7 @@ void main() {
 	    o = n.key,
 	    e = n.type,
 	    f = l[u];
-	  if (null === f || f && o == f.key && e === f.type && 0 == (2 & f.__u)) return u;
+	  if (null === f && null == n.key || f && o == f.key && e === f.type && 0 == (2 & f.__u)) return u;
 	  if (t > (null != f && 0 == (2 & f.__u) ? 1 : 0)) for (i = u - 1, r = u + 1; i >= 0 || r < l.length;) {
 	    if (i >= 0) {
 	      if ((f = l[i]) && 0 == (2 & f.__u) && o == f.key && e === f.type) return i;
