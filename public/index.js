@@ -21962,7 +21962,7 @@ void main() {
 	    auth
 	  } = newConfig;
 	  newConfig.headers = headers = AxiosHeaders$1.from(headers);
-	  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+	  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
 
 	  // HTTP basic authentication
 	  if (auth) {
@@ -22549,7 +22549,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.8.1";
+	const VERSION$1 = "1.8.3";
 
 	const validators$1 = {};
 
