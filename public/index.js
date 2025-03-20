@@ -21843,7 +21843,7 @@ void main() {
 	 */
 	function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
 	  let isRelativeUrl = !isAbsoluteURL(requestedURL);
-	  if (baseURL && isRelativeUrl || allowAbsoluteUrls == false) {
+	  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
 	    return combineURLs(baseURL, requestedURL);
 	  }
 	  return requestedURL;
@@ -22549,7 +22549,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.8.3";
+	const VERSION$1 = "1.8.4";
 
 	const validators$1 = {};
 
