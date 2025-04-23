@@ -5,7 +5,7 @@
 	 * @license
 	 * Copyright 2010-2025 Three.js Authors
 	 * SPDX-License-Identifier: MIT
-	 */const REVISION='175';/**
+	 */const REVISION='176';/**
 	 * Represents mouse buttons and interaction types in context of controls.
 	 *
 	 * @type {ConstantsMouse}
@@ -456,19 +456,6 @@
 	 * @type {number}
 	 * @constant
 	 */const RGBAFormat=1023;/**
-	 * reads each element as a single luminance component. This is then converted to a floating point,
-	 * clamped to the range `[0,1]`, and then assembled into an RGBA element by placing the luminance value
-	 * in the red, green and blue channels, and attaching 1.0 to the alpha channel.
-	 *
-	 * @type {number}
-	 * @constant
-	 */const LuminanceFormat=1024;/**
-	 * Reads each element as a luminance/alpha double. The same process occurs as for the `LuminanceFormat`,
-	 * except that the alpha channel may have values other than `1.0`.
-	 *
-	 * @type {number}
-	 * @constant
-	 */const LuminanceAlphaFormat=1025;/**
 	 * Reads each element as a single depth value, converts it to floating point, and clamps to the range `[0,1]`.
 	 *
 	 * @type {number}
@@ -807,6 +794,22 @@
 	 * @property {string} COMPUTE - A `compute` timestamp query.
 	 * @property {string} RENDER - A `render` timestamp query.
 	 **//**
+	 * Represents the different interpolation sampling types.
+	 *
+	 * @typedef {Object} ConstantsInterpolationSamplingType
+	 * @property {string} PERSPECTIVE - Perspective-correct interpolation.
+	 * @property {string} LINEAR - Linear interpolation.
+	 * @property {string} FLAT - Flat interpolation.
+	 *//**
+	 * Represents the different interpolation sampling modes.
+	 *
+	 * @typedef {Object} ConstantsInterpolationSamplingMode
+	 * @property {string} NORMAL - Normal sampling mode.
+	 * @property {string} CENTROID - Centroid sampling mode.
+	 * @property {string} SAMPLE - Sample-specific sampling mode.
+	 * @property {string} FLAT_FIRST - Flat interpolation using the first vertex.
+	 * @property {string} FLAT_EITHER - Flat interpolation using either vertex.
+	 *//**
 	 * This modules allows to dispatch event objects on custom JavaScript objects.
 	 *
 	 * Main repository: [eventdispatcher.js]{@link https://github.com/mrdoob/eventdispatcher.js/}
@@ -1748,6 +1751,12 @@
 			 * @readonly
 			 * @default false
 			 */this.isRenderTargetTexture=false;/**
+			 * Indicates if a texture should be handled like a texture array.
+			 *
+			 * @type {boolean}
+			 * @readonly
+			 * @default false
+			 */this.isTextureArray=false;/**
 			 * Indicates whether this texture should be processed by `PMREMGenerator` or not
 			 * (only relevant for render target textures).
 			 *
@@ -1770,7 +1779,7 @@
 		 *
 		 * @param {Texture} source - The texture to copy.
 		 * @return {Texture} A reference to this instance.
-		 */copy(source){this.name=source.name;this.source=source.source;this.mipmaps=source.mipmaps.slice(0);this.mapping=source.mapping;this.channel=source.channel;this.wrapS=source.wrapS;this.wrapT=source.wrapT;this.magFilter=source.magFilter;this.minFilter=source.minFilter;this.anisotropy=source.anisotropy;this.format=source.format;this.internalFormat=source.internalFormat;this.type=source.type;this.offset.copy(source.offset);this.repeat.copy(source.repeat);this.center.copy(source.center);this.rotation=source.rotation;this.matrixAutoUpdate=source.matrixAutoUpdate;this.matrix.copy(source.matrix);this.generateMipmaps=source.generateMipmaps;this.premultiplyAlpha=source.premultiplyAlpha;this.flipY=source.flipY;this.unpackAlignment=source.unpackAlignment;this.colorSpace=source.colorSpace;this.renderTarget=source.renderTarget;this.isRenderTargetTexture=source.isRenderTargetTexture;this.userData=JSON.parse(JSON.stringify(source.userData));this.needsUpdate=true;return this;}/**
+		 */copy(source){this.name=source.name;this.source=source.source;this.mipmaps=source.mipmaps.slice(0);this.mapping=source.mapping;this.channel=source.channel;this.wrapS=source.wrapS;this.wrapT=source.wrapT;this.magFilter=source.magFilter;this.minFilter=source.minFilter;this.anisotropy=source.anisotropy;this.format=source.format;this.internalFormat=source.internalFormat;this.type=source.type;this.offset.copy(source.offset);this.repeat.copy(source.repeat);this.center.copy(source.center);this.rotation=source.rotation;this.matrixAutoUpdate=source.matrixAutoUpdate;this.matrix.copy(source.matrix);this.generateMipmaps=source.generateMipmaps;this.premultiplyAlpha=source.premultiplyAlpha;this.flipY=source.flipY;this.unpackAlignment=source.unpackAlignment;this.colorSpace=source.colorSpace;this.renderTarget=source.renderTarget;this.isRenderTargetTexture=source.isRenderTargetTexture;this.isTextureArray=source.isTextureArray;this.userData=JSON.parse(JSON.stringify(source.userData));this.needsUpdate=true;return this;}/**
 		 * Serializes the texture into JSON.
 		 *
 		 * @param {?(Object|string)} meta - An optional value holding meta information about the serialization.
@@ -2207,6 +2216,7 @@
 		 * @property {?Texture} [depthTexture=null] - Reference to a depth texture.
 		 * @property {number} [samples=0] - The MSAA samples count.
 		 * @property {number} [count=1] - Defines the number of color attachments . Must be at least `1`.
+		 * @property {boolean} [multiview=false] - Whether this target is used for multiview rendering.
 		 *//**
 		 * Constructs a new render target.
 		 *
@@ -2234,7 +2244,7 @@
 			 *
 			 * @type {number}
 			 * @default 1
-			 */this.depth=1;/**
+			 */this.depth=options.depth?options.depth:1;/**
 			 * A rectangular area inside the render target's viewport. Fragments that are
 			 * outside the area will be discarded.
 			 *
@@ -2251,7 +2261,7 @@
 			 *
 			 * @type {Vector4}
 			 * @default (0,0,width,height)
-			 */this.viewport=new Vector4(0,0,width,height);const image={width:width,height:height,depth:1};options=Object.assign({generateMipmaps:false,internalFormat:null,minFilter:LinearFilter,depthBuffer:true,stencilBuffer:false,resolveDepthBuffer:true,resolveStencilBuffer:true,depthTexture:null,samples:0,count:1},options);const texture=new Texture(image,options.mapping,options.wrapS,options.wrapT,options.magFilter,options.minFilter,options.format,options.type,options.anisotropy,options.colorSpace);texture.flipY=false;texture.generateMipmaps=options.generateMipmaps;texture.internalFormat=options.internalFormat;/**
+			 */this.viewport=new Vector4(0,0,width,height);const image={width:width,height:height,depth:this.depth};options=Object.assign({generateMipmaps:false,internalFormat:null,minFilter:LinearFilter,depthBuffer:true,stencilBuffer:false,resolveDepthBuffer:true,resolveStencilBuffer:true,depthTexture:null,samples:0,count:1,multiview:false},options);const texture=new Texture(image,options.mapping,options.wrapS,options.wrapT,options.magFilter,options.minFilter,options.format,options.type,options.anisotropy,options.colorSpace);texture.flipY=false;texture.generateMipmaps=options.generateMipmaps;texture.internalFormat=options.internalFormat;/**
 			 * An array of textures. Each color attachment is represented as a separate texture.
 			 * Has at least a single entry for the default color attachment.
 			 *
@@ -2276,14 +2286,19 @@
 			 *
 			 * @type {boolean}
 			 * @default true
-			 */this.resolveStencilBuffer=options.resolveStencilBuffer;this._depthTexture=options.depthTexture;/**
+			 */this.resolveStencilBuffer=options.resolveStencilBuffer;this._depthTexture=null;this.depthTexture=options.depthTexture;/**
 			 * The number of MSAA samples.
 			 *
 			 * A value of `0` disables MSAA.
 			 *
 			 * @type {number}
 			 * @default 0
-			 */this.samples=options.samples;}/**
+			 */this.samples=options.samples;/**
+			 * Whether to this target is used in multiview rendering.
+			 *
+			 * @type {boolean}
+			 * @default false
+			 */this.multiview=options.multiview;}/**
 		 * The texture representing the default color attachment.
 		 *
 		 * @type {Texture}
@@ -4736,7 +4751,7 @@
 	if(isRootObject){// initialize meta obj
 	meta={geometries:{},materials:{},textures:{},images:{},shapes:{},skeletons:{},animations:{},nodes:{}};output.metadata={version:4.6,type:'Object',generator:'Object3D.toJSON'};}// standard Object3D serialization
 	const object={};object.uuid=this.uuid;object.type=this.type;if(this.name!=='')object.name=this.name;if(this.castShadow===true)object.castShadow=true;if(this.receiveShadow===true)object.receiveShadow=true;if(this.visible===false)object.visible=false;if(this.frustumCulled===false)object.frustumCulled=false;if(this.renderOrder!==0)object.renderOrder=this.renderOrder;if(Object.keys(this.userData).length>0)object.userData=this.userData;object.layers=this.layers.mask;object.matrix=this.matrix.toArray();object.up=this.up.toArray();if(this.matrixAutoUpdate===false)object.matrixAutoUpdate=false;// object specific properties
-	if(this.isInstancedMesh){object.type='InstancedMesh';object.count=this.count;object.instanceMatrix=this.instanceMatrix.toJSON();if(this.instanceColor!==null)object.instanceColor=this.instanceColor.toJSON();}if(this.isBatchedMesh){object.type='BatchedMesh';object.perObjectFrustumCulled=this.perObjectFrustumCulled;object.sortObjects=this.sortObjects;object.drawRanges=this._drawRanges;object.reservedRanges=this._reservedRanges;object.visibility=this._visibility;object.active=this._active;object.bounds=this._bounds.map(bound=>({boxInitialized:bound.boxInitialized,boxMin:bound.box.min.toArray(),boxMax:bound.box.max.toArray(),sphereInitialized:bound.sphereInitialized,sphereRadius:bound.sphere.radius,sphereCenter:bound.sphere.center.toArray()}));object.maxInstanceCount=this._maxInstanceCount;object.maxVertexCount=this._maxVertexCount;object.maxIndexCount=this._maxIndexCount;object.geometryInitialized=this._geometryInitialized;object.geometryCount=this._geometryCount;object.matricesTexture=this._matricesTexture.toJSON(meta);if(this._colorsTexture!==null)object.colorsTexture=this._colorsTexture.toJSON(meta);if(this.boundingSphere!==null){object.boundingSphere={center:object.boundingSphere.center.toArray(),radius:object.boundingSphere.radius};}if(this.boundingBox!==null){object.boundingBox={min:object.boundingBox.min.toArray(),max:object.boundingBox.max.toArray()};}}//
+	if(this.isInstancedMesh){object.type='InstancedMesh';object.count=this.count;object.instanceMatrix=this.instanceMatrix.toJSON();if(this.instanceColor!==null)object.instanceColor=this.instanceColor.toJSON();}if(this.isBatchedMesh){object.type='BatchedMesh';object.perObjectFrustumCulled=this.perObjectFrustumCulled;object.sortObjects=this.sortObjects;object.drawRanges=this._drawRanges;object.reservedRanges=this._reservedRanges;object.geometryInfo=this._geometryInfo.map(info=>({...info,boundingBox:info.boundingBox?{min:info.boundingBox.min.toArray(),max:info.boundingBox.max.toArray()}:undefined,boundingSphere:info.boundingSphere?{radius:info.boundingSphere.radius,center:info.boundingSphere.center.toArray()}:undefined}));object.instanceInfo=this._instanceInfo.map(info=>({...info}));object.availableInstanceIds=this._availableInstanceIds.slice();object.availableGeometryIds=this._availableGeometryIds.slice();object.nextIndexStart=this._nextIndexStart;object.nextVertexStart=this._nextVertexStart;object.geometryCount=this._geometryCount;object.maxInstanceCount=this._maxInstanceCount;object.maxVertexCount=this._maxVertexCount;object.maxIndexCount=this._maxIndexCount;object.geometryInitialized=this._geometryInitialized;object.matricesTexture=this._matricesTexture.toJSON(meta);object.indirectTexture=this._indirectTexture.toJSON(meta);if(this._colorsTexture!==null){object.colorsTexture=this._colorsTexture.toJSON(meta);}if(this.boundingSphere!==null){object.boundingSphere={center:this.boundingSphere.center.toArray(),radius:this.boundingSphere.radius};}if(this.boundingBox!==null){object.boundingBox={min:this.boundingBox.min.toArray(),max:this.boundingBox.max.toArray()};}}//
 	function serialize(library,element){if(library[element.uuid]===undefined){library[element.uuid]=element.toJSON(meta);}return element.uuid;}if(this.isScene){if(this.background){if(this.background.isColor){object.background=this.background.toJSON();}else if(this.background.isTexture){object.background=this.background.toJSON(meta).uuid;}}if(this.environment&&this.environment.isTexture&&this.environment.isRenderTargetTexture!==true){object.environment=this.environment.toJSON(meta).uuid;}}else if(this.isMesh||this.isLine||this.isPoints){object.geometry=serialize(meta.geometries,this.geometry);const parameters=this.geometry.parameters;if(parameters!==undefined&&parameters.shapes!==undefined){const shapes=parameters.shapes;if(Array.isArray(shapes)){for(let i=0,l=shapes.length;i<l;i++){const shape=shapes[i];serialize(meta.shapes,shape);}}else {serialize(meta.shapes,shapes);}}}if(this.isSkinnedMesh){object.bindMode=this.bindMode;object.bindMatrix=this.bindMatrix.toArray();if(this.skeleton!==undefined){serialize(meta.skeletons,this.skeleton);object.skeleton=this.skeleton.uuid;}}if(this.material!==undefined){if(Array.isArray(this.material)){const uuids=[];for(let i=0,l=this.material.length;i<l;i++){uuids.push(serialize(meta.materials,this.material[i]));}object.material=uuids;}else {object.material=serialize(meta.materials,this.material);}}//
 	if(this.children.length>0){object.children=[];for(let i=0;i<this.children.length;i++){object.children.push(this.children[i].toJSON(meta).object);}}//
 	if(this.animations.length>0){object.animations=[];for(let i=0;i<this.animations.length;i++){const animation=this.animations[i];object.animations.push(serialize(meta.animations,animation));}}if(isRootObject){const geometries=extractFromCache(meta.geometries);const materials=extractFromCache(meta.materials);const textures=extractFromCache(meta.textures);const images=extractFromCache(meta.images);const shapes=extractFromCache(meta.shapes);const skeletons=extractFromCache(meta.skeletons);const animations=extractFromCache(meta.animations);const nodes=extractFromCache(meta.nodes);if(geometries.length>0)output.geometries=geometries;if(materials.length>0)output.materials=materials;if(textures.length>0)output.textures=textures;if(images.length>0)output.images=images;if(shapes.length>0)output.shapes=shapes;if(skeletons.length>0)output.skeletons=skeletons;if(animations.length>0)output.animations=animations;if(nodes.length>0)output.nodes=nodes;}output.object=object;return output;// extract data from the cache hash
@@ -5673,8 +5688,7 @@
 		 * @type {boolean}
 		 * @default false
 		 * @param {boolean} value
-		 */set needsUpdate(value){if(value===true)this.version++;}onBuild(/* shaderobject, renderer */){console.warn('Material: onBuild() has been removed.');// @deprecated, r166
-	}}/**
+		 */set needsUpdate(value){if(value===true)this.version++;}}/**
 	 * A material for drawing geometries in a simple shaded (flat or wireframe) way.
 	 *
 	 * This material is not affected by lights.
@@ -7212,7 +7226,7 @@
 		 *
 		 * @private
 		 * @param {Group} hand - The group representing the hand space.
-		 * @param {XRHandJoint} inputjoint - The XR frame.
+		 * @param {XRJointSpace} inputjoint - The hand joint data.
 		 * @return {Group} A group representing the hand joint for the given input joint.
 		 */_getHandJoint(hand,inputjoint){if(hand.joints[inputjoint.jointName]===undefined){const joint=new Group();joint.matrixAutoUpdate=false;joint.visible=false;hand.joints[inputjoint.jointName]=joint;hand.add(joint);}return hand.joints[inputjoint.jointName];}}/**
 	 * Scenes allow you to set up what is to be rendered and where by three.js.
@@ -7545,7 +7559,7 @@
 			 * @type {boolean}
 			 * @default false
 			 */this.generateMipmaps=false;/**
-			 * The depth compare function.
+			 * Code corresponding to the depth compare function.
 			 *
 			 * @type {?(NeverCompare|LessCompare|EqualCompare|LessEqualCompare|GreaterCompare|NotEqualCompare|GreaterEqualCompare|AlwaysCompare)}
 			 * @default null
@@ -8278,6 +8292,11 @@
 			 * @type {Vector2}
 			 * @default (512,512)
 			 */this.mapSize=new Vector2$1(512,512);/**
+			 * The type of shadow texture. The default is `UnsignedByteType`.
+			 *
+			 * @type {number}
+			 * @default UnsignedByteType
+			 */this.mapType=UnsignedByteType;/**
 			 * The depth map generated using the internal camera; a location beyond a
 			 * pixel's depth is in shadow. Computed internally during rendering.
 			 *
@@ -8338,7 +8357,7 @@
 		 *
 		 * @param {LightShadow} source - The light shadow to copy.
 		 * @return {LightShadow} A reference to this light shadow instance.
-		 */copy(source){this.camera=source.camera.clone();this.intensity=source.intensity;this.bias=source.bias;this.radius=source.radius;this.mapSize.copy(source.mapSize);return this;}/**
+		 */copy(source){this.camera=source.camera.clone();this.intensity=source.intensity;this.bias=source.bias;this.radius=source.radius;this.autoUpdate=source.autoUpdate;this.needsUpdate=source.needsUpdate;this.normalBias=source.normalBias;this.blurSamples=source.blurSamples;this.mapSize.copy(source.mapSize);return this;}/**
 		 * Returns a new light shadow instance with copied values from this instance.
 		 *
 		 * @return {LightShadow} A clone of this instance.
@@ -8544,10 +8563,16 @@
 			 * @readonly
 			 * @default true
 			 */this.isArrayCamera=true;/**
+			 * Whether this camera is used with multiview rendering or not.
+			 *
+			 * @type {boolean}
+			 * @readonly
+			 * @default false
+			 */this.isMultiViewCamera=false;/**
 			 * An array of perspective sub cameras.
 			 *
 			 * @type {Array<PerspectiveCamera>}
-			 */this.cameras=array;this.index=0;}}/**
+			 */this.cameras=array;}}/**
 	 * This class can be used to represent points in 3D space as
 	 * [Spherical coordinates]{@link https://en.wikipedia.org/wiki/Spherical_coordinate_system}.
 	 */class Spherical{/**
@@ -8673,7 +8698,7 @@
 	 * @param {number} type - The texture's type.
 	 * @return {number} The byte length.
 	 */function getByteLength(width,height,format,type){const typeByteLength=getTextureTypeByteLength(type);switch(format){// https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml
-	case AlphaFormat:return width*height;case LuminanceFormat:return width*height;case LuminanceAlphaFormat:return width*height*2;case RedFormat:return width*height/typeByteLength.components*typeByteLength.byteLength;case RedIntegerFormat:return width*height/typeByteLength.components*typeByteLength.byteLength;case RGFormat:return width*height*2/typeByteLength.components*typeByteLength.byteLength;case RGIntegerFormat:return width*height*2/typeByteLength.components*typeByteLength.byteLength;case RGBFormat:return width*height*3/typeByteLength.components*typeByteLength.byteLength;case RGBAFormat:return width*height*4/typeByteLength.components*typeByteLength.byteLength;case RGBAIntegerFormat:return width*height*4/typeByteLength.components*typeByteLength.byteLength;// https://registry.khronos.org/webgl/extensions/WEBGL_compressed_texture_s3tc_srgb/
+	case AlphaFormat:return width*height;case RedFormat:return width*height/typeByteLength.components*typeByteLength.byteLength;case RedIntegerFormat:return width*height/typeByteLength.components*typeByteLength.byteLength;case RGFormat:return width*height*2/typeByteLength.components*typeByteLength.byteLength;case RGIntegerFormat:return width*height*2/typeByteLength.components*typeByteLength.byteLength;case RGBFormat:return width*height*3/typeByteLength.components*typeByteLength.byteLength;case RGBAFormat:return width*height*4/typeByteLength.components*typeByteLength.byteLength;case RGBAIntegerFormat:return width*height*4/typeByteLength.components*typeByteLength.byteLength;// https://registry.khronos.org/webgl/extensions/WEBGL_compressed_texture_s3tc_srgb/
 	case RGB_S3TC_DXT1_Format:case RGBA_S3TC_DXT1_Format:return Math.floor((width+3)/4)*Math.floor((height+3)/4)*8;case RGBA_S3TC_DXT3_Format:case RGBA_S3TC_DXT5_Format:return Math.floor((width+3)/4)*Math.floor((height+3)/4)*16;// https://registry.khronos.org/webgl/extensions/WEBGL_compressed_texture_pvrtc/
 	case RGB_PVRTC_2BPPV1_Format:case RGBA_PVRTC_2BPPV1_Format:return Math.max(width,16)*Math.max(height,8)/4;case RGB_PVRTC_4BPPV1_Format:case RGBA_PVRTC_4BPPV1_Format:return Math.max(width,8)*Math.max(height,8)/2;// https://registry.khronos.org/webgl/extensions/WEBGL_compressed_texture_etc/
 	case RGB_ETC1_Format:case RGB_ETC2_Format:return Math.floor((width+3)/4)*Math.floor((height+3)/4)*8;case RGBA_ETC2_EAC_Format:return Math.floor((width+3)/4)*Math.floor((height+3)/4)*16;// https://registry.khronos.org/webgl/extensions/WEBGL_compressed_texture_astc/
@@ -9193,9 +9218,10 @@
 	for(let i=0,il=lights.length;i<il;i++){const light=lights[i];const shadow=light.shadow;if(shadow===undefined){console.warn('THREE.WebGLShadowMap:',light,'has no shadow.');continue;}if(shadow.autoUpdate===false&&shadow.needsUpdate===false)continue;_shadowMapSize.copy(shadow.mapSize);const shadowFrameExtents=shadow.getFrameExtents();_shadowMapSize.multiply(shadowFrameExtents);_viewportSize.copy(shadow.mapSize);if(_shadowMapSize.x>_maxTextureSize||_shadowMapSize.y>_maxTextureSize){if(_shadowMapSize.x>_maxTextureSize){_viewportSize.x=Math.floor(_maxTextureSize/shadowFrameExtents.x);_shadowMapSize.x=_viewportSize.x*shadowFrameExtents.x;shadow.mapSize.x=_viewportSize.x;}if(_shadowMapSize.y>_maxTextureSize){_viewportSize.y=Math.floor(_maxTextureSize/shadowFrameExtents.y);_shadowMapSize.y=_viewportSize.y*shadowFrameExtents.y;shadow.mapSize.y=_viewportSize.y;}}if(shadow.map===null||toVSM===true||fromVSM===true){const pars=this.type!==VSMShadowMap?{minFilter:NearestFilter,magFilter:NearestFilter}:{};if(shadow.map!==null){shadow.map.dispose();}shadow.map=new WebGLRenderTarget(_shadowMapSize.x,_shadowMapSize.y,pars);shadow.map.texture.name=light.name+'.shadowMap';shadow.camera.updateProjectionMatrix();}renderer.setRenderTarget(shadow.map);renderer.clear();const viewportCount=shadow.getViewportCount();for(let vp=0;vp<viewportCount;vp++){const viewport=shadow.getViewport(vp);_viewport.set(_viewportSize.x*viewport.x,_viewportSize.y*viewport.y,_viewportSize.x*viewport.z,_viewportSize.y*viewport.w);_state.viewport(_viewport);shadow.updateMatrices(light,vp);_frustum=shadow.getFrustum();renderObject(scene,camera,shadow.camera,light,this.type);}// do blur pass for VSM
 	if(shadow.isPointLightShadow!==true&&this.type===VSMShadowMap){VSMPass(shadow,camera);}shadow.needsUpdate=false;}_previousType=this.type;scope.needsUpdate=false;renderer.setRenderTarget(currentRenderTarget,activeCubeFace,activeMipmapLevel);};function VSMPass(shadow,camera){const geometry=objects.update(fullScreenMesh);if(shadowMaterialVertical.defines.VSM_SAMPLES!==shadow.blurSamples){shadowMaterialVertical.defines.VSM_SAMPLES=shadow.blurSamples;shadowMaterialHorizontal.defines.VSM_SAMPLES=shadow.blurSamples;shadowMaterialVertical.needsUpdate=true;shadowMaterialHorizontal.needsUpdate=true;}if(shadow.mapPass===null){shadow.mapPass=new WebGLRenderTarget(_shadowMapSize.x,_shadowMapSize.y);}// vertical pass
 	shadowMaterialVertical.uniforms.shadow_pass.value=shadow.map.texture;shadowMaterialVertical.uniforms.resolution.value=shadow.mapSize;shadowMaterialVertical.uniforms.radius.value=shadow.radius;renderer.setRenderTarget(shadow.mapPass);renderer.clear();renderer.renderBufferDirect(camera,null,geometry,shadowMaterialVertical,fullScreenMesh,null);// horizontal pass
-	shadowMaterialHorizontal.uniforms.shadow_pass.value=shadow.mapPass.texture;shadowMaterialHorizontal.uniforms.resolution.value=shadow.mapSize;shadowMaterialHorizontal.uniforms.radius.value=shadow.radius;renderer.setRenderTarget(shadow.map);renderer.clear();renderer.renderBufferDirect(camera,null,geometry,shadowMaterialHorizontal,fullScreenMesh,null);}function getDepthMaterial(object,material,light,type){let result=null;const customMaterial=light.isPointLight===true?object.customDistanceMaterial:object.customDepthMaterial;if(customMaterial!==undefined){result=customMaterial;}else {result=light.isPointLight===true?_distanceMaterial:_depthMaterial;if(renderer.localClippingEnabled&&material.clipShadows===true&&Array.isArray(material.clippingPlanes)&&material.clippingPlanes.length!==0||material.displacementMap&&material.displacementScale!==0||material.alphaMap&&material.alphaTest>0||material.map&&material.alphaTest>0){// in this case we need a unique material instance reflecting the
+	shadowMaterialHorizontal.uniforms.shadow_pass.value=shadow.mapPass.texture;shadowMaterialHorizontal.uniforms.resolution.value=shadow.mapSize;shadowMaterialHorizontal.uniforms.radius.value=shadow.radius;renderer.setRenderTarget(shadow.map);renderer.clear();renderer.renderBufferDirect(camera,null,geometry,shadowMaterialHorizontal,fullScreenMesh,null);}function getDepthMaterial(object,material,light,type){let result=null;const customMaterial=light.isPointLight===true?object.customDistanceMaterial:object.customDepthMaterial;if(customMaterial!==undefined){result=customMaterial;}else {result=light.isPointLight===true?_distanceMaterial:_depthMaterial;if(renderer.localClippingEnabled&&material.clipShadows===true&&Array.isArray(material.clippingPlanes)&&material.clippingPlanes.length!==0||material.displacementMap&&material.displacementScale!==0||material.alphaMap&&material.alphaTest>0||material.map&&material.alphaTest>0||material.alphaToCoverage===true){// in this case we need a unique material instance reflecting the
 	// appropriate state
-	const keyA=result.uuid,keyB=material.uuid;let materialsForVariant=_materialCache[keyA];if(materialsForVariant===undefined){materialsForVariant={};_materialCache[keyA]=materialsForVariant;}let cachedMaterial=materialsForVariant[keyB];if(cachedMaterial===undefined){cachedMaterial=result.clone();materialsForVariant[keyB]=cachedMaterial;material.addEventListener('dispose',onMaterialDispose);}result=cachedMaterial;}}result.visible=material.visible;result.wireframe=material.wireframe;if(type===VSMShadowMap){result.side=material.shadowSide!==null?material.shadowSide:material.side;}else {result.side=material.shadowSide!==null?material.shadowSide:shadowSide[material.side];}result.alphaMap=material.alphaMap;result.alphaTest=material.alphaTest;result.map=material.map;result.clipShadows=material.clipShadows;result.clippingPlanes=material.clippingPlanes;result.clipIntersection=material.clipIntersection;result.displacementMap=material.displacementMap;result.displacementScale=material.displacementScale;result.displacementBias=material.displacementBias;result.wireframeLinewidth=material.wireframeLinewidth;result.linewidth=material.linewidth;if(light.isPointLight===true&&result.isMeshDistanceMaterial===true){const materialProperties=renderer.properties.get(result);materialProperties.light=light;}return result;}function renderObject(object,camera,shadowCamera,light,type){if(object.visible===false)return;const visible=object.layers.test(camera.layers);if(visible&&(object.isMesh||object.isLine||object.isPoints)){if((object.castShadow||object.receiveShadow&&type===VSMShadowMap)&&(!object.frustumCulled||_frustum.intersectsObject(object))){object.modelViewMatrix.multiplyMatrices(shadowCamera.matrixWorldInverse,object.matrixWorld);const geometry=objects.update(object);const material=object.material;if(Array.isArray(material)){const groups=geometry.groups;for(let k=0,kl=groups.length;k<kl;k++){const group=groups[k];const groupMaterial=material[group.materialIndex];if(groupMaterial&&groupMaterial.visible){const depthMaterial=getDepthMaterial(object,groupMaterial,light,type);object.onBeforeShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,group);renderer.renderBufferDirect(shadowCamera,null,geometry,depthMaterial,object,group);object.onAfterShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,group);}}}else if(material.visible){const depthMaterial=getDepthMaterial(object,material,light,type);object.onBeforeShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,null);renderer.renderBufferDirect(shadowCamera,null,geometry,depthMaterial,object,null);object.onAfterShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,null);}}}const children=object.children;for(let i=0,l=children.length;i<l;i++){renderObject(children[i],camera,shadowCamera,light,type);}}function onMaterialDispose(event){const material=event.target;material.removeEventListener('dispose',onMaterialDispose);// make sure to remove the unique distance/depth materials used for shadow map rendering
+	const keyA=result.uuid,keyB=material.uuid;let materialsForVariant=_materialCache[keyA];if(materialsForVariant===undefined){materialsForVariant={};_materialCache[keyA]=materialsForVariant;}let cachedMaterial=materialsForVariant[keyB];if(cachedMaterial===undefined){cachedMaterial=result.clone();materialsForVariant[keyB]=cachedMaterial;material.addEventListener('dispose',onMaterialDispose);}result=cachedMaterial;}}result.visible=material.visible;result.wireframe=material.wireframe;if(type===VSMShadowMap){result.side=material.shadowSide!==null?material.shadowSide:material.side;}else {result.side=material.shadowSide!==null?material.shadowSide:shadowSide[material.side];}result.alphaMap=material.alphaMap;result.alphaTest=material.alphaToCoverage===true?0.5:material.alphaTest;// approximate alphaToCoverage by using a fixed alphaTest value
+	result.map=material.map;result.clipShadows=material.clipShadows;result.clippingPlanes=material.clippingPlanes;result.clipIntersection=material.clipIntersection;result.displacementMap=material.displacementMap;result.displacementScale=material.displacementScale;result.displacementBias=material.displacementBias;result.wireframeLinewidth=material.wireframeLinewidth;result.linewidth=material.linewidth;if(light.isPointLight===true&&result.isMeshDistanceMaterial===true){const materialProperties=renderer.properties.get(result);materialProperties.light=light;}return result;}function renderObject(object,camera,shadowCamera,light,type){if(object.visible===false)return;const visible=object.layers.test(camera.layers);if(visible&&(object.isMesh||object.isLine||object.isPoints)){if((object.castShadow||object.receiveShadow&&type===VSMShadowMap)&&(!object.frustumCulled||_frustum.intersectsObject(object))){object.modelViewMatrix.multiplyMatrices(shadowCamera.matrixWorldInverse,object.matrixWorld);const geometry=objects.update(object);const material=object.material;if(Array.isArray(material)){const groups=geometry.groups;for(let k=0,kl=groups.length;k<kl;k++){const group=groups[k];const groupMaterial=material[group.materialIndex];if(groupMaterial&&groupMaterial.visible){const depthMaterial=getDepthMaterial(object,groupMaterial,light,type);object.onBeforeShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,group);renderer.renderBufferDirect(shadowCamera,null,geometry,depthMaterial,object,group);object.onAfterShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,group);}}}else if(material.visible){const depthMaterial=getDepthMaterial(object,material,light,type);object.onBeforeShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,null);renderer.renderBufferDirect(shadowCamera,null,geometry,depthMaterial,object,null);object.onAfterShadow(renderer,object,camera,shadowCamera,geometry,depthMaterial,null);}}}const children=object.children;for(let i=0,l=children.length;i<l;i++){renderObject(children[i],camera,shadowCamera,light,type);}}function onMaterialDispose(event){const material=event.target;material.removeEventListener('dispose',onMaterialDispose);// make sure to remove the unique distance/depth materials used for shadow map rendering
 	for(const id in _materialCache){const cache=_materialCache[id];const uuid=event.target.uuid;if(uuid in cache){const shadowMaterial=cache[uuid];shadowMaterial.dispose();delete cache[uuid];}}}}const reversedFuncs={[NeverDepth]:AlwaysDepth,[LessDepth]:GreaterDepth,[EqualDepth]:NotEqualDepth,[LessEqualDepth]:GreaterEqualDepth,[AlwaysDepth]:NeverDepth,[GreaterDepth]:LessDepth,[NotEqualDepth]:EqualDepth,[GreaterEqualDepth]:LessEqualDepth};function WebGLState(gl,extensions){function ColorBuffer(){let locked=false;const color=new Vector4();let currentColorMask=null;const currentColorClear=new Vector4(0,0,0,0);return {setMask:function(colorMask){if(currentColorMask!==colorMask&&!locked){gl.colorMask(colorMask,colorMask,colorMask,colorMask);currentColorMask=colorMask;}},setLocked:function(lock){locked=lock;},setClear:function(r,g,b,a,premultipliedAlpha){if(premultipliedAlpha===true){r*=a;g*=a;b*=a;}color.set(r,g,b,a);if(currentColorClear.equals(color)===false){gl.clearColor(r,g,b,a);currentColorClear.copy(color);}},reset:function(){locked=false;currentColorMask=null;currentColorClear.set(-1,0,0,0);// set to invalid state
 	}};}function DepthBuffer(){let locked=false;let currentReversed=false;let currentDepthMask=null;let currentDepthFunc=null;let currentDepthClear=null;return {setReversed:function(reversed){if(currentReversed!==reversed){const ext=extensions.get('EXT_clip_control');if(reversed){ext.clipControlEXT(ext.LOWER_LEFT_EXT,ext.ZERO_TO_ONE_EXT);}else {ext.clipControlEXT(ext.LOWER_LEFT_EXT,ext.NEGATIVE_ONE_TO_ONE_EXT);}currentReversed=reversed;const oldDepth=currentDepthClear;currentDepthClear=null;this.setClear(oldDepth);}},getReversed:function(){return currentReversed;},setTest:function(depthTest){if(depthTest){enable(gl.DEPTH_TEST);}else {disable(gl.DEPTH_TEST);}},setMask:function(depthMask){if(currentDepthMask!==depthMask&&!locked){gl.depthMask(depthMask);currentDepthMask=depthMask;}},setFunc:function(depthFunc){if(currentReversed)depthFunc=reversedFuncs[depthFunc];if(currentDepthFunc!==depthFunc){switch(depthFunc){case NeverDepth:gl.depthFunc(gl.NEVER);break;case AlwaysDepth:gl.depthFunc(gl.ALWAYS);break;case LessDepth:gl.depthFunc(gl.LESS);break;case LessEqualDepth:gl.depthFunc(gl.LEQUAL);break;case EqualDepth:gl.depthFunc(gl.EQUAL);break;case GreaterEqualDepth:gl.depthFunc(gl.GEQUAL);break;case GreaterDepth:gl.depthFunc(gl.GREATER);break;case NotEqualDepth:gl.depthFunc(gl.NOTEQUAL);break;default:gl.depthFunc(gl.LEQUAL);}currentDepthFunc=depthFunc;}},setLocked:function(lock){locked=lock;},setClear:function(depth){if(currentDepthClear!==depth){if(currentReversed){depth=1-depth;}gl.clearDepth(depth);currentDepthClear=depth;}},reset:function(){locked=false;currentDepthMask=null;currentDepthFunc=null;currentDepthClear=null;currentReversed=false;}};}function StencilBuffer(){let locked=false;let currentStencilMask=null;let currentStencilFunc=null;let currentStencilRef=null;let currentStencilFuncMask=null;let currentStencilFail=null;let currentStencilZFail=null;let currentStencilZPass=null;let currentStencilClear=null;return {setTest:function(stencilTest){if(!locked){if(stencilTest){enable(gl.STENCIL_TEST);}else {disable(gl.STENCIL_TEST);}}},setMask:function(stencilMask){if(currentStencilMask!==stencilMask&&!locked){gl.stencilMask(stencilMask);currentStencilMask=stencilMask;}},setFunc:function(stencilFunc,stencilRef,stencilMask){if(currentStencilFunc!==stencilFunc||currentStencilRef!==stencilRef||currentStencilFuncMask!==stencilMask){gl.stencilFunc(stencilFunc,stencilRef,stencilMask);currentStencilFunc=stencilFunc;currentStencilRef=stencilRef;currentStencilFuncMask=stencilMask;}},setOp:function(stencilFail,stencilZFail,stencilZPass){if(currentStencilFail!==stencilFail||currentStencilZFail!==stencilZFail||currentStencilZPass!==stencilZPass){gl.stencilOp(stencilFail,stencilZFail,stencilZPass);currentStencilFail=stencilFail;currentStencilZFail=stencilZFail;currentStencilZPass=stencilZPass;}},setLocked:function(lock){locked=lock;},setClear:function(stencil){if(currentStencilClear!==stencil){gl.clearStencil(stencil);currentStencilClear=stencil;}},reset:function(){locked=false;currentStencilMask=null;currentStencilFunc=null;currentStencilRef=null;currentStencilFuncMask=null;currentStencilFail=null;currentStencilZFail=null;currentStencilZPass=null;currentStencilClear=null;}};}//
 	const colorBuffer=new ColorBuffer();const depthBuffer=new DepthBuffer();const stencilBuffer=new StencilBuffer();const uboBindings=new WeakMap();const uboProgramMap=new WeakMap();let enabledCapabilities={};let currentBoundFramebuffers={};let currentDrawbuffers=new WeakMap();let defaultDrawbuffers=[];let currentProgram=null;let currentBlendingEnabled=false;let currentBlending=null;let currentBlendEquation=null;let currentBlendSrc=null;let currentBlendDst=null;let currentBlendEquationAlpha=null;let currentBlendSrcAlpha=null;let currentBlendDstAlpha=null;let currentBlendColor=new Color(0,0,0);let currentBlendAlpha=0;let currentPremultipledAlpha=false;let currentFlipSided=null;let currentCullFace=null;let currentLineWidth=null;let currentPolygonOffsetFactor=null;let currentPolygonOffsetUnits=null;const maxTextures=gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);let lineWidthAvailable=false;let version=0;const glVersion=gl.getParameter(gl.VERSION);if(glVersion.indexOf('WebGL')!==-1){version=parseFloat(/^WebGL (\d)/.exec(glVersion)[1]);lineWidthAvailable=version>=1.0;}else if(glVersion.indexOf('OpenGL ES')!==-1){version=parseFloat(/^OpenGL ES (\d)/.exec(glVersion)[1]);lineWidthAvailable=version>=2.0;}let currentTextureSlot=null;let currentBoundTextures={};const scissorParam=gl.getParameter(gl.SCISSOR_BOX);const viewportParam=gl.getParameter(gl.VIEWPORT);const currentScissor=new Vector4().fromArray(scissorParam);const currentViewport=new Vector4().fromArray(viewportParam);function createTexture(type,target,count,dimensions){const data=new Uint8Array(4);// 4 is required to match default unpack alignment of 4.
@@ -9265,22 +9291,22 @@
 	function setupDepthRenderbuffer(renderTarget){const renderTargetProperties=properties.get(renderTarget);const isCube=renderTarget.isWebGLCubeRenderTarget===true;// if the bound depth texture has changed
 	if(renderTargetProperties.__boundDepthTexture!==renderTarget.depthTexture){// fire the dispose event to get rid of stored state associated with the previously bound depth buffer
 	const depthTexture=renderTarget.depthTexture;if(renderTargetProperties.__depthDisposeCallback){renderTargetProperties.__depthDisposeCallback();}// set up dispose listeners to track when the currently attached buffer is implicitly unbound
-	if(depthTexture){const disposeEvent=()=>{delete renderTargetProperties.__boundDepthTexture;delete renderTargetProperties.__depthDisposeCallback;depthTexture.removeEventListener('dispose',disposeEvent);};depthTexture.addEventListener('dispose',disposeEvent);renderTargetProperties.__depthDisposeCallback=disposeEvent;}renderTargetProperties.__boundDepthTexture=depthTexture;}if(renderTarget.depthTexture&&!renderTargetProperties.__autoAllocateDepthBuffer){if(isCube)throw new Error('target.depthTexture not supported in Cube render targets');setupDepthTexture(renderTargetProperties.__webglFramebuffer,renderTarget);}else {if(isCube){renderTargetProperties.__webglDepthbuffer=[];for(let i=0;i<6;i++){state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer[i]);if(renderTargetProperties.__webglDepthbuffer[i]===undefined){renderTargetProperties.__webglDepthbuffer[i]=_gl.createRenderbuffer();setupRenderBufferStorage(renderTargetProperties.__webglDepthbuffer[i],renderTarget,false);}else {// attach buffer if it's been created already
-	const glAttachmentType=renderTarget.stencilBuffer?_gl.DEPTH_STENCIL_ATTACHMENT:_gl.DEPTH_ATTACHMENT;const renderbuffer=renderTargetProperties.__webglDepthbuffer[i];_gl.bindRenderbuffer(_gl.RENDERBUFFER,renderbuffer);_gl.framebufferRenderbuffer(_gl.FRAMEBUFFER,glAttachmentType,_gl.RENDERBUFFER,renderbuffer);}}}else {state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer);if(renderTargetProperties.__webglDepthbuffer===undefined){renderTargetProperties.__webglDepthbuffer=_gl.createRenderbuffer();setupRenderBufferStorage(renderTargetProperties.__webglDepthbuffer,renderTarget,false);}else {// attach buffer if it's been created already
+	if(depthTexture){const disposeEvent=()=>{delete renderTargetProperties.__boundDepthTexture;delete renderTargetProperties.__depthDisposeCallback;depthTexture.removeEventListener('dispose',disposeEvent);};depthTexture.addEventListener('dispose',disposeEvent);renderTargetProperties.__depthDisposeCallback=disposeEvent;}renderTargetProperties.__boundDepthTexture=depthTexture;}if(renderTarget.depthTexture&&!renderTargetProperties.__autoAllocateDepthBuffer){if(isCube)throw new Error('target.depthTexture not supported in Cube render targets');const mipmaps=renderTarget.texture.mipmaps;if(mipmaps&&mipmaps.length>0){setupDepthTexture(renderTargetProperties.__webglFramebuffer[0],renderTarget);}else {setupDepthTexture(renderTargetProperties.__webglFramebuffer,renderTarget);}}else {if(isCube){renderTargetProperties.__webglDepthbuffer=[];for(let i=0;i<6;i++){state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer[i]);if(renderTargetProperties.__webglDepthbuffer[i]===undefined){renderTargetProperties.__webglDepthbuffer[i]=_gl.createRenderbuffer();setupRenderBufferStorage(renderTargetProperties.__webglDepthbuffer[i],renderTarget,false);}else {// attach buffer if it's been created already
+	const glAttachmentType=renderTarget.stencilBuffer?_gl.DEPTH_STENCIL_ATTACHMENT:_gl.DEPTH_ATTACHMENT;const renderbuffer=renderTargetProperties.__webglDepthbuffer[i];_gl.bindRenderbuffer(_gl.RENDERBUFFER,renderbuffer);_gl.framebufferRenderbuffer(_gl.FRAMEBUFFER,glAttachmentType,_gl.RENDERBUFFER,renderbuffer);}}}else {const mipmaps=renderTarget.texture.mipmaps;if(mipmaps&&mipmaps.length>0){state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer[0]);}else {state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer);}if(renderTargetProperties.__webglDepthbuffer===undefined){renderTargetProperties.__webglDepthbuffer=_gl.createRenderbuffer();setupRenderBufferStorage(renderTargetProperties.__webglDepthbuffer,renderTarget,false);}else {// attach buffer if it's been created already
 	const glAttachmentType=renderTarget.stencilBuffer?_gl.DEPTH_STENCIL_ATTACHMENT:_gl.DEPTH_ATTACHMENT;const renderbuffer=renderTargetProperties.__webglDepthbuffer;_gl.bindRenderbuffer(_gl.RENDERBUFFER,renderbuffer);_gl.framebufferRenderbuffer(_gl.FRAMEBUFFER,glAttachmentType,_gl.RENDERBUFFER,renderbuffer);}}}state.bindFramebuffer(_gl.FRAMEBUFFER,null);}// rebind framebuffer with external textures
 	function rebindTextures(renderTarget,colorTexture,depthTexture){const renderTargetProperties=properties.get(renderTarget);if(colorTexture!==undefined){setupFrameBufferTexture(renderTargetProperties.__webglFramebuffer,renderTarget,renderTarget.texture,_gl.COLOR_ATTACHMENT0,_gl.TEXTURE_2D,0);}if(depthTexture!==undefined){setupDepthRenderbuffer(renderTarget);}}// Set up GL resources for the render target
 	function setupRenderTarget(renderTarget){const texture=renderTarget.texture;const renderTargetProperties=properties.get(renderTarget);const textureProperties=properties.get(texture);renderTarget.addEventListener('dispose',onRenderTargetDispose);const textures=renderTarget.textures;const isCube=renderTarget.isWebGLCubeRenderTarget===true;const isMultipleRenderTargets=textures.length>1;if(!isMultipleRenderTargets){if(textureProperties.__webglTexture===undefined){textureProperties.__webglTexture=_gl.createTexture();}textureProperties.__version=texture.version;info.memory.textures++;}// Setup framebuffer
 	if(isCube){renderTargetProperties.__webglFramebuffer=[];for(let i=0;i<6;i++){if(texture.mipmaps&&texture.mipmaps.length>0){renderTargetProperties.__webglFramebuffer[i]=[];for(let level=0;level<texture.mipmaps.length;level++){renderTargetProperties.__webglFramebuffer[i][level]=_gl.createFramebuffer();}}else {renderTargetProperties.__webglFramebuffer[i]=_gl.createFramebuffer();}}}else {if(texture.mipmaps&&texture.mipmaps.length>0){renderTargetProperties.__webglFramebuffer=[];for(let level=0;level<texture.mipmaps.length;level++){renderTargetProperties.__webglFramebuffer[level]=_gl.createFramebuffer();}}else {renderTargetProperties.__webglFramebuffer=_gl.createFramebuffer();}if(isMultipleRenderTargets){for(let i=0,il=textures.length;i<il;i++){const attachmentProperties=properties.get(textures[i]);if(attachmentProperties.__webglTexture===undefined){attachmentProperties.__webglTexture=_gl.createTexture();info.memory.textures++;}}}if(renderTarget.samples>0&&useMultisampledRTT(renderTarget)===false){renderTargetProperties.__webglMultisampledFramebuffer=_gl.createFramebuffer();renderTargetProperties.__webglColorRenderbuffer=[];state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglMultisampledFramebuffer);for(let i=0;i<textures.length;i++){const texture=textures[i];renderTargetProperties.__webglColorRenderbuffer[i]=_gl.createRenderbuffer();_gl.bindRenderbuffer(_gl.RENDERBUFFER,renderTargetProperties.__webglColorRenderbuffer[i]);const glFormat=utils.convert(texture.format,texture.colorSpace);const glType=utils.convert(texture.type);const glInternalFormat=getInternalFormat(texture.internalFormat,glFormat,glType,texture.colorSpace,renderTarget.isXRRenderTarget===true);const samples=getRenderTargetSamples(renderTarget);_gl.renderbufferStorageMultisample(_gl.RENDERBUFFER,samples,glInternalFormat,renderTarget.width,renderTarget.height);_gl.framebufferRenderbuffer(_gl.FRAMEBUFFER,_gl.COLOR_ATTACHMENT0+i,_gl.RENDERBUFFER,renderTargetProperties.__webglColorRenderbuffer[i]);}_gl.bindRenderbuffer(_gl.RENDERBUFFER,null);if(renderTarget.depthBuffer){renderTargetProperties.__webglDepthRenderbuffer=_gl.createRenderbuffer();setupRenderBufferStorage(renderTargetProperties.__webglDepthRenderbuffer,renderTarget,true);}state.bindFramebuffer(_gl.FRAMEBUFFER,null);}}// Setup color buffer
 	if(isCube){state.bindTexture(_gl.TEXTURE_CUBE_MAP,textureProperties.__webglTexture);setTextureParameters(_gl.TEXTURE_CUBE_MAP,texture);for(let i=0;i<6;i++){if(texture.mipmaps&&texture.mipmaps.length>0){for(let level=0;level<texture.mipmaps.length;level++){setupFrameBufferTexture(renderTargetProperties.__webglFramebuffer[i][level],renderTarget,texture,_gl.COLOR_ATTACHMENT0,_gl.TEXTURE_CUBE_MAP_POSITIVE_X+i,level);}}else {setupFrameBufferTexture(renderTargetProperties.__webglFramebuffer[i],renderTarget,texture,_gl.COLOR_ATTACHMENT0,_gl.TEXTURE_CUBE_MAP_POSITIVE_X+i,0);}}if(textureNeedsGenerateMipmaps(texture)){generateMipmap(_gl.TEXTURE_CUBE_MAP);}state.unbindTexture();}else if(isMultipleRenderTargets){for(let i=0,il=textures.length;i<il;i++){const attachment=textures[i];const attachmentProperties=properties.get(attachment);state.bindTexture(_gl.TEXTURE_2D,attachmentProperties.__webglTexture);setTextureParameters(_gl.TEXTURE_2D,attachment);setupFrameBufferTexture(renderTargetProperties.__webglFramebuffer,renderTarget,attachment,_gl.COLOR_ATTACHMENT0+i,_gl.TEXTURE_2D,0);if(textureNeedsGenerateMipmaps(attachment)){generateMipmap(_gl.TEXTURE_2D);}}state.unbindTexture();}else {let glTextureType=_gl.TEXTURE_2D;if(renderTarget.isWebGL3DRenderTarget||renderTarget.isWebGLArrayRenderTarget){glTextureType=renderTarget.isWebGL3DRenderTarget?_gl.TEXTURE_3D:_gl.TEXTURE_2D_ARRAY;}state.bindTexture(glTextureType,textureProperties.__webglTexture);setTextureParameters(glTextureType,texture);if(texture.mipmaps&&texture.mipmaps.length>0){for(let level=0;level<texture.mipmaps.length;level++){setupFrameBufferTexture(renderTargetProperties.__webglFramebuffer[level],renderTarget,texture,_gl.COLOR_ATTACHMENT0,glTextureType,level);}}else {setupFrameBufferTexture(renderTargetProperties.__webglFramebuffer,renderTarget,texture,_gl.COLOR_ATTACHMENT0,glTextureType,0);}if(textureNeedsGenerateMipmaps(texture)){generateMipmap(glTextureType);}state.unbindTexture();}// Setup depth and stencil buffers
 	if(renderTarget.depthBuffer){setupDepthRenderbuffer(renderTarget);}}function updateRenderTargetMipmap(renderTarget){const textures=renderTarget.textures;for(let i=0,il=textures.length;i<il;i++){const texture=textures[i];if(textureNeedsGenerateMipmaps(texture)){const targetType=getTargetType(renderTarget);const webglTexture=properties.get(texture).__webglTexture;state.bindTexture(targetType,webglTexture);generateMipmap(targetType);state.unbindTexture();}}}const invalidationArrayRead=[];const invalidationArrayDraw=[];function updateMultisampleRenderTarget(renderTarget){if(renderTarget.samples>0){if(useMultisampledRTT(renderTarget)===false){const textures=renderTarget.textures;const width=renderTarget.width;const height=renderTarget.height;let mask=_gl.COLOR_BUFFER_BIT;const depthStyle=renderTarget.stencilBuffer?_gl.DEPTH_STENCIL_ATTACHMENT:_gl.DEPTH_ATTACHMENT;const renderTargetProperties=properties.get(renderTarget);const isMultipleRenderTargets=textures.length>1;// If MRT we need to remove FBO attachments
-	if(isMultipleRenderTargets){for(let i=0;i<textures.length;i++){state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglMultisampledFramebuffer);_gl.framebufferRenderbuffer(_gl.FRAMEBUFFER,_gl.COLOR_ATTACHMENT0+i,_gl.RENDERBUFFER,null);state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer);_gl.framebufferTexture2D(_gl.DRAW_FRAMEBUFFER,_gl.COLOR_ATTACHMENT0+i,_gl.TEXTURE_2D,null,0);}}state.bindFramebuffer(_gl.READ_FRAMEBUFFER,renderTargetProperties.__webglMultisampledFramebuffer);state.bindFramebuffer(_gl.DRAW_FRAMEBUFFER,renderTargetProperties.__webglFramebuffer);for(let i=0;i<textures.length;i++){if(renderTarget.resolveDepthBuffer){if(renderTarget.depthBuffer)mask|=_gl.DEPTH_BUFFER_BIT;// resolving stencil is slow with a D3D backend. disable it for all transmission render targets (see #27799)
+	if(isMultipleRenderTargets){for(let i=0;i<textures.length;i++){state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglMultisampledFramebuffer);_gl.framebufferRenderbuffer(_gl.FRAMEBUFFER,_gl.COLOR_ATTACHMENT0+i,_gl.RENDERBUFFER,null);state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer);_gl.framebufferTexture2D(_gl.DRAW_FRAMEBUFFER,_gl.COLOR_ATTACHMENT0+i,_gl.TEXTURE_2D,null,0);}}state.bindFramebuffer(_gl.READ_FRAMEBUFFER,renderTargetProperties.__webglMultisampledFramebuffer);const mipmaps=renderTarget.texture.mipmaps;if(mipmaps&&mipmaps.length>0){state.bindFramebuffer(_gl.DRAW_FRAMEBUFFER,renderTargetProperties.__webglFramebuffer[0]);}else {state.bindFramebuffer(_gl.DRAW_FRAMEBUFFER,renderTargetProperties.__webglFramebuffer);}for(let i=0;i<textures.length;i++){if(renderTarget.resolveDepthBuffer){if(renderTarget.depthBuffer)mask|=_gl.DEPTH_BUFFER_BIT;// resolving stencil is slow with a D3D backend. disable it for all transmission render targets (see #27799)
 	if(renderTarget.stencilBuffer&&renderTarget.resolveStencilBuffer)mask|=_gl.STENCIL_BUFFER_BIT;}if(isMultipleRenderTargets){_gl.framebufferRenderbuffer(_gl.READ_FRAMEBUFFER,_gl.COLOR_ATTACHMENT0,_gl.RENDERBUFFER,renderTargetProperties.__webglColorRenderbuffer[i]);const webglTexture=properties.get(textures[i]).__webglTexture;_gl.framebufferTexture2D(_gl.DRAW_FRAMEBUFFER,_gl.COLOR_ATTACHMENT0,_gl.TEXTURE_2D,webglTexture,0);}_gl.blitFramebuffer(0,0,width,height,0,0,width,height,mask,_gl.NEAREST);if(supportsInvalidateFramebuffer===true){invalidationArrayRead.length=0;invalidationArrayDraw.length=0;invalidationArrayRead.push(_gl.COLOR_ATTACHMENT0+i);if(renderTarget.depthBuffer&&renderTarget.resolveDepthBuffer===false){invalidationArrayRead.push(depthStyle);invalidationArrayDraw.push(depthStyle);_gl.invalidateFramebuffer(_gl.DRAW_FRAMEBUFFER,invalidationArrayDraw);}_gl.invalidateFramebuffer(_gl.READ_FRAMEBUFFER,invalidationArrayRead);}}state.bindFramebuffer(_gl.READ_FRAMEBUFFER,null);state.bindFramebuffer(_gl.DRAW_FRAMEBUFFER,null);// If MRT since pre-blit we removed the FBO we need to reconstruct the attachments
 	if(isMultipleRenderTargets){for(let i=0;i<textures.length;i++){state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglMultisampledFramebuffer);_gl.framebufferRenderbuffer(_gl.FRAMEBUFFER,_gl.COLOR_ATTACHMENT0+i,_gl.RENDERBUFFER,renderTargetProperties.__webglColorRenderbuffer[i]);const webglTexture=properties.get(textures[i]).__webglTexture;state.bindFramebuffer(_gl.FRAMEBUFFER,renderTargetProperties.__webglFramebuffer);_gl.framebufferTexture2D(_gl.DRAW_FRAMEBUFFER,_gl.COLOR_ATTACHMENT0+i,_gl.TEXTURE_2D,webglTexture,0);}}state.bindFramebuffer(_gl.DRAW_FRAMEBUFFER,renderTargetProperties.__webglMultisampledFramebuffer);}else {if(renderTarget.depthBuffer&&renderTarget.resolveDepthBuffer===false&&supportsInvalidateFramebuffer){const depthStyle=renderTarget.stencilBuffer?_gl.DEPTH_STENCIL_ATTACHMENT:_gl.DEPTH_ATTACHMENT;_gl.invalidateFramebuffer(_gl.DRAW_FRAMEBUFFER,[depthStyle]);}}}}function getRenderTargetSamples(renderTarget){return Math.min(capabilities.maxSamples,renderTarget.samples);}function useMultisampledRTT(renderTarget){const renderTargetProperties=properties.get(renderTarget);return renderTarget.samples>0&&extensions.has('WEBGL_multisampled_render_to_texture')===true&&renderTargetProperties.__useRenderToTexture!==false;}function updateVideoTexture(texture){const frame=info.render.frame;// Check the last frame we updated the VideoTexture
 	if(_videoTextures.get(texture)!==frame){_videoTextures.set(texture,frame);texture.update();}}function verifyColorSpace(texture,image){const colorSpace=texture.colorSpace;const format=texture.format;const type=texture.type;if(texture.isCompressedTexture===true||texture.isVideoTexture===true)return image;if(colorSpace!==LinearSRGBColorSpace&&colorSpace!==NoColorSpace){// sRGB
 	if(ColorManagement.getTransfer(colorSpace)===SRGBTransfer){// in WebGL 2 uncompressed textures can only be sRGB encoded if they have the RGBA8 format
 	if(format!==RGBAFormat||type!==UnsignedByteType){console.warn('THREE.WebGLTextures: sRGB encoded textures have to use RGBAFormat and UnsignedByteType.');}}else {console.error('THREE.WebGLTextures: Unsupported texture color space:',colorSpace);}}return image;}function getDimensions(image){if(typeof HTMLImageElement!=='undefined'&&image instanceof HTMLImageElement){// if intrinsic data are not available, fallback to width/height
 	_imageDimensions.width=image.naturalWidth||image.width;_imageDimensions.height=image.naturalHeight||image.height;}else if(typeof VideoFrame!=='undefined'&&image instanceof VideoFrame){_imageDimensions.width=image.displayWidth;_imageDimensions.height=image.displayHeight;}else {_imageDimensions.width=image.width;_imageDimensions.height=image.height;}return _imageDimensions;}//
-	this.allocateTextureUnit=allocateTextureUnit;this.resetTextureUnits=resetTextureUnits;this.setTexture2D=setTexture2D;this.setTexture2DArray=setTexture2DArray;this.setTexture3D=setTexture3D;this.setTextureCube=setTextureCube;this.rebindTextures=rebindTextures;this.setupRenderTarget=setupRenderTarget;this.updateRenderTargetMipmap=updateRenderTargetMipmap;this.updateMultisampleRenderTarget=updateMultisampleRenderTarget;this.setupDepthRenderbuffer=setupDepthRenderbuffer;this.setupFrameBufferTexture=setupFrameBufferTexture;this.useMultisampledRTT=useMultisampledRTT;}function WebGLUtils(gl,extensions){function convert(p,colorSpace=NoColorSpace){let extension;const transfer=ColorManagement.getTransfer(colorSpace);if(p===UnsignedByteType)return gl.UNSIGNED_BYTE;if(p===UnsignedShort4444Type)return gl.UNSIGNED_SHORT_4_4_4_4;if(p===UnsignedShort5551Type)return gl.UNSIGNED_SHORT_5_5_5_1;if(p===UnsignedInt5999Type)return gl.UNSIGNED_INT_5_9_9_9_REV;if(p===ByteType)return gl.BYTE;if(p===ShortType)return gl.SHORT;if(p===UnsignedShortType)return gl.UNSIGNED_SHORT;if(p===IntType)return gl.INT;if(p===UnsignedIntType)return gl.UNSIGNED_INT;if(p===FloatType$1)return gl.FLOAT;if(p===HalfFloatType)return gl.HALF_FLOAT;if(p===AlphaFormat)return gl.ALPHA;if(p===RGBFormat)return gl.RGB;if(p===RGBAFormat)return gl.RGBA;if(p===LuminanceFormat)return gl.LUMINANCE;if(p===LuminanceAlphaFormat)return gl.LUMINANCE_ALPHA;if(p===DepthFormat)return gl.DEPTH_COMPONENT;if(p===DepthStencilFormat)return gl.DEPTH_STENCIL;// WebGL2 formats.
+	this.allocateTextureUnit=allocateTextureUnit;this.resetTextureUnits=resetTextureUnits;this.setTexture2D=setTexture2D;this.setTexture2DArray=setTexture2DArray;this.setTexture3D=setTexture3D;this.setTextureCube=setTextureCube;this.rebindTextures=rebindTextures;this.setupRenderTarget=setupRenderTarget;this.updateRenderTargetMipmap=updateRenderTargetMipmap;this.updateMultisampleRenderTarget=updateMultisampleRenderTarget;this.setupDepthRenderbuffer=setupDepthRenderbuffer;this.setupFrameBufferTexture=setupFrameBufferTexture;this.useMultisampledRTT=useMultisampledRTT;}function WebGLUtils(gl,extensions){function convert(p,colorSpace=NoColorSpace){let extension;const transfer=ColorManagement.getTransfer(colorSpace);if(p===UnsignedByteType)return gl.UNSIGNED_BYTE;if(p===UnsignedShort4444Type)return gl.UNSIGNED_SHORT_4_4_4_4;if(p===UnsignedShort5551Type)return gl.UNSIGNED_SHORT_5_5_5_1;if(p===UnsignedInt5999Type)return gl.UNSIGNED_INT_5_9_9_9_REV;if(p===ByteType)return gl.BYTE;if(p===ShortType)return gl.SHORT;if(p===UnsignedShortType)return gl.UNSIGNED_SHORT;if(p===IntType)return gl.INT;if(p===UnsignedIntType)return gl.UNSIGNED_INT;if(p===FloatType$1)return gl.FLOAT;if(p===HalfFloatType)return gl.HALF_FLOAT;if(p===AlphaFormat)return gl.ALPHA;if(p===RGBFormat)return gl.RGB;if(p===RGBAFormat)return gl.RGBA;if(p===DepthFormat)return gl.DEPTH_COMPONENT;if(p===DepthStencilFormat)return gl.DEPTH_STENCIL;// WebGL2 formats.
 	if(p===RedFormat)return gl.RED;if(p===RedIntegerFormat)return gl.RED_INTEGER;if(p===RGFormat)return gl.RG;if(p===RGIntegerFormat)return gl.RG_INTEGER;if(p===RGBAIntegerFormat)return gl.RGBA_INTEGER;// S3TC
 	if(p===RGB_S3TC_DXT1_Format||p===RGBA_S3TC_DXT1_Format||p===RGBA_S3TC_DXT3_Format||p===RGBA_S3TC_DXT5_Format){if(transfer===SRGBTransfer){extension=extensions.get('WEBGL_compressed_texture_s3tc_srgb');if(extension!==null){if(p===RGB_S3TC_DXT1_Format)return extension.COMPRESSED_SRGB_S3TC_DXT1_EXT;if(p===RGBA_S3TC_DXT1_Format)return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;if(p===RGBA_S3TC_DXT3_Format)return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;if(p===RGBA_S3TC_DXT5_Format)return extension.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;}else {return null;}}else {extension=extensions.get('WEBGL_compressed_texture_s3tc');if(extension!==null){if(p===RGB_S3TC_DXT1_Format)return extension.COMPRESSED_RGB_S3TC_DXT1_EXT;if(p===RGBA_S3TC_DXT1_Format)return extension.COMPRESSED_RGBA_S3TC_DXT1_EXT;if(p===RGBA_S3TC_DXT3_Format)return extension.COMPRESSED_RGBA_S3TC_DXT3_EXT;if(p===RGBA_S3TC_DXT5_Format)return extension.COMPRESSED_RGBA_S3TC_DXT5_EXT;}else {return null;}}}// PVRTC
 	if(p===RGB_PVRTC_4BPPV1_Format||p===RGB_PVRTC_2BPPV1_Format||p===RGBA_PVRTC_4BPPV1_Format||p===RGBA_PVRTC_2BPPV1_Format){extension=extensions.get('WEBGL_compressed_texture_pvrtc');if(extension!==null){if(p===RGB_PVRTC_4BPPV1_Format)return extension.COMPRESSED_RGB_PVRTC_4BPPV1_IMG;if(p===RGB_PVRTC_2BPPV1_Format)return extension.COMPRESSED_RGB_PVRTC_2BPPV1_IMG;if(p===RGBA_PVRTC_4BPPV1_Format)return extension.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;if(p===RGBA_PVRTC_2BPPV1_Format)return extension.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;}else {return null;}}// ETC
@@ -9423,7 +9449,8 @@ void main() {
 			 */this.setFramebufferScaleFactor=function(value){framebufferScaleFactor=value;if(scope.isPresenting===true){console.warn('THREE.WebXRManager: Cannot change framebuffer scale while presenting.');}};/**
 			 * Sets the reference space type. Can be used to configure a spatial relationship with the user's physical
 			 * environment. Depending on how the user moves in 3D space, setting an appropriate reference space can
-			 * improve tracking. Default is `local-floor`.
+			 * improve tracking. Default is `local-floor`. Valid values can be found here
+			 * https://developer.mozilla.org/en-US/docs/Web/API/XRReferenceSpace#reference_space_types.
 			 *
 			 * This method can not be used during a XR session.
 			 *
@@ -9917,7 +9944,7 @@ void main() {
 			 * @param {Object3D} scene - The scene or another type of 3D object to precompile.
 			 * @param {Camera} camera - The camera.
 			 * @param {?Scene} [targetScene=null] - The target scene.
-			 * @return {?Set} The precompiled materials.
+			 * @return {Set<Material>} The precompiled materials.
 			 */this.compile=function(scene,camera,targetScene=null){if(targetScene===null)targetScene=scene;currentRenderState=renderStates.get(targetScene);currentRenderState.init(camera);renderStateStack.push(currentRenderState);// gather lights from both the target scene and the new object that will be added to the scene.
 	targetScene.traverseVisible(function(object){if(object.isLight&&object.layers.test(camera.layers)){currentRenderState.pushLight(object);if(object.castShadow){currentRenderState.pushShadow(object);}}});if(scene!==targetScene){scene.traverseVisible(function(object){if(object.isLight&&object.layers.test(camera.layers)){currentRenderState.pushLight(object);if(object.castShadow){currentRenderState.pushShadow(object);}}});}currentRenderState.setupLights();// Only initialize materials in the new scene, not the targetScene.
 	const materials=new Set();scene.traverse(function(object){if(!(object.isMesh||object.isPoints||object.isLine||object.isSprite)){return;}const material=object.material;if(material){if(Array.isArray(material)){for(let i=0;i<material.length;i++){const material2=material[i];prepareMaterial(material2,targetScene,object);materials.add(material2);}}else {prepareMaterial(material,targetScene,object);materials.add(material);}}});currentRenderState=renderStateStack.pop();return materials;};// compileAsync
@@ -10085,7 +10112,7 @@ void main() {
 			 * Copies pixels from the current bound framebuffer into the given texture.
 			 *
 			 * @param {FramebufferTexture} texture - The texture.
-			 * @param {Vector2} position - The start position of the copy operation.
+			 * @param {?Vector2} [position=null] - The start position of the copy operation.
 			 * @param {number} [level=0] - The mip level. The default represents the base mip.
 			 */this.copyFramebufferToTexture=function(texture,position=null,level=0){const levelScale=Math.pow(2,-level);const width=Math.floor(texture.image.width*levelScale);const height=Math.floor(texture.image.height*levelScale);const x=position!==null?position.x:0;const y=position!==null?position.y:0;textures.setTexture2D(texture,0);_gl.copyTexSubImage2D(_gl.TEXTURE_2D,level,0,0,x,y,width,height);state.unbindTexture();};const _srcFramebuffer=_gl.createFramebuffer();const _dstFramebuffer=_gl.createFramebuffer();/**
 			 * Copies data of the given source texture into a destination texture.
@@ -10095,10 +10122,10 @@ void main() {
 			 *
 			 * @param {Texture} srcTexture - The source texture.
 			 * @param {Texture} dstTexture - The destination texture.
-			 * @param {Box2|Box3} [srcRegion=null] - A bounding box which describes the source region. Can be two or three-dimensional.
-			 * @param {Vector2|Vector3} [dstPosition=null] - A vector that represents the origin of the destination region. Can be two or three-dimensional.
-			 * @param {number} srcLevel - The source mipmap level to copy.
-			 * @param {number} dstLevel - The destination mipmap level.
+			 * @param {?(Box2|Box3)} [srcRegion=null] - A bounding box which describes the source region. Can be two or three-dimensional.
+			 * @param {?(Vector2|Vector3)} [dstPosition=null] - A vector that represents the origin of the destination region. Can be two or three-dimensional.
+			 * @param {number} [srcLevel=0] - The source mipmap level to copy.
+			 * @param {?number} [dstLevel=null] - The destination mipmap level.
 			 */this.copyTextureToTexture=function(srcTexture,dstTexture,srcRegion=null,dstPosition=null,srcLevel=0,dstLevel=null){// support the previous signature with just a single dst mipmap level
 	if(dstLevel===null){if(srcLevel!==0){// @deprecated, r171
 	warnOnce('WebGLRenderer: copyTextureToTexture function signature has changed to support src and dst mipmap levels.');dstLevel=srcLevel;srcLevel=0;}else {dstLevel=0;}}// gather the necessary dimensions to copy
@@ -10220,6 +10247,7 @@ void main() {
 	 * ```
 	 *
 	 * @augments Controls
+	 * @three_import import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 	 */
 	class OrbitControls extends Controls {
 	  /**
@@ -14775,6 +14803,26 @@ void main() {
 	 * @property {string} RENDER - A `render` timestamp query.
 	 **/
 
+	/**
+	 * Represents the different interpolation sampling types.
+	 *
+	 * @typedef {Object} ConstantsInterpolationSamplingType
+	 * @property {string} PERSPECTIVE - Perspective-correct interpolation.
+	 * @property {string} LINEAR - Linear interpolation.
+	 * @property {string} FLAT - Flat interpolation.
+	 */
+
+	/**
+	 * Represents the different interpolation sampling modes.
+	 *
+	 * @typedef {Object} ConstantsInterpolationSamplingMode
+	 * @property {string} NORMAL - Normal sampling mode.
+	 * @property {string} CENTROID - Centroid sampling mode.
+	 * @property {string} SAMPLE - Sample-specific sampling mode.
+	 * @property {string} FLAT_FIRST - Flat interpolation using the first vertex.
+	 * @property {string} FLAT_EITHER - Flat interpolation using either vertex.
+	 */
+
 	const _vector$1 = /*@__PURE__*/new Vector3();
 	const _vector2 = /*@__PURE__*/new Vector2();
 	let _id$1 = 0;
@@ -18753,33 +18801,44 @@ void main() {
 	      object.sortObjects = this.sortObjects;
 	      object.drawRanges = this._drawRanges;
 	      object.reservedRanges = this._reservedRanges;
-	      object.visibility = this._visibility;
-	      object.active = this._active;
-	      object.bounds = this._bounds.map(bound => ({
-	        boxInitialized: bound.boxInitialized,
-	        boxMin: bound.box.min.toArray(),
-	        boxMax: bound.box.max.toArray(),
-	        sphereInitialized: bound.sphereInitialized,
-	        sphereRadius: bound.sphere.radius,
-	        sphereCenter: bound.sphere.center.toArray()
+	      object.geometryInfo = this._geometryInfo.map(info => ({
+	        ...info,
+	        boundingBox: info.boundingBox ? {
+	          min: info.boundingBox.min.toArray(),
+	          max: info.boundingBox.max.toArray()
+	        } : undefined,
+	        boundingSphere: info.boundingSphere ? {
+	          radius: info.boundingSphere.radius,
+	          center: info.boundingSphere.center.toArray()
+	        } : undefined
 	      }));
+	      object.instanceInfo = this._instanceInfo.map(info => ({
+	        ...info
+	      }));
+	      object.availableInstanceIds = this._availableInstanceIds.slice();
+	      object.availableGeometryIds = this._availableGeometryIds.slice();
+	      object.nextIndexStart = this._nextIndexStart;
+	      object.nextVertexStart = this._nextVertexStart;
+	      object.geometryCount = this._geometryCount;
 	      object.maxInstanceCount = this._maxInstanceCount;
 	      object.maxVertexCount = this._maxVertexCount;
 	      object.maxIndexCount = this._maxIndexCount;
 	      object.geometryInitialized = this._geometryInitialized;
-	      object.geometryCount = this._geometryCount;
 	      object.matricesTexture = this._matricesTexture.toJSON(meta);
-	      if (this._colorsTexture !== null) object.colorsTexture = this._colorsTexture.toJSON(meta);
+	      object.indirectTexture = this._indirectTexture.toJSON(meta);
+	      if (this._colorsTexture !== null) {
+	        object.colorsTexture = this._colorsTexture.toJSON(meta);
+	      }
 	      if (this.boundingSphere !== null) {
 	        object.boundingSphere = {
-	          center: object.boundingSphere.center.toArray(),
-	          radius: object.boundingSphere.radius
+	          center: this.boundingSphere.center.toArray(),
+	          radius: this.boundingSphere.radius
 	        };
 	      }
 	      if (this.boundingBox !== null) {
 	        object.boundingBox = {
-	          min: object.boundingBox.min.toArray(),
-	          max: object.boundingBox.max.toArray()
+	          min: this.boundingBox.min.toArray(),
+	          max: this.boundingBox.max.toArray()
 	        };
 	      }
 	    }
