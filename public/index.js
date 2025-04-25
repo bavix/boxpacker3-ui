@@ -24701,6 +24701,10 @@ void main() {
 	const {
 	  getPrototypeOf
 	} = Object;
+	const {
+	  iterator,
+	  toStringTag
+	} = Symbol;
 	const kindOf = (cache => thing => {
 	  const str = toString.call(thing);
 	  return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
@@ -24823,7 +24827,7 @@ void main() {
 	    return false;
 	  }
 	  const prototype = getPrototypeOf(val);
-	  return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in val) && !(Symbol.iterator in val);
+	  return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(toStringTag in val) && !(iterator in val);
 	};
 
 	/**
@@ -25164,10 +25168,10 @@ void main() {
 	 * @returns {void}
 	 */
 	const forEachEntry = (obj, fn) => {
-	  const generator = obj && obj[Symbol.iterator];
-	  const iterator = generator.call(obj);
+	  const generator = obj && obj[iterator];
+	  const _iterator = generator.call(obj);
 	  let result;
-	  while ((result = iterator.next()) && !result.done) {
+	  while ((result = _iterator.next()) && !result.done) {
 	    const pair = result.value;
 	    fn.call(obj, pair[0], pair[1]);
 	  }
@@ -25271,7 +25275,7 @@ void main() {
 	 * @returns {boolean}
 	 */
 	function isSpecCompliantForm(thing) {
-	  return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === 'FormData' && thing[Symbol.iterator]);
+	  return !!(thing && isFunction(thing.append) && thing[toStringTag] === 'FormData' && thing[iterator]);
 	}
 	const toJSONObject = obj => {
 	  const stack = new Array(10);
@@ -25324,6 +25328,7 @@ void main() {
 
 	// *********************
 
+	const isIterable = thing => thing != null && isFunction(thing[iterator]);
 	var utils$1 = {
 	  isArray,
 	  isArrayBuffer,
@@ -25380,7 +25385,8 @@ void main() {
 	  isAsyncFn,
 	  isThenable,
 	  setImmediate: _setImmediate,
-	  asap
+	  asap,
+	  isIterable
 	};
 
 	/**
@@ -26201,10 +26207,17 @@ void main() {
 	      setHeaders(header, valueOrRewrite);
 	    } else if (utils$1.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
 	      setHeaders(parseHeaders(header), valueOrRewrite);
-	    } else if (utils$1.isHeaders(header)) {
-	      for (const [key, value] of header.entries()) {
-	        setHeader(value, key, rewrite);
+	    } else if (utils$1.isObject(header) && utils$1.isIterable(header)) {
+	      let obj = {},
+	        dest,
+	        key;
+	      for (const entry of header) {
+	        if (!utils$1.isArray(entry)) {
+	          throw TypeError('Object iterator must return a key-value pair');
+	        }
+	        obj[key = entry[0]] = (dest = obj[key]) ? utils$1.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
 	      }
+	      setHeaders(obj, valueOrRewrite);
 	    } else {
 	      header != null && setHeader(valueOrRewrite, header, rewrite);
 	    }
@@ -26307,6 +26320,9 @@ void main() {
 	  }
 	  toString() {
 	    return Object.entries(this.toJSON()).map(([header, value]) => header + ': ' + value).join('\n');
+	  }
+	  getSetCookie() {
+	    return this.get("set-cookie") || [];
 	  }
 	  get [Symbol.toStringTag]() {
 	    return 'AxiosHeaders';
@@ -27189,7 +27205,7 @@ void main() {
 	    });
 	  } catch (err) {
 	    unsubscribe && unsubscribe();
-	    if (err && err.name === 'TypeError' && /fetch/i.test(err.message)) {
+	    if (err && err.name === 'TypeError' && /Load failed|fetch/i.test(err.message)) {
 	      throw Object.assign(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request), {
 	        cause: err.cause || err
 	      });
@@ -27307,7 +27323,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.8.4";
+	const VERSION$1 = "1.9.0";
 
 	const validators$1 = {};
 
@@ -27402,7 +27418,7 @@ void main() {
 	 */
 	let Axios$1 = class Axios {
 	  constructor(instanceConfig) {
-	    this.defaults = instanceConfig;
+	    this.defaults = instanceConfig || {};
 	    this.interceptors = {
 	      request: new InterceptorManager(),
 	      response: new InterceptorManager()
