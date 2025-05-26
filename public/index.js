@@ -23866,13 +23866,13 @@ void main() {
 	  "-" == l[0] ? n.setProperty(l, null == u ? "" : u) : n[l] = null == u ? "" : "number" != typeof u || v$1.test(l) ? u : u + "px";
 	}
 	function j$2(n, l, u, t, i) {
-	  var r;
+	  var r, o;
 	  n: if ("style" == l) {
 	    if ("string" == typeof u) n.style.cssText = u;else {
 	      if ("string" == typeof t && (n.style.cssText = t = ""), t) for (l in t) u && l in u || T$2(n.style, l, "");
 	      if (u) for (l in u) t && u[l] == t[l] || T$2(n.style, l, u[l]);
 	    }
-	  } else if ("o" == l[0] && "n" == l[1]) r = l != (l = l.replace(f$1, "$1")), l = l.toLowerCase() in n || "onFocusOut" == l || "onFocusIn" == l ? l.toLowerCase().slice(2) : l.slice(2), n.l || (n.l = {}), n.l[l + r] = u, u ? t ? u.u = t.u : (u.u = c$1, n.addEventListener(l, r ? a$1 : s$1, r)) : n.removeEventListener(l, r ? a$1 : s$1, r);else {
+	  } else if ("o" == l[0] && "n" == l[1]) r = l != (l = l.replace(f$1, "$1")), o = l.toLowerCase(), l = o in n || "onFocusOut" == l || "onFocusIn" == l ? o.slice(2) : l.slice(2), n.l || (n.l = {}), n.l[l + r] = u, u ? t ? u.u = t.u : (u.u = c$1, n.addEventListener(l, r ? a$1 : s$1, r)) : n.removeEventListener(l, r ? a$1 : s$1, r);else {
 	    if ("http://www.w3.org/2000/svg" == i) l = l.replace(/xlink(H|:h)/, "h").replace(/sName$/, "s");else if ("width" != l && "height" != l && "href" != l && "list" != l && "form" != l && "tabIndex" != l && "download" != l && "rowSpan" != l && "colSpan" != l && "role" != l && "popover" != l && l in n) try {
 	      n[l] = null == u ? "" : u;
 	      break n;
@@ -24237,7 +24237,7 @@ void main() {
 	    r = function () {
 	      clearTimeout(u), k$1 && cancelAnimationFrame(t), setTimeout(n);
 	    },
-	    u = setTimeout(r, 100);
+	    u = setTimeout(r, 35);
 	  k$1 && (t = requestAnimationFrame(r));
 	}
 	function z$1(n) {
@@ -24469,9 +24469,6 @@ void main() {
 	      },
 	      contains: function () {
 	        return true;
-	      },
-	      appendChild: function (n) {
-	        this.childNodes.push(n), e.h.appendChild(n);
 	      },
 	      insertBefore: function (n, t) {
 	        this.childNodes.push(n), e.h.insertBefore(n, t);
