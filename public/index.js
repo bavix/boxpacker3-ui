@@ -20951,7 +20951,7 @@ void main() {
 	      }
 	      NativeBigInt.prototype = Object.create(Integer.prototype);
 	      function isPrecise(n) {
-	        return -9007199254740992 < n && n < MAX_INT;
+	        return -MAX_INT < n && n < MAX_INT;
 	      }
 	      function smallToArray(n) {
 	        // For performance reasons doesn't reference BASE, need to change this function if BASE changes
@@ -21884,7 +21884,7 @@ void main() {
 	      };
 	      SmallInteger.prototype.prev = function () {
 	        var value = this.value;
-	        if (value - 1 > -9007199254740992) return new SmallInteger(value - 1);
+	        if (value - 1 > -MAX_INT) return new SmallInteger(value - 1);
 	        return new BigInteger(MAX_INT_ARR, true);
 	      };
 	      NativeBigInt.prototype.prev = function () {
@@ -21985,7 +21985,7 @@ void main() {
 	      };
 	      NativeBigInt.prototype.xor = SmallInteger.prototype.xor = BigInteger.prototype.xor;
 	      var LOBMASK_I = 1 << 30,
-	        LOBMASK_BI = (BASE & -1e7) * (BASE & -1e7) | LOBMASK_I;
+	        LOBMASK_BI = (BASE & -BASE) * (BASE & -BASE) | LOBMASK_I;
 	      function roughLOB(n) {
 	        // get lowestOneBit (rough)
 	        // SmallInteger: return Min(lowestOneBit(n), 1 << 30)
