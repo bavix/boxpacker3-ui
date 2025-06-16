@@ -25687,6 +25687,9 @@ void main() {
 	    if (utils$1.isDate(value)) {
 	      return value.toISOString();
 	    }
+	    if (utils$1.isBoolean(value)) {
+	      return value.toString();
+	    }
 	    if (!useBlob && utils$1.isBlob(value)) {
 	      throw new AxiosError$1('Blob is not supported. Use a Buffer instead.');
 	    }
@@ -27284,7 +27287,7 @@ void main() {
 	      duplex: "half",
 	      credentials: isCredentialsSupported ? withCredentials : undefined
 	    });
-	    let response = await fetch(request);
+	    let response = await fetch(request, fetchOptions);
 	    const isStreamResponse = supportsResponseStream && (responseType === 'stream' || responseType === 'response');
 	    if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
 	      const options = {};
@@ -27431,7 +27434,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.9.0";
+	const VERSION$1 = "1.10.0";
 
 	const validators$1 = {};
 
