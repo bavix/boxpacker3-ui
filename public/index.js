@@ -25000,6 +25000,26 @@ void main() {
 	};
 
 	/**
+	 * Determine if a value is an empty object (safely handles Buffers)
+	 *
+	 * @param {*} val The value to test
+	 *
+	 * @returns {boolean} True if value is an empty object, otherwise false
+	 */
+	const isEmptyObject = val => {
+	  // Early return for non-objects or Buffers to prevent RangeError
+	  if (!isObject(val) || isBuffer(val)) {
+	    return false;
+	  }
+	  try {
+	    return Object.keys(val).length === 0 && Object.getPrototypeOf(val) === Object.prototype;
+	  } catch (e) {
+	    // Fallback for any other objects that might cause RangeError with Object.keys()
+	    return false;
+	  }
+	};
+
+	/**
 	 * Determine if a value is a Date
 	 *
 	 * @param {*} val The value to test
@@ -25113,6 +25133,11 @@ void main() {
 	      fn.call(null, obj[i], i, obj);
 	    }
 	  } else {
+	    // Buffer check
+	    if (isBuffer(obj)) {
+	      return;
+	    }
+
 	    // Iterate over object keys
 	    const keys = allOwnKeys ? Object.getOwnPropertyNames(obj) : Object.keys(obj);
 	    const len = keys.length;
@@ -25124,6 +25149,9 @@ void main() {
 	  }
 	}
 	function findKey(obj, key) {
+	  if (isBuffer(obj)) {
+	    return null;
+	  }
 	  key = key.toLowerCase();
 	  const keys = Object.keys(obj);
 	  let i = keys.length;
@@ -25453,6 +25481,11 @@ void main() {
 	      if (stack.indexOf(source) >= 0) {
 	        return;
 	      }
+
+	      //Buffer check
+	      if (isBuffer(source)) {
+	        return source;
+	      }
 	      if (!('toJSON' in source)) {
 	        stack[i] = source;
 	        const target = isArray(source) ? [] : {};
@@ -25509,6 +25542,7 @@ void main() {
 	  isBoolean,
 	  isObject,
 	  isPlainObject,
+	  isEmptyObject,
 	  isReadableStream,
 	  isRequest,
 	  isResponse,
@@ -26060,15 +26094,16 @@ void main() {
 	};
 
 	function toURLEncodedForm(data, options) {
-	  return toFormData$1(data, new platform.classes.URLSearchParams(), Object.assign({
+	  return toFormData$1(data, new platform.classes.URLSearchParams(), {
 	    visitor: function (value, key, path, helpers) {
 	      if (platform.isNode && utils$1.isBuffer(value)) {
 	        this.append(key, value.toString('base64'));
 	        return false;
 	      }
 	      return helpers.defaultVisitor.apply(this, arguments);
-	    }
-	  }, options));
+	    },
+	    ...options
+	  });
 	}
 
 	/**
@@ -26663,7 +26698,7 @@ void main() {
 	      clearTimeout(timer);
 	      timer = null;
 	    }
-	    fn.apply(null, args);
+	    fn(...args);
 	  };
 	  const throttled = (...args) => {
 	    const now = Date.now();
@@ -26889,7 +26924,10 @@ void main() {
 	    validateStatus: mergeDirectKeys,
 	    headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
 	  };
-	  utils$1.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
+	  utils$1.forEach(Object.keys({
+	    ...config1,
+	    ...config2
+	  }), function computeConfigValue(prop) {
 	    const merge = mergeMap[prop] || mergeDeepProperties;
 	    const configValue = merge(config1[prop], config2[prop], prop);
 	    utils$1.isUndefined(configValue) && merge !== mergeDirectKeys || (config[prop] = configValue);
@@ -27495,7 +27533,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.10.0";
+	const VERSION$1 = "1.11.0";
 
 	const validators$1 = {};
 
@@ -27704,8 +27742,8 @@ void main() {
 	    let len;
 	    if (!synchronousRequestInterceptors) {
 	      const chain = [dispatchRequest.bind(this), undefined];
-	      chain.unshift.apply(chain, requestInterceptorChain);
-	      chain.push.apply(chain, responseInterceptorChain);
+	      chain.unshift(...requestInterceptorChain);
+	      chain.push(...responseInterceptorChain);
 	      len = chain.length;
 	      promise = Promise.resolve(config);
 	      while (i < len) {
