@@ -24927,7 +24927,7 @@ void main() {
 	 * @returns {boolean} True if value is a Buffer, otherwise false
 	 */
 	function isBuffer(val) {
-	  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);
+	  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && isFunction$1(val.constructor.isBuffer) && val.constructor.isBuffer(val);
 	}
 
 	/**
@@ -24971,7 +24971,7 @@ void main() {
 	 * @param {*} val The value to test
 	 * @returns {boolean} True if value is a Function, otherwise false
 	 */
-	const isFunction = typeOfTest('function');
+	const isFunction$1 = typeOfTest('function');
 
 	/**
 	 * Determine if a value is a Number
@@ -25077,7 +25077,7 @@ void main() {
 	 *
 	 * @returns {boolean} True if value is a Stream, otherwise false
 	 */
-	const isStream = val => isObject(val) && isFunction(val.pipe);
+	const isStream = val => isObject(val) && isFunction$1(val.pipe);
 
 	/**
 	 * Determine if a value is a FormData
@@ -25088,9 +25088,9 @@ void main() {
 	 */
 	const isFormData = thing => {
 	  let kind;
-	  return thing && (typeof FormData === 'function' && thing instanceof FormData || isFunction(thing.append) && ((kind = kindOf(thing)) === 'formdata' ||
+	  return thing && (typeof FormData === 'function' && thing instanceof FormData || isFunction$1(thing.append) && ((kind = kindOf(thing)) === 'formdata' ||
 	  // detect form-data instance
-	  kind === 'object' && isFunction(thing.toString) && thing.toString() === '[object FormData]'));
+	  kind === 'object' && isFunction$1(thing.toString) && thing.toString() === '[object FormData]'));
 	};
 
 	/**
@@ -25207,7 +25207,8 @@ void main() {
 	function merge(/* obj1, obj2, obj3, ... */
 	) {
 	  const {
-	    caseless
+	    caseless,
+	    skipUndefined
 	  } = isContextDefined(this) && this || {};
 	  const result = {};
 	  const assignValue = (val, key) => {
@@ -25219,7 +25220,9 @@ void main() {
 	    } else if (isArray(val)) {
 	      result[targetKey] = val.slice();
 	    } else {
-	      result[targetKey] = val;
+	      if (!skipUndefined || !isUndefined(val)) {
+	        result[targetKey] = val;
+	      }
 	    }
 	  };
 	  for (let i = 0, l = arguments.length; i < l; i++) {
@@ -25242,7 +25245,7 @@ void main() {
 	  allOwnKeys
 	} = {}) => {
 	  forEach(b, (val, key) => {
-	    if (thisArg && isFunction(val)) {
+	    if (thisArg && isFunction$1(val)) {
 	      a[key] = bind(val, thisArg);
 	    } else {
 	      a[key] = val;
@@ -25447,11 +25450,11 @@ void main() {
 	const freezeMethods = obj => {
 	  reduceDescriptors(obj, (descriptor, name) => {
 	    // skip restricted props in strict mode
-	    if (isFunction(obj) && ['arguments', 'caller', 'callee'].indexOf(name) !== -1) {
+	    if (isFunction$1(obj) && ['arguments', 'caller', 'callee'].indexOf(name) !== -1) {
 	      return false;
 	    }
 	    const value = obj[name];
-	    if (!isFunction(value)) return;
+	    if (!isFunction$1(value)) return;
 	    descriptor.enumerable = false;
 	    if ('writable' in descriptor) {
 	      descriptor.writable = false;
@@ -25487,7 +25490,7 @@ void main() {
 	 * @returns {boolean}
 	 */
 	function isSpecCompliantForm(thing) {
-	  return !!(thing && isFunction(thing.append) && thing[toStringTag] === 'FormData' && thing[iterator]);
+	  return !!(thing && isFunction$1(thing.append) && thing[toStringTag] === 'FormData' && thing[iterator]);
 	}
 	const toJSONObject = obj => {
 	  const stack = new Array(10);
@@ -25517,7 +25520,7 @@ void main() {
 	  return visit(obj, 0);
 	};
 	const isAsyncFn = kindOfTest('AsyncFunction');
-	const isThenable = thing => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
+	const isThenable = thing => thing && (isObject(thing) || isFunction$1(thing)) && isFunction$1(thing.then) && isFunction$1(thing.catch);
 
 	// original code
 	// https://github.com/DigitalBrainJS/AxiosPromise/blob/16deab13710ec09779922131f3fa5954320f83ab/lib/utils.js#L11-L34
@@ -25540,12 +25543,12 @@ void main() {
 	      _global.postMessage(token, "*");
 	    };
 	  })(`axios@${Math.random()}`, []) : cb => setTimeout(cb);
-	})(typeof setImmediate === 'function', isFunction(_global.postMessage));
+	})(typeof setImmediate === 'function', isFunction$1(_global.postMessage));
 	const asap = typeof queueMicrotask !== 'undefined' ? queueMicrotask.bind(_global) : typeof process !== 'undefined' && process.nextTick || _setImmediate;
 
 	// *********************
 
-	const isIterable = thing => thing != null && isFunction(thing[iterator]);
+	const isIterable = thing => thing != null && isFunction$1(thing[iterator]);
 	var utils$1 = {
 	  isArray,
 	  isArrayBuffer,
@@ -25567,7 +25570,7 @@ void main() {
 	  isFile,
 	  isBlob,
 	  isRegExp,
-	  isFunction,
+	  isFunction: isFunction$1,
 	  isStream,
 	  isURLSearchParams,
 	  isTypedArray,
@@ -25678,9 +25681,20 @@ void main() {
 	  }, prop => {
 	    return prop !== 'isAxiosError';
 	  });
-	  AxiosError$1.call(axiosError, error.message, code, config, request, response);
-	  axiosError.cause = error;
-	  axiosError.name = error.name;
+	  const msg = error && error.message ? error.message : 'Error';
+
+	  // Prefer explicit code; otherwise copy the low-level error's code (e.g. ECONNREFUSED)
+	  const errCode = code == null && error ? error.code : code;
+	  AxiosError$1.call(axiosError, msg, errCode, config, request, response);
+
+	  // Chain the original error on the standard field; non-enumerable to avoid JSON noise
+	  if (error && axiosError.cause == null) {
+	    Object.defineProperty(axiosError, 'cause', {
+	      value: error,
+	      configurable: true
+	    });
+	  }
+	  axiosError.name = error && error.name || 'Error';
 	  customProps && Object.assign(axiosError, customProps);
 	  return axiosError;
 	};
@@ -25928,7 +25942,7 @@ void main() {
 	 * @returns {string} The encoded value.
 	 */
 	function encode(val) {
-	  return encodeURIComponent(val).replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, '+').replace(/%5B/gi, '[').replace(/%5D/gi, ']');
+	  return encodeURIComponent(val).replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, '+');
 	}
 
 	/**
@@ -26275,7 +26289,7 @@ void main() {
 	      const silentJSONParsing = transitional && transitional.silentJSONParsing;
 	      const strictJSONParsing = !silentJSONParsing && JSONRequested;
 	      try {
-	        return JSON.parse(data);
+	        return JSON.parse(data, this.parseReviver);
 	      } catch (e) {
 	        if (strictJSONParsing) {
 	          if (e.name === 'SyntaxError') {
@@ -26967,14 +26981,19 @@ void main() {
 	  if (auth) {
 	    headers.set('Authorization', 'Basic ' + btoa((auth.username || '') + ':' + (auth.password ? unescape(encodeURIComponent(auth.password)) : '')));
 	  }
-	  let contentType;
 	  if (utils$1.isFormData(data)) {
 	    if (platform.hasStandardBrowserEnv || platform.hasStandardBrowserWebWorkerEnv) {
-	      headers.setContentType(undefined); // Let the browser set it
-	    } else if ((contentType = headers.getContentType()) !== false) {
-	      // fix semicolon duplication issue for ReactNative FormData implementation
-	      const [type, ...tokens] = contentType ? contentType.split(';').map(token => token.trim()).filter(Boolean) : [];
-	      headers.setContentType([type || 'multipart/form-data', ...tokens].join('; '));
+	      headers.setContentType(undefined); // browser handles it
+	    } else if (utils$1.isFunction(data.getHeaders)) {
+	      // Node.js FormData (like form-data package)
+	      const formHeaders = data.getHeaders();
+	      // Only set safe headers to avoid overwriting security headers
+	      const allowedHeaders = ['content-type', 'content-length'];
+	      Object.entries(formHeaders).forEach(([key, val]) => {
+	        if (allowedHeaders.includes(key.toLowerCase())) {
+	          headers.set(key, val);
+	        }
+	      });
 	    }
 	  }
 
@@ -27082,12 +27101,15 @@ void main() {
 	    };
 
 	    // Handle low level network errors
-	    request.onerror = function handleError() {
-	      // Real errors are hidden from us by the browser
-	      // onerror should only fire if it's a network error
-	      reject(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request));
-
-	      // Clean up request
+	    request.onerror = function handleError(event) {
+	      // Browsers deliver a ProgressEvent in XHR onerror
+	      // (message may be empty; when present, surface it)
+	      // See https://developer.mozilla.org/docs/Web/API/XMLHttpRequest/error_event
+	      const msg = event && event.message ? event.message : 'Network Error';
+	      const err = new AxiosError$1(msg, AxiosError$1.ERR_NETWORK, config, request);
+	      // attach the underlying event for consumers who want details
+	      err.event = event || null;
+	      reject(err);
 	      request = null;
 	    };
 
@@ -27283,11 +27305,23 @@ void main() {
 	  });
 	};
 
-	const isFetchSupported = typeof fetch === 'function' && typeof Request === 'function' && typeof Response === 'function';
-	const isReadableStreamSupported = isFetchSupported && typeof ReadableStream === 'function';
-
-	// used only inside the fetch adapter
-	const encodeText = isFetchSupported && (typeof TextEncoder === 'function' ? (encoder => str => encoder.encode(str))(new TextEncoder()) : async str => new Uint8Array(await new Response(str).arrayBuffer()));
+	const DEFAULT_CHUNK_SIZE = 64 * 1024;
+	const {
+	  isFunction
+	} = utils$1;
+	const globalFetchAPI = (({
+	  fetch,
+	  Request,
+	  Response
+	}) => ({
+	  fetch,
+	  Request,
+	  Response
+	}))(utils$1.global);
+	const {
+	  ReadableStream: ReadableStream$1,
+	  TextEncoder
+	} = utils$1.global;
 	const test = (fn, ...args) => {
 	  try {
 	    return !!fn(...args);
@@ -27295,154 +27329,200 @@ void main() {
 	    return false;
 	  }
 	};
-	const supportsRequestStream = isReadableStreamSupported && test(() => {
-	  let duplexAccessed = false;
-	  const hasContentType = new Request(platform.origin, {
-	    body: new ReadableStream(),
-	    method: 'POST',
-	    get duplex() {
-	      duplexAccessed = true;
-	      return 'half';
-	    }
-	  }).headers.has('Content-Type');
-	  return duplexAccessed && !hasContentType;
-	});
-	const DEFAULT_CHUNK_SIZE = 64 * 1024;
-	const supportsResponseStream = isReadableStreamSupported && test(() => utils$1.isReadableStream(new Response('').body));
-	const resolvers = {
-	  stream: supportsResponseStream && (res => res.body)
-	};
-	isFetchSupported && (res => {
-	  ['text', 'arrayBuffer', 'blob', 'formData', 'stream'].forEach(type => {
-	    !resolvers[type] && (resolvers[type] = utils$1.isFunction(res[type]) ? res => res[type]() : (_, config) => {
-	      throw new AxiosError$1(`Response type '${type}' is not supported`, AxiosError$1.ERR_NOT_SUPPORT, config);
-	    });
-	  });
-	})(new Response());
-	const getBodyLength = async body => {
-	  if (body == null) {
-	    return 0;
+	const factory = env => {
+	  const {
+	    fetch,
+	    Request,
+	    Response
+	  } = Object.assign({}, globalFetchAPI, env);
+	  const isFetchSupported = isFunction(fetch);
+	  const isRequestSupported = isFunction(Request);
+	  const isResponseSupported = isFunction(Response);
+	  if (!isFetchSupported) {
+	    return false;
 	  }
-	  if (utils$1.isBlob(body)) {
-	    return body.size;
-	  }
-	  if (utils$1.isSpecCompliantForm(body)) {
-	    const _request = new Request(platform.origin, {
+	  const isReadableStreamSupported = isFetchSupported && isFunction(ReadableStream$1);
+	  const encodeText = isFetchSupported && (typeof TextEncoder === 'function' ? (encoder => str => encoder.encode(str))(new TextEncoder()) : async str => new Uint8Array(await new Request(str).arrayBuffer()));
+	  const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
+	    let duplexAccessed = false;
+	    const hasContentType = new Request(platform.origin, {
+	      body: new ReadableStream$1(),
 	      method: 'POST',
-	      body
-	    });
-	    return (await _request.arrayBuffer()).byteLength;
-	  }
-	  if (utils$1.isArrayBufferView(body) || utils$1.isArrayBuffer(body)) {
-	    return body.byteLength;
-	  }
-	  if (utils$1.isURLSearchParams(body)) {
-	    body = body + '';
-	  }
-	  if (utils$1.isString(body)) {
-	    return (await encodeText(body)).byteLength;
-	  }
-	};
-	const resolveBodyLength = async (headers, body) => {
-	  const length = utils$1.toFiniteNumber(headers.getContentLength());
-	  return length == null ? getBodyLength(body) : length;
-	};
-	var fetchAdapter = isFetchSupported && (async config => {
-	  let {
-	    url,
-	    method,
-	    data,
-	    signal,
-	    cancelToken,
-	    timeout,
-	    onDownloadProgress,
-	    onUploadProgress,
-	    responseType,
-	    headers,
-	    withCredentials = 'same-origin',
-	    fetchOptions
-	  } = resolveConfig(config);
-	  responseType = responseType ? (responseType + '').toLowerCase() : 'text';
-	  let composedSignal = composeSignals([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
-	  let request;
-	  const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
-	    composedSignal.unsubscribe();
+	      get duplex() {
+	        duplexAccessed = true;
+	        return 'half';
+	      }
+	    }).headers.has('Content-Type');
+	    return duplexAccessed && !hasContentType;
 	  });
-	  let requestContentLength;
-	  try {
-	    if (onUploadProgress && supportsRequestStream && method !== 'get' && method !== 'head' && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
-	      let _request = new Request(url, {
+	  const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test(() => utils$1.isReadableStream(new Response('').body));
+	  const resolvers = {
+	    stream: supportsResponseStream && (res => res.body)
+	  };
+	  isFetchSupported && (() => {
+	    ['text', 'arrayBuffer', 'blob', 'formData', 'stream'].forEach(type => {
+	      !resolvers[type] && (resolvers[type] = (res, config) => {
+	        let method = res && res[type];
+	        if (method) {
+	          return method.call(res);
+	        }
+	        throw new AxiosError$1(`Response type '${type}' is not supported`, AxiosError$1.ERR_NOT_SUPPORT, config);
+	      });
+	    });
+	  })();
+	  const getBodyLength = async body => {
+	    if (body == null) {
+	      return 0;
+	    }
+	    if (utils$1.isBlob(body)) {
+	      return body.size;
+	    }
+	    if (utils$1.isSpecCompliantForm(body)) {
+	      const _request = new Request(platform.origin, {
 	        method: 'POST',
-	        body: data,
-	        duplex: "half"
+	        body
 	      });
-	      let contentTypeHeader;
-	      if (utils$1.isFormData(data) && (contentTypeHeader = _request.headers.get('content-type'))) {
-	        headers.setContentType(contentTypeHeader);
-	      }
-	      if (_request.body) {
-	        const [onProgress, flush] = progressEventDecorator(requestContentLength, progressEventReducer(asyncDecorator(onUploadProgress)));
-	        data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
-	      }
+	      return (await _request.arrayBuffer()).byteLength;
 	    }
-	    if (!utils$1.isString(withCredentials)) {
-	      withCredentials = withCredentials ? 'include' : 'omit';
+	    if (utils$1.isArrayBufferView(body) || utils$1.isArrayBuffer(body)) {
+	      return body.byteLength;
 	    }
+	    if (utils$1.isURLSearchParams(body)) {
+	      body = body + '';
+	    }
+	    if (utils$1.isString(body)) {
+	      return (await encodeText(body)).byteLength;
+	    }
+	  };
+	  const resolveBodyLength = async (headers, body) => {
+	    const length = utils$1.toFiniteNumber(headers.getContentLength());
+	    return length == null ? getBodyLength(body) : length;
+	  };
+	  return async config => {
+	    let {
+	      url,
+	      method,
+	      data,
+	      signal,
+	      cancelToken,
+	      timeout,
+	      onDownloadProgress,
+	      onUploadProgress,
+	      responseType,
+	      headers,
+	      withCredentials = 'same-origin',
+	      fetchOptions
+	    } = resolveConfig(config);
+	    responseType = responseType ? (responseType + '').toLowerCase() : 'text';
+	    let composedSignal = composeSignals([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
+	    let request = null;
+	    const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
+	      composedSignal.unsubscribe();
+	    });
+	    let requestContentLength;
+	    try {
+	      if (onUploadProgress && supportsRequestStream && method !== 'get' && method !== 'head' && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
+	        let _request = new Request(url, {
+	          method: 'POST',
+	          body: data,
+	          duplex: "half"
+	        });
+	        let contentTypeHeader;
+	        if (utils$1.isFormData(data) && (contentTypeHeader = _request.headers.get('content-type'))) {
+	          headers.setContentType(contentTypeHeader);
+	        }
+	        if (_request.body) {
+	          const [onProgress, flush] = progressEventDecorator(requestContentLength, progressEventReducer(asyncDecorator(onUploadProgress)));
+	          data = trackStream(_request.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
+	        }
+	      }
+	      if (!utils$1.isString(withCredentials)) {
+	        withCredentials = withCredentials ? 'include' : 'omit';
+	      }
 
-	    // Cloudflare Workers throws when credentials are defined
-	    // see https://github.com/cloudflare/workerd/issues/902
-	    const isCredentialsSupported = "credentials" in Request.prototype;
-	    request = new Request(url, {
-	      ...fetchOptions,
-	      signal: composedSignal,
-	      method: method.toUpperCase(),
-	      headers: headers.normalize().toJSON(),
-	      body: data,
-	      duplex: "half",
-	      credentials: isCredentialsSupported ? withCredentials : undefined
-	    });
-	    let response = await fetch(request, fetchOptions);
-	    const isStreamResponse = supportsResponseStream && (responseType === 'stream' || responseType === 'response');
-	    if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
-	      const options = {};
-	      ['status', 'statusText', 'headers'].forEach(prop => {
-	        options[prop] = response[prop];
+	      // Cloudflare Workers throws when credentials are defined
+	      // see https://github.com/cloudflare/workerd/issues/902
+	      const isCredentialsSupported = isRequestSupported && "credentials" in Request.prototype;
+	      const resolvedOptions = {
+	        ...fetchOptions,
+	        signal: composedSignal,
+	        method: method.toUpperCase(),
+	        headers: headers.normalize().toJSON(),
+	        body: data,
+	        duplex: "half",
+	        credentials: isCredentialsSupported ? withCredentials : undefined
+	      };
+	      request = isRequestSupported && new Request(url, resolvedOptions);
+	      let response = await (isRequestSupported ? fetch(request, fetchOptions) : fetch(url, resolvedOptions));
+	      const isStreamResponse = supportsResponseStream && (responseType === 'stream' || responseType === 'response');
+	      if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
+	        const options = {};
+	        ['status', 'statusText', 'headers'].forEach(prop => {
+	          options[prop] = response[prop];
+	        });
+	        const responseContentLength = utils$1.toFiniteNumber(response.headers.get('content-length'));
+	        const [onProgress, flush] = onDownloadProgress && progressEventDecorator(responseContentLength, progressEventReducer(asyncDecorator(onDownloadProgress), true)) || [];
+	        response = new Response(trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
+	          flush && flush();
+	          unsubscribe && unsubscribe();
+	        }), options);
+	      }
+	      responseType = responseType || 'text';
+	      let responseData = await resolvers[utils$1.findKey(resolvers, responseType) || 'text'](response, config);
+	      !isStreamResponse && unsubscribe && unsubscribe();
+	      return await new Promise((resolve, reject) => {
+	        settle(resolve, reject, {
+	          data: responseData,
+	          headers: AxiosHeaders$1.from(response.headers),
+	          status: response.status,
+	          statusText: response.statusText,
+	          config,
+	          request
+	        });
 	      });
-	      const responseContentLength = utils$1.toFiniteNumber(response.headers.get('content-length'));
-	      const [onProgress, flush] = onDownloadProgress && progressEventDecorator(responseContentLength, progressEventReducer(asyncDecorator(onDownloadProgress), true)) || [];
-	      response = new Response(trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
-	        flush && flush();
-	        unsubscribe && unsubscribe();
-	      }), options);
+	    } catch (err) {
+	      unsubscribe && unsubscribe();
+	      if (err && err.name === 'TypeError' && /Load failed|fetch/i.test(err.message)) {
+	        throw Object.assign(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request), {
+	          cause: err.cause || err
+	        });
+	      }
+	      throw AxiosError$1.from(err, err && err.code, config, request);
 	    }
-	    responseType = responseType || 'text';
-	    let responseData = await resolvers[utils$1.findKey(resolvers, responseType) || 'text'](response, config);
-	    !isStreamResponse && unsubscribe && unsubscribe();
-	    return await new Promise((resolve, reject) => {
-	      settle(resolve, reject, {
-	        data: responseData,
-	        headers: AxiosHeaders$1.from(response.headers),
-	        status: response.status,
-	        statusText: response.statusText,
-	        config,
-	        request
-	      });
-	    });
-	  } catch (err) {
-	    unsubscribe && unsubscribe();
-	    if (err && err.name === 'TypeError' && /Load failed|fetch/i.test(err.message)) {
-	      throw Object.assign(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request), {
-	        cause: err.cause || err
-	      });
-	    }
-	    throw AxiosError$1.from(err, err && err.code, config, request);
+	  };
+	};
+	const seedCache = new Map();
+	const getFetch = config => {
+	  let env = utils$1.merge.call({
+	    skipUndefined: true
+	  }, globalFetchAPI, config ? config.env : null);
+	  const {
+	    fetch,
+	    Request,
+	    Response
+	  } = env;
+	  const seeds = [Request, Response, fetch];
+	  let len = seeds.length,
+	    i = len,
+	    seed,
+	    target,
+	    map = seedCache;
+	  while (i--) {
+	    seed = seeds[i];
+	    target = map.get(seed);
+	    target === undefined && map.set(seed, target = i ? new Map() : factory(env));
+	    map = target;
 	  }
-	});
+	  return target;
+	};
+	getFetch();
 
 	const knownAdapters = {
 	  http: httpAdapter,
 	  xhr: xhrAdapter,
-	  fetch: fetchAdapter
+	  fetch: {
+	    get: getFetch
+	  }
 	};
 	utils$1.forEach(knownAdapters, (fn, value) => {
 	  if (fn) {
@@ -27461,7 +27541,7 @@ void main() {
 	const renderReason = reason => `- ${reason}`;
 	const isResolvedHandle = adapter => utils$1.isFunction(adapter) || adapter === null || adapter === false;
 	var adapters = {
-	  getAdapter: adapters => {
+	  getAdapter: (adapters, config) => {
 	    adapters = utils$1.isArray(adapters) ? adapters : [adapters];
 	    const {
 	      length
@@ -27479,7 +27559,7 @@ void main() {
 	          throw new AxiosError$1(`Unknown adapter '${id}'`);
 	        }
 	      }
-	      if (adapter) {
+	      if (adapter && (utils$1.isFunction(adapter) || (adapter = adapter.get(config)))) {
 	        break;
 	      }
 	      rejectedReasons[id || '#' + i] = adapter;
@@ -27526,7 +27606,7 @@ void main() {
 	  if (['post', 'put', 'patch'].indexOf(config.method) !== -1) {
 	    config.headers.setContentType('application/x-www-form-urlencoded', false);
 	  }
-	  const adapter = adapters.getAdapter(config.adapter || defaults.adapter);
+	  const adapter = adapters.getAdapter(config.adapter || defaults.adapter, config);
 	  return adapter(config).then(function onAdapterResolution(response) {
 	    throwIfCancellationRequested(config);
 
@@ -27548,7 +27628,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.11.0";
+	const VERSION$1 = "1.12.0";
 
 	const validators$1 = {};
 
