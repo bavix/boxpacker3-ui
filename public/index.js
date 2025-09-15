@@ -25219,10 +25219,8 @@ void main() {
 	      result[targetKey] = merge({}, val);
 	    } else if (isArray(val)) {
 	      result[targetKey] = val.slice();
-	    } else {
-	      if (!skipUndefined || !isUndefined(val)) {
-	        result[targetKey] = val;
-	      }
+	    } else if (!skipUndefined || !isUndefined(val)) {
+	      result[targetKey] = val;
 	    }
 	  };
 	  for (let i = 0, l = arguments.length; i < l; i++) {
@@ -27310,11 +27308,9 @@ void main() {
 	  isFunction
 	} = utils$1;
 	const globalFetchAPI = (({
-	  fetch,
 	  Request,
 	  Response
 	}) => ({
-	  fetch,
 	  Request,
 	  Response
 	}))(utils$1.global);
@@ -27330,12 +27326,15 @@ void main() {
 	  }
 	};
 	const factory = env => {
+	  env = utils$1.merge.call({
+	    skipUndefined: true
+	  }, globalFetchAPI, env);
 	  const {
-	    fetch,
+	    fetch: envFetch,
 	    Request,
 	    Response
-	  } = Object.assign({}, globalFetchAPI, env);
-	  const isFetchSupported = isFunction(fetch);
+	  } = env;
+	  const isFetchSupported = envFetch ? isFunction(envFetch) : typeof fetch === 'function';
 	  const isRequestSupported = isFunction(Request);
 	  const isResponseSupported = isFunction(Response);
 	  if (!isFetchSupported) {
@@ -27413,6 +27412,7 @@ void main() {
 	      withCredentials = 'same-origin',
 	      fetchOptions
 	    } = resolveConfig(config);
+	    let _fetch = envFetch || fetch;
 	    responseType = responseType ? (responseType + '').toLowerCase() : 'text';
 	    let composedSignal = composeSignals([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
 	    let request = null;
@@ -27453,7 +27453,7 @@ void main() {
 	        credentials: isCredentialsSupported ? withCredentials : undefined
 	      };
 	      request = isRequestSupported && new Request(url, resolvedOptions);
-	      let response = await (isRequestSupported ? fetch(request, fetchOptions) : fetch(url, resolvedOptions));
+	      let response = await (isRequestSupported ? _fetch(request, fetchOptions) : _fetch(url, resolvedOptions));
 	      const isStreamResponse = supportsResponseStream && (responseType === 'stream' || responseType === 'response');
 	      if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
 	        const options = {};
@@ -27493,9 +27493,7 @@ void main() {
 	};
 	const seedCache = new Map();
 	const getFetch = config => {
-	  let env = utils$1.merge.call({
-	    skipUndefined: true
-	  }, globalFetchAPI, config ? config.env : null);
+	  let env = config ? config.env : {};
 	  const {
 	    fetch,
 	    Request,
@@ -27628,7 +27626,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.12.0";
+	const VERSION$1 = "1.12.2";
 
 	const validators$1 = {};
 
@@ -27848,7 +27846,6 @@ void main() {
 	    }
 	    len = requestInterceptorChain.length;
 	    let newConfig = config;
-	    i = 0;
 	    while (i < len) {
 	      const onFulfilled = requestInterceptorChain[i++];
 	      const onRejected = requestInterceptorChain[i++];
