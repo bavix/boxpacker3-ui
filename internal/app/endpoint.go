@@ -81,8 +81,13 @@ type boxPack struct {
 }
 
 type request struct {
-	Boxes []box  `json:"boxes"`
-	Items []item `json:"items"`
+	Boxes    []box           `json:"boxes"`
+	Items    []item          `json:"items"`
+	Strategy *packingStrategy `json:"strategy,omitempty"`
+}
+
+type packingStrategy struct {
+	Value int `json:"value"`
 }
 
 type response struct {
@@ -110,7 +115,12 @@ func Bp3Handle(w http.ResponseWriter, req *http.Request) {
 		items = append(items, boxpacker3.NewItem(item.ID, item.Width, item.Height, item.Depth, item.Weight))
 	}
 
-	packer := boxpacker3.NewPacker()
+	var opts []boxpacker3.PackerOption
+	if t.Strategy != nil {
+		opts = append(opts, boxpacker3.WithStrategy(boxpacker3.PackingStrategy(t.Strategy.Value)))
+	}
+
+	packer := boxpacker3.NewPacker(opts...)
 
 	packResult := packer.Pack(boxes, items)
 

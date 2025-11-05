@@ -1,0 +1,13 @@
+# Fill one box - Small box with items
+# Format: width;height;depth;weight;type
+# type: 0 = box, 1 = item
+
+# Box
+220;185;50;20000;0
+
+# Items to fill the box
+100;80;40;500;1
+80;60;30;400;1
+60;50;25;300;1
+50;40;20;250;1
+40;30;20;200;1

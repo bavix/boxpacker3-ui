@@ -1,5 +1,8 @@
 body {overflow: hidden;margin: 0;}
-.container {max-width: 100% !important;}
-.columns {margin-left: 0; margin-right: 0;}
+.container {max-width: 100% !important; height: 100vh;}
+.columns {margin-left: 0; margin-right: 0; height: 100vh;}
 .columns .column {padding-left: 0;padding-right: 0;}
+.column.is-one-quarter {overflow-y: auto; height: 100vh;}
 .column .panel {margin: 0.5rem;}
+.panel-block.is-active {background-color: #f5f5f5;}
+.slider {width: 100%;}

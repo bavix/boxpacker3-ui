@@ -8750,7 +8750,124 @@
 			 * An array of perspective sub cameras.
 			 *
 			 * @type {Array<PerspectiveCamera>}
-			 */this.cameras=array;}}/**
+			 */this.cameras=array;}}const _matrix$1=/*@__PURE__*/new Matrix4$1();/**
+	 * This class is designed to assist with raycasting. Raycasting is used for
+	 * mouse picking (working out what objects in the 3d space the mouse is over)
+	 * amongst other things.
+	 */class Raycaster{/**
+		 * Constructs a new raycaster.
+		 *
+		 * @param {Vector3} origin - The origin vector where the ray casts from.
+		 * @param {Vector3} direction - The (normalized) direction vector that gives direction to the ray.
+		 * @param {number} [near=0] - All results returned are further away than near. Near can't be negative.
+		 * @param {number} [far=Infinity] - All results returned are closer than far. Far can't be lower than near.
+		 */constructor(origin,direction,near=0,far=Infinity){/**
+			 * The ray used for raycasting.
+			 *
+			 * @type {Ray}
+			 */this.ray=new Ray(origin,direction);/**
+			 * All results returned are further away than near. Near can't be negative.
+			 *
+			 * @type {number}
+			 * @default 0
+			 */this.near=near;/**
+			 * All results returned are further away than near. Near can't be negative.
+			 *
+			 * @type {number}
+			 * @default Infinity
+			 */this.far=far;/**
+			 * The camera to use when raycasting against view-dependent objects such as
+			 * billboarded objects like sprites. This field can be set manually or
+			 * is set when calling `setFromCamera()`.
+			 *
+			 * @type {?Camera}
+			 * @default null
+			 */this.camera=null;/**
+			 * Allows to selectively ignore 3D objects when performing intersection tests.
+			 * The following code example ensures that only 3D objects on layer `1` will be
+			 * honored by raycaster.
+			 * ```js
+			 * raycaster.layers.set( 1 );
+			 * object.layers.enable( 1 );
+			 * ```
+			 *
+			 * @type {Layers}
+			 */this.layers=new Layers$1();/**
+			 * A parameter object that configures the raycasting. It has the structure:
+			 *
+			 * ```
+			 * {
+			 * 	Mesh: {},
+			 * 	Line: { threshold: 1 },
+			 * 	LOD: {},
+			 * 	Points: { threshold: 1 },
+			 * 	Sprite: {}
+			 * }
+			 * ```
+			 * Where `threshold` is the precision of the raycaster when intersecting objects, in world units.
+			 *
+			 * @type {Object}
+			 */this.params={Mesh:{},Line:{threshold:1},LOD:{},Points:{threshold:1},Sprite:{}};}/**
+		 * Updates the ray with a new origin and direction by copying the values from the arguments.
+		 *
+		 * @param {Vector3} origin - The origin vector where the ray casts from.
+		 * @param {Vector3} direction - The (normalized) direction vector that gives direction to the ray.
+		 */set(origin,direction){// direction is assumed to be normalized (for accurate distance calculations)
+	this.ray.set(origin,direction);}/**
+		 * Uses the given coordinates and camera to compute a new origin and direction for the internal ray.
+		 *
+		 * @param {Vector2} coords - 2D coordinates of the mouse, in normalized device coordinates (NDC).
+		 * X and Y components should be between `-1` and `1`.
+		 * @param {Camera} camera - The camera from which the ray should originate.
+		 */setFromCamera(coords,camera){if(camera.isPerspectiveCamera){this.ray.origin.setFromMatrixPosition(camera.matrixWorld);this.ray.direction.set(coords.x,coords.y,0.5).unproject(camera).sub(this.ray.origin).normalize();this.camera=camera;}else if(camera.isOrthographicCamera){this.ray.origin.set(coords.x,coords.y,(camera.near+camera.far)/(camera.near-camera.far)).unproject(camera);// set origin in plane of camera
+	this.ray.direction.set(0,0,-1).transformDirection(camera.matrixWorld);this.camera=camera;}else {error$1('Raycaster: Unsupported camera type: '+camera.type);}}/**
+		 * Uses the given WebXR controller to compute a new origin and direction for the internal ray.
+		 *
+		 * @param {WebXRController} controller - The controller to copy the position and direction from.
+		 * @return {Raycaster} A reference to this raycaster.
+		 */setFromXRController(controller){_matrix$1.identity().extractRotation(controller.matrixWorld);this.ray.origin.setFromMatrixPosition(controller.matrixWorld);this.ray.direction.set(0,0,-1).applyMatrix4(_matrix$1);return this;}/**
+		 * The intersection point of a raycaster intersection test.
+		 * @typedef {Object} Raycaster~Intersection
+		 * @property {number} distance - The distance from the ray's origin to the intersection point.
+		 * @property {number} distanceToRay -  Some 3D objects e.g. {@link Points} provide the distance of the
+		 * intersection to the nearest point on the ray. For other objects it will be `undefined`.
+		 * @property {Vector3} point - The intersection point, in world coordinates.
+		 * @property {Object} face - The face that has been intersected.
+		 * @property {number} faceIndex - The face index.
+		 * @property {Object3D} object - The 3D object that has been intersected.
+		 * @property {Vector2} uv - U,V coordinates at point of intersection.
+		 * @property {Vector2} uv1 - Second set of U,V coordinates at point of intersection.
+		 * @property {Vector3} uv1 - Interpolated normal vector at point of intersection.
+		 * @property {number} instanceId - The index number of the instance where the ray
+		 * intersects the {@link InstancedMesh}.
+		 *//**
+		 * Checks all intersection between the ray and the object with or without the
+		 * descendants. Intersections are returned sorted by distance, closest first.
+		 *
+		 * `Raycaster` delegates to the `raycast()` method of the passed 3D object, when
+		 * evaluating whether the ray intersects the object or not. This allows meshes to respond
+		 * differently to ray casting than lines or points.
+		 *
+		 * Note that for meshes, faces must be pointed towards the origin of the ray in order
+		 * to be detected; intersections of the ray passing through the back of a face will not
+		 * be detected. To raycast against both faces of an object, you'll want to set  {@link Material#side}
+		 * to `THREE.DoubleSide`.
+		 *
+		 * @param {Object3D} object - The 3D object to check for intersection with the ray.
+		 * @param {boolean} [recursive=true] - If set to `true`, it also checks all descendants.
+		 * Otherwise it only checks intersection with the object.
+		 * @param {Array<Raycaster~Intersection>} [intersects=[]] The target array that holds the result of the method.
+		 * @return {Array<Raycaster~Intersection>} An array holding the intersection points.
+		 */intersectObject(object,recursive=true,intersects=[]){intersect(object,this,intersects,recursive);intersects.sort(ascSort);return intersects;}/**
+		 * Checks all intersection between the ray and the objects with or without
+		 * the descendants. Intersections are returned sorted by distance, closest first.
+		 *
+		 * @param {Array<Object3D>} objects - The 3D objects to check for intersection with the ray.
+		 * @param {boolean} [recursive=true] - If set to `true`, it also checks all descendants.
+		 * Otherwise it only checks intersection with the object.
+		 * @param {Array<Raycaster~Intersection>} [intersects=[]] The target array that holds the result of the method.
+		 * @return {Array<Raycaster~Intersection>} An array holding the intersection points.
+		 */intersectObjects(objects,recursive=true,intersects=[]){for(let i=0,l=objects.length;i<l;i++){intersect(objects[i],this,intersects,recursive);}intersects.sort(ascSort);return intersects;}}function ascSort(a,b){return a.distance-b.distance;}function intersect(object,raycaster,intersects,recursive){let propagate=true;if(object.layers.test(raycaster.layers)){const result=object.raycast(raycaster,intersects);if(result===false)propagate=false;}if(propagate===true&&recursive===true){const children=object.children;for(let i=0,l=children.length;i<l;i++){intersect(children[i],raycaster,intersects,true);}}}/**
 	 * This class can be used to represent points in 3D space as
 	 * [Spherical coordinates](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
 	 */class Spherical{/**
@@ -22531,7 +22648,7 @@ void main() {
 	      };
 	      BigInteger.prototype.toString = function (radix, alphabet) {
 	        if (radix === undefined$1) radix = 10;
-	        if (radix !== 10) return toBaseString(this, radix, alphabet);
+	        if (radix !== 10 || alphabet) return toBaseString(this, radix, alphabet);
 	        var v = this.value,
 	          l = v.length,
 	          str = String(v[--l]),
@@ -22546,7 +22663,7 @@ void main() {
 	      };
 	      SmallInteger.prototype.toString = function (radix, alphabet) {
 	        if (radix === undefined$1) radix = 10;
-	        if (radix != 10) return toBaseString(this, radix, alphabet);
+	        if (radix != 10 || alphabet) return toBaseString(this, radix, alphabet);
 	        return String(this.value);
 	      };
 	      NativeBigInt.prototype.toString = SmallInteger.prototype.toString;
@@ -23972,6 +24089,46 @@ void main() {
 
 	var libExports = /*@__PURE__*/ requireLib();
 
+	class CameraAnimation {
+	  constructor(camera, controls, targetPosition, targetLookAt, duration) {
+	    this.camera = camera;
+	    this.controls = controls;
+	    this.duration = duration;
+	    this.startTime = Date.now();
+	    this.startPosition = camera.position.clone();
+	    this.startLookAt = controls.target.clone();
+	    this.targetPosition = targetPosition.clone();
+	    this.targetLookAt = targetLookAt.clone();
+	    this.isActive = true;
+	  }
+	  update() {
+	    if (!this.isActive) return false;
+	    const elapsed = Date.now() - this.startTime;
+	    const progress = Math.min(elapsed / this.duration, 1);
+
+	    // Ease in-out cubic function for smooth animation
+	    const easedProgress = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+	    // Interpolate camera position using manual calculation
+	    this.camera.position.x = this.startPosition.x + (this.targetPosition.x - this.startPosition.x) * easedProgress;
+	    this.camera.position.y = this.startPosition.y + (this.targetPosition.y - this.startPosition.y) * easedProgress;
+	    this.camera.position.z = this.startPosition.z + (this.targetPosition.z - this.startPosition.z) * easedProgress;
+
+	    // Interpolate look-at target
+	    this.controls.target.x = this.startLookAt.x + (this.targetLookAt.x - this.startLookAt.x) * easedProgress;
+	    this.controls.target.y = this.startLookAt.y + (this.targetLookAt.y - this.startLookAt.y) * easedProgress;
+	    this.controls.target.z = this.startLookAt.z + (this.targetLookAt.z - this.startLookAt.z) * easedProgress;
+	    this.controls.update();
+	    if (progress >= 1) {
+	      this.isActive = false;
+	      return false;
+	    }
+	    return true;
+	  }
+	  stop() {
+	    this.isActive = false;
+	  }
+	}
 	class Playground {
 	  camera;
 	  scene;
@@ -23989,7 +24146,24 @@ void main() {
 	   * @type {[THREE.Mesh]}
 	   */
 	  items = [];
+
+	  /**
+	   * @type {Map<string, THREE.Mesh>}
+	   */
+	  boxMap = new Map();
+
+	  /**
+	   * @type {Map<string, THREE.Mesh>}
+	   */
+	  itemMap = new Map();
 	  materials = {};
+	  animationFrameId = null;
+	  selectedBox = null;
+	  onBoxSelect = null;
+	  animationSpeed = 1;
+	  showAnimation = true;
+	  cameraAnimation = null;
+	  boxList = [];
 	  constructor(container) {
 	    this.camera = new PerspectiveCamera(45, container.offsetWidth / window.innerHeight, 1, 80000);
 	    this.camera.position.set(-600, 550, 1300);
@@ -23999,7 +24173,8 @@ void main() {
 	    const canvasWidth = container.offsetWidth;
 	    const canvasHeight = window.innerHeight;
 	    this.renderer = new WebGLRenderer({
-	      antialias: true
+	      antialias: true,
+	      alpha: true
 	    });
 	    this.renderer.setPixelRatio(window.devicePixelRatio);
 	    this.renderer.setSize(canvasWidth, canvasHeight);
@@ -24008,8 +24183,21 @@ void main() {
 	    window.addEventListener('keydown', e => this.onKeyboard(e));
 	    this.cameraControls = new OrbitControls(this.camera, this.renderer.domElement);
 	    this.cameraControls.addEventListener('change', () => this.renderer.render(this.scene, this.camera));
+
+	    // Add click handler for box selection
+	    this.raycaster = new Raycaster();
+	    this.mouse = new Vector2$1();
+	    this.renderer.domElement.addEventListener('click', e => this.onCanvasClick(e));
 	    this.materials['wireframe'] = new MeshBasicMaterial({
-	      wireframe: true
+	      wireframe: true,
+	      color: 0x888888,
+	      transparent: true,
+	      opacity: 0.5
+	    });
+	    this.materials['wireframe_selected'] = new MeshBasicMaterial({
+	      wireframe: true,
+	      color: 0x00ff00,
+	      linewidth: 2
 	    });
 	    this.materials['flat'] = new MeshPhongMaterial({
 	      specular: 0x000000,
@@ -24023,15 +24211,84 @@ void main() {
 	      side: DoubleSide
 	    });
 	    this.scene = new Scene();
-	    this.scene.background = null;
+	    this.scene.background = new Color(0x0a0a0a); // Very dark background
+
 	    this.scene.add(this.ambientLight);
 	    this.scene.add(this.light);
+	    this.animate();
+	  }
+	  animate() {
+	    this.animationFrameId = requestAnimationFrame(() => this.animate());
+
+	    // Update camera animation if active
+	    if (this.cameraAnimation) {
+	      this.cameraAnimation.update();
+	    }
+	    this.cameraControls.update();
+	    this.renderer.render(this.scene, this.camera);
 	  }
 	  render(request) {
 	    if (request !== undefined && typeof request.boxes !== 'undefined' && request.boxes.length > 0) {
 	      this.createObjects(request);
 	    }
-	    this.renderer.render(this.scene, this.camera);
+	  }
+	  selectBox(boxId, animate = true) {
+	    if (this.selectedBox) {
+	      const oldBox = this.boxMap.get(this.selectedBox);
+	      if (oldBox) {
+	        oldBox.material = this.materials['wireframe'];
+	      }
+	    }
+	    this.selectedBox = boxId;
+	    const box = this.boxMap.get(boxId);
+	    if (box) {
+	      box.material = this.materials['wireframe_selected'];
+
+	      // Calculate optimal camera position
+	      const boxPosition = box.position.clone();
+	      const boxData = box.userData.boxData;
+	      Math.max(boxData.width, boxData.height, boxData.depth);
+
+	      // Calculate optimal viewing angle
+	      const diagonal = Math.sqrt(boxData.width * boxData.width + boxData.height * boxData.height + boxData.depth * boxData.depth);
+	      const distance = diagonal * 1.5; // Optimal distance for viewing
+
+	      // Calculate camera position with better angle
+	      const angle = Math.PI / 4; // 45 degrees
+	      const height = boxData.height * 0.7; // Slightly above center
+
+	      const targetPosition = new Vector3$1(boxPosition.x + Math.cos(angle) * distance, boxPosition.y + height, boxPosition.z + Math.sin(angle) * distance);
+	      const targetLookAt = new Vector3$1(boxPosition.x, boxPosition.y + boxData.height * 0.3, boxPosition.z);
+	      if (animate && this.cameraAnimation) {
+	        // Stop current animation
+	        this.cameraAnimation.stop();
+	      }
+	      if (animate) {
+	        // Animate camera movement
+	        this.cameraAnimation = new CameraAnimation(this.camera, this.cameraControls, targetPosition, targetLookAt, 1000 // 1 second animation
+	        );
+	      } else {
+	        // Instant move
+	        this.camera.position.copy(targetPosition);
+	        this.cameraControls.target.copy(targetLookAt);
+	        this.cameraControls.update();
+	      }
+	    }
+	    if (this.onBoxSelect) {
+	      this.onBoxSelect(boxId);
+	    }
+	  }
+	  selectNextBox() {
+	    if (this.boxList.length === 0) return;
+	    const currentIndex = this.boxList.findIndex(id => id === this.selectedBox);
+	    const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % this.boxList.length;
+	    this.selectBox(this.boxList[nextIndex]);
+	  }
+	  selectPreviousBox() {
+	    if (this.boxList.length === 0) return;
+	    const currentIndex = this.boxList.findIndex(id => id === this.selectedBox);
+	    const prevIndex = currentIndex === -1 ? this.boxList.length - 1 : (currentIndex - 1 + this.boxList.length) % this.boxList.length;
+	    this.selectBox(this.boxList[prevIndex]);
 	  }
 	  onWindowResize(e, container) {
 	    const canvasWidth = container.offsetWidth;
@@ -24042,30 +24299,66 @@ void main() {
 	    this.render();
 	  }
 	  onKeyboard(e) {
+	    // Navigation between boxes with Ctrl+Arrow keys
+	    if (e.ctrlKey || e.metaKey) {
+	      if (e.key === 'ArrowLeft') {
+	        e.preventDefault();
+	        this.selectPreviousBox();
+	        return;
+	      } else if (e.key === 'ArrowRight') {
+	        e.preventDefault();
+	        this.selectNextBox();
+	        return;
+	      }
+	    }
+
+	    // Camera movement with WASD or Arrow keys (without Ctrl)
 	    const delta = 200;
 	    switch (e.code) {
 	      case "KeyA":
-	      case "ArrowLeft":
-	        this.camera.position.set(this.camera.position.x - delta, this.camera.position.y, this.camera.position.z);
+	        if (!e.ctrlKey && !e.metaKey) {
+	          this.camera.position.set(this.camera.position.x - delta, this.camera.position.y, this.camera.position.z);
+	        }
 	        break;
 	      case "KeyW":
-	      case "ArrowUp":
-	        this.camera.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z - delta);
+	        if (!e.ctrlKey && !e.metaKey) {
+	          this.camera.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z - delta);
+	        }
 	        break;
 	      case "KeyD":
-	      case "ArrowRight":
-	        this.camera.position.set(this.camera.position.x + delta, this.camera.position.y, this.camera.position.z);
+	        if (!e.ctrlKey && !e.metaKey) {
+	          this.camera.position.set(this.camera.position.x + delta, this.camera.position.y, this.camera.position.z);
+	        }
 	        break;
 	      case "KeyS":
-	      case "ArrowDown":
-	        this.camera.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z + delta);
+	        if (!e.ctrlKey && !e.metaKey) {
+	          this.camera.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z + delta);
+	        }
 	        break;
 	    }
 	    this.cameraControls.update();
 	  }
+	  onCanvasClick(event) {
+	    const rect = this.renderer.domElement.getBoundingClientRect();
+	    this.mouse.x = (event.clientX - rect.left) / rect.width * 2 - 1;
+	    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+	    this.raycaster.setFromCamera(this.mouse, this.camera);
+	    const intersects = this.raycaster.intersectObjects(this.boxes, true);
+	    if (intersects.length > 0) {
+	      // Find the box mesh (not the item mesh)
+	      let boxMesh = intersects[0].object;
+	      while (boxMesh && !this.boxMap.has(boxMesh.userData?.boxId)) {
+	        boxMesh = boxMesh.parent;
+	      }
+	      if (boxMesh && boxMesh.userData?.boxId) {
+	        this.selectBox(boxMesh.userData.boxId);
+	      }
+	    }
+	  }
 	  destroy() {
 	    for (const item of this.items) {
 	      item.geometry.dispose();
+	      if (item.material) item.material.dispose();
 	      this.scene.remove(item);
 	    }
 	    for (const box of this.boxes) {
@@ -24074,58 +24367,137 @@ void main() {
 	    }
 	    this.boxes = [];
 	    this.items = [];
+	    this.boxMap.clear();
+	    this.itemMap.clear();
+	    this.selectedBox = null;
 	  }
 	  createObjects(request) {
 	    this.destroy();
+
+	    // Store box list for navigation
+	    this.boxList = request.boxes.map(box => box.id);
 	    const delta = 50;
 	    let point = {
 	      x: 0,
-	      y: 0,
 	      z: 0
 	    };
 	    let zMax = 0;
 
-	    // boxes
+	    // Create boxes first
 	    for (const box of request.boxes) {
 	      const boxGeometry = new BoxGeometry(box.width, box.height, box.depth);
 	      const boxMesh = new Mesh(boxGeometry, this.materials['wireframe']);
-	      point.x += box.width;
-	      boxMesh.position.set(point.x, point.y, point.z);
+	      point.x += box.width / 2;
+	      boxMesh.position.set(point.x, box.height / 2, point.z);
 	      this.boxes = this.boxes.concat(boxMesh);
+	      this.boxMap.set(box.id, boxMesh);
 	      this.scene.add(boxMesh);
-	      for (const item of box.items) {
-	        const color = libExports.colorFromUuid(item.id);
-	        const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
-	        const itemMesh = new Mesh(itemGeometry, new MeshPhongMaterial({
-	          color: color,
-	          flatShading: true,
-	          side: DoubleSide
-	        }));
-	        itemMesh.position.set(item.position.x - box.width / 2 + item.width / 2, item.position.y - box.height / 2 + item.height / 2, item.position.z - box.depth / 2 + item.depth / 2);
-	        this.items = this.items.concat(itemMesh);
-	        boxMesh.add(itemMesh);
+
+	      // Store box data for later use
+	      boxMesh.userData = {
+	        boxId: box.id,
+	        boxData: box,
+	        items: []
+	      };
+
+	      // Add items with animation
+	      if (this.showAnimation) {
+	        this.animateItemsIntoBox(boxMesh, box.items, box);
+	      } else {
+	        this.addItemsToBox(boxMesh, box.items, box);
 	      }
-	      point.x += delta;
+	      point.x += box.width / 2 + delta;
 	      zMax = Math.max(box.depth, zMax);
 	    }
+
+	    // Add unfit items
 	    point = {
 	      x: 0,
 	      y: 0,
-	      z: zMax + delta
+	      z: zMax + delta + 100
 	    };
-	    for (const item of request.items) {
+	    for (const item of request.items || []) {
 	      const color = libExports.colorFromUuid(item.id);
 	      const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
-	      const itemMesh = new Mesh(itemGeometry, new MeshPhongMaterial({
+	      const itemMaterial = new MeshPhongMaterial({
 	        color: color,
 	        flatShading: true,
-	        side: DoubleSide
-	      }));
-	      console.log('unfit item', item, point);
-	      itemMesh.position.set(point.x, point.y, point.z);
-	      point.z += item.width + delta;
+	        side: DoubleSide,
+	        transparent: true,
+	        opacity: 0.5
+	      });
+	      const itemMesh = new Mesh(itemGeometry, itemMaterial);
+	      itemMesh.position.set(point.x + item.width / 2, item.height / 2, point.z);
 	      this.items = this.items.concat(itemMesh);
+	      this.itemMap.set(item.id, itemMesh);
 	      this.scene.add(itemMesh);
+	      point.x += item.width + delta;
+	    }
+	  }
+	  addItemsToBox(boxMesh, items, boxData) {
+	    for (const item of items) {
+	      const color = libExports.colorFromUuid(item.id);
+	      const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
+	      const itemMaterial = new MeshPhongMaterial({
+	        color: color,
+	        flatShading: true,
+	        side: DoubleSide,
+	        transparent: true,
+	        opacity: 0.9
+	      });
+	      const itemMesh = new Mesh(itemGeometry, itemMaterial);
+	      itemMesh.position.set(item.position.x - boxData.width / 2 + item.width / 2, item.position.y - boxData.height / 2 + item.height / 2, item.position.z - boxData.depth / 2 + item.depth / 2);
+	      this.items = this.items.concat(itemMesh);
+	      this.itemMap.set(item.id, itemMesh);
+	      boxMesh.add(itemMesh);
+	      boxMesh.userData.items.push(item);
+	    }
+	  }
+	  animateItemsIntoBox(boxMesh, items, boxData) {
+	    let delay = 0;
+	    const itemDelay = 100 / this.animationSpeed;
+	    for (const item of items) {
+	      setTimeout(() => {
+	        const color = libExports.colorFromUuid(item.id);
+	        const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
+	        const itemMaterial = new MeshPhongMaterial({
+	          color: color,
+	          flatShading: true,
+	          side: DoubleSide,
+	          transparent: true,
+	          opacity: 0.9
+	        });
+	        const itemMesh = new Mesh(itemGeometry, itemMaterial);
+
+	        // Start position (above the box)
+	        const startY = boxData.height + item.height / 2 + 100;
+	        const finalX = item.position.x - boxData.width / 2 + item.width / 2;
+	        const finalY = item.position.y - boxData.height / 2 + item.height / 2;
+	        const finalZ = item.position.z - boxData.depth / 2 + item.depth / 2;
+	        itemMesh.position.set(finalX, startY, finalZ);
+	        itemMesh.scale.set(0.1, 0.1, 0.1);
+	        this.items = this.items.concat(itemMesh);
+	        this.itemMap.set(item.id, itemMesh);
+	        boxMesh.add(itemMesh);
+	        boxMesh.userData.items.push(item);
+
+	        // Animate
+	        const startTime = Date.now();
+	        const duration = 800 / this.animationSpeed;
+	        const animate = () => {
+	          const elapsed = Date.now() - startTime;
+	          const progress = Math.min(elapsed / duration, 1);
+	          const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+	          itemMesh.position.y = startY + (finalY - startY) * easeProgress;
+	          itemMesh.scale.set(0.1 + (1 - 0.1) * easeProgress, 0.1 + (1 - 0.1) * easeProgress, 0.1 + (1 - 0.1) * easeProgress);
+	          if (progress < 1) {
+	            requestAnimationFrame(animate);
+	          }
+	        };
+	        animate();
+	      }, delay);
+	      delay += itemDelay;
 	    }
 	  }
 	}
@@ -28546,15 +28918,45 @@ void main() {
 	    return [this.id, this.width, this.type, this.height, this.depth, this.weight].join(';');
 	  }
 	}
+
+	// Packing strategies (matching boxpacker3 constants)
+	const STRATEGIES = [{
+	  value: 0,
+	  name: 'Minimize Boxes',
+	  description: 'Minimizes the number of boxes used'
+	}, {
+	  value: 1,
+	  name: 'Greedy',
+	  description: 'First-fit strategy with ascending item order'
+	}, {
+	  value: 2,
+	  name: 'First Fit Decreasing (FFD)',
+	  description: 'First-fit decreasing strategy'
+	}, {
+	  value: 3,
+	  name: 'Best Fit',
+	  description: 'Best-fit strategy'
+	}, {
+	  value: 4,
+	  name: 'Best Fit Decreasing (BFD)',
+	  description: 'Best-fit decreasing strategy'
+	}];
 	class ItemComponent extends Rn.Component {
 	  state = {
 	    hasError: false,
 	    text: '',
 	    type: itemType,
-	    elements: []
+	    elements: [],
+	    packResult: null,
+	    selectedBox: null,
+	    showAnimation: true,
+	    animationSpeed: 1,
+	    strategy: 0 // Default: Minimize Boxes
 	  };
 	  constructor() {
 	    super(...arguments);
+	    this.renderTimeout = null;
+	    this.lastRenderElements = null;
 	  }
 	  async componentDidMount() {
 	    let {
@@ -28566,7 +28968,47 @@ void main() {
 	    this.setState({
 	      elements
 	    });
+
+	    // Setup box selection callback
+	    this.props.playground.onBoxSelect = boxId => {
+	      this.setState({
+	        selectedBox: boxId
+	      });
+	    };
 	    await this.playgroundRender(elements);
+	    this.lastRenderElements = this.getElementsSnapshot(elements);
+	  }
+	  componentDidUpdate(prevProps, prevState) {
+	    // Auto-recalculate when elements, strategy, or animation settings change
+	    const elementsChanged = prevState.elements !== this.state.elements;
+	    const strategyChanged = prevState.strategy !== this.state.strategy;
+	    prevState.showAnimation !== this.state.showAnimation;
+
+	    // Check if enabled state of elements changed
+	    const elementsSnapshot = this.getElementsSnapshot(this.state.elements);
+	    const enabledStateChanged = this.lastRenderElements !== elementsSnapshot;
+
+	    // Only re-render if there are actual changes and we have elements
+	    if ((elementsChanged || strategyChanged || enabledStateChanged) && this.state.elements.length > 0 && this.state.elements.filter(e => e.enabled).length > 0) {
+	      // Debounce rapid updates
+	      if (this.renderTimeout) {
+	        clearTimeout(this.renderTimeout);
+	      }
+	      this.renderTimeout = setTimeout(() => {
+	        this.playgroundRender(this.state.elements);
+	        this.lastRenderElements = this.getElementsSnapshot(this.state.elements);
+	      }, 300); // 300ms debounce
+	    }
+	  }
+	  componentWillUnmount() {
+	    // Cleanup timeout on unmount
+	    if (this.renderTimeout) {
+	      clearTimeout(this.renderTimeout);
+	    }
+	  }
+	  getElementsSnapshot(elements) {
+	    // Create a snapshot string for enabled elements to detect changes
+	    return elements.filter(e => e.enabled).map(e => `${e.id}:${e.enabled}:${e.type}`).sort().join('|');
 	  }
 	  setText = e => {
 	    this.setState({
@@ -28578,18 +29020,21 @@ void main() {
 	      type: v
 	    });
 	  };
-	  switchEnabled = async id => {
+	  switchEnabled = id => {
 	    const {
 	      elements
 	    } = this.state;
 	    const element = elements.find(e => e.id === id);
-	    element.enabled = !element.enabled;
-	    this.setState({
-	      elements
-	    });
-	    await this.playgroundRender(elements);
+	    if (element) {
+	      element.enabled = !element.enabled;
+	      // Create new array to trigger React update
+	      this.setState({
+	        elements: [...elements]
+	      });
+	      // ComponentDidUpdate will handle the re-render
+	    }
 	  };
-	  addElement = async () => {
+	  addElement = () => {
 	    let {
 	      elements,
 	      type,
@@ -28604,42 +29049,267 @@ void main() {
 	    }
 	    const id = generateUUID();
 	    const datum = new Datum(id, type, matchResult[1], matchResult[2], matchResult[3], matchResult[4]);
-	    elements = elements.concat(datum);
 	    this.setState({
-	      elements,
+	      elements: elements.concat(datum),
 	      text: '',
 	      hasError: false
 	    });
-	    await this.playgroundRender(elements);
+	    // ComponentDidUpdate will handle the re-render
 	  };
 	  playgroundRender = async elements => {
 	    const items = elements.filter(e => e.enabled);
-	    this.props.playground.render(await api('/bp3', {
+
+	    // Clear visualization first
+	    this.props.playground.destroy();
+	    const requestData = {
 	      boxes: items.filter(i => i.type === boxType),
 	      items: items.filter(i => i.type === itemType)
-	    }));
+	    };
+
+	    // Add strategy if not default
+	    if (this.state.strategy !== 0) {
+	      requestData.strategy = {
+	        value: this.state.strategy
+	      };
+	    }
+	    const packResult = await api('/bp3', requestData);
+	    this.setState({
+	      packResult,
+	      selectedBox: null
+	    });
+
+	    // Update animation settings
+	    this.props.playground.showAnimation = this.state.showAnimation;
+	    this.props.playground.animationSpeed = this.state.animationSpeed;
+	    this.props.playground.render(packResult);
+	  };
+	  setStrategy = e => {
+	    const strategy = parseInt(e.target.value);
+	    this.setState({
+	      strategy
+	    });
+	    // ComponentDidUpdate will handle the re-render
+	  };
+	  selectBox = boxId => {
+	    this.props.playground.selectBox(boxId);
+	    this.setState({
+	      selectedBox: boxId
+	    });
+	  };
+	  toggleAnimation = () => {
+	    const newValue = !this.state.showAnimation;
+	    this.setState({
+	      showAnimation: newValue
+	    });
+	    this.props.playground.showAnimation = newValue;
+	    // ComponentDidUpdate will handle the re-render
+	  };
+	  setAnimationSpeed = e => {
+	    const speed = parseFloat(e.target.value);
+	    this.setState({
+	      animationSpeed: speed
+	    });
+	    this.props.playground.animationSpeed = speed;
+	    // ComponentDidUpdate will handle the re-render if needed
+	  };
+	  calculateBoxStats = box => {
+	    const totalVolume = box.width * box.height * box.depth;
+	    const usedVolume = box.items.reduce((sum, item) => {
+	      return sum + item.width * item.height * item.depth;
+	    }, 0);
+	    const usedWeight = box.items.reduce((sum, item) => sum + item.weight, 0);
+	    const utilization = totalVolume > 0 ? usedVolume / totalVolume * 100 : 0;
+	    const weightUtilization = box.weight > 0 ? usedWeight / box.weight * 100 : 0;
+	    return {
+	      totalVolume: Math.round(totalVolume),
+	      usedVolume: Math.round(usedVolume),
+	      freeVolume: Math.round(totalVolume - usedVolume),
+	      utilization: Math.round(utilization * 10) / 10,
+	      usedWeight: Math.round(usedWeight),
+	      weightUtilization: Math.round(weightUtilization * 10) / 10,
+	      itemsCount: box.items.length
+	    };
 	  };
 	  onImport = () => {
-	    alert('planned to develop');
+	    // Create file input element
+	    const input = document.createElement('input');
+	    input.type = 'file';
+	    input.accept = '.csv';
+	    input.style.display = 'none';
+	    input.onchange = async e => {
+	      const file = e.target.files[0];
+	      if (!file) {
+	        return;
+	      }
+	      try {
+	        const text = await file.text();
+	        const lines = text.split('\n').filter(line => line.trim());
+	        if (lines.length === 0) {
+	          alert('File is empty');
+	          return;
+	        }
+
+	        // Skip header if present (check for common header patterns)
+	        let startIndex = 0;
+	        const firstLine = lines[0].trim().toLowerCase();
+	        if (firstLine.includes('width') || firstLine.includes('height') || firstLine.includes('type') || firstLine.includes('id') || firstLine.includes('depth') || firstLine.includes('weight')) {
+	          startIndex = 1;
+	        }
+	        const importedElements = [];
+	        const errors = [];
+	        for (let i = startIndex; i < lines.length; i++) {
+	          const line = lines[i].trim();
+	          if (!line || line.startsWith('#')) continue; // Skip empty lines and comments
+
+	          const parts = line.split(/[;,\t]/).map(p => p.trim()).filter(p => p);
+
+	          // Support both formats:
+	          // Old: id;width;type;height;depth;weight (6 fields)
+	          // New: width;height;depth;weight;type (5 fields) or type;width;height;depth;weight
+	          if (parts.length < 4) {
+	            errors.push(`Line ${i + 1}: insufficient data (expected at least 4 fields: width, height, depth, weight)`);
+	            continue;
+	          }
+	          let widthNum, heightNum, depthNum, weightNum, typeNum;
+	          if (parts.length === 5) {
+	            // New simplified format: width;height;depth;weight;type
+	            [widthNum, heightNum, depthNum, weightNum, typeNum] = parts.map(p => parseInt(p));
+	          } else if (parts.length === 6) {
+	            // Old format: id;width;type;height;depth;weight
+	            const [id, width, type, height, depth, weight] = parts;
+	            widthNum = parseInt(width);
+	            heightNum = parseInt(height);
+	            depthNum = parseInt(depth);
+	            weightNum = parseInt(weight);
+	            typeNum = parseInt(type);
+	          } else {
+	            // Try to auto-detect: assume first number is type if it's 0 or 1
+	            const firstNum = parseInt(parts[0]);
+	            if (firstNum === 0 || firstNum === 1) {
+	              // Format: type;width;height;depth;weight
+	              [typeNum, widthNum, heightNum, depthNum, weightNum] = parts.map(p => parseInt(p));
+	            } else {
+	              // Format: width;height;depth;weight (type defaults to itemType)
+	              [widthNum, heightNum, depthNum, weightNum] = parts.map(p => parseInt(p));
+	              typeNum = itemType; // Default to item if type not specified
+	            }
+	          }
+
+	          // Validate data
+	          if (isNaN(widthNum) || isNaN(heightNum) || isNaN(depthNum) || isNaN(weightNum)) {
+	            errors.push(`Line ${i + 1}: invalid data format (expected numbers)`);
+	            continue;
+	          }
+	          if (widthNum <= 0 || heightNum <= 0 || depthNum <= 0 || weightNum <= 0) {
+	            errors.push(`Line ${i + 1}: dimensions and weight must be positive`);
+	            continue;
+	          }
+	          if (typeNum === undefined || isNaN(typeNum)) {
+	            typeNum = itemType; // Default to item
+	          } else if (typeNum !== boxType && typeNum !== itemType) {
+	            errors.push(`Line ${i + 1}: invalid type (must be 0 for boxes or 1 for items)`);
+	            continue;
+	          }
+
+	          // Generate ID automatically
+	          const elementId = generateUUID();
+	          importedElements.push(new Datum(elementId, typeNum, widthNum, heightNum, depthNum, weightNum));
+	        }
+	        if (importedElements.length === 0) {
+	          alert('Failed to import elements. Please check the file format.\n\nErrors:\n' + errors.join('\n'));
+	          return;
+	        }
+
+	        // Clear any pending renders
+	        if (this.renderTimeout) {
+	          clearTimeout(this.renderTimeout);
+	          this.renderTimeout = null;
+	        }
+
+	        // Replace all existing elements with imported ones (full cleanup)
+	        // This includes boxes loaded from /bp3boxes endpoint
+	        this.setState({
+	          elements: importedElements,
+	          packResult: null,
+	          // Clear previous packing results
+	          selectedBox: null // Clear selection
+	        }, () => {
+	          // Immediate render after import (no debounce)
+	          this.playgroundRender(importedElements);
+	          this.lastRenderElements = this.getElementsSnapshot(importedElements);
+	        });
+
+	        // Show import result
+	        let message = `Imported elements: ${importedElements.length}`;
+	        const boxesCount = importedElements.filter(e => e.type === boxType).length;
+	        const itemsCount = importedElements.filter(e => e.type === itemType).length;
+	        message += `\nBoxes: ${boxesCount}, Items: ${itemsCount}`;
+	        if (errors.length > 0) {
+	          message += `\nErrors: ${errors.length}`;
+	        }
+	        if (errors.length > 0 && errors.length <= 5) {
+	          message += '\n\nErrors:\n' + errors.join('\n');
+	        }
+	        alert(message);
+	      } catch (error) {
+	        alert('Error reading file: ' + error.message);
+	      } finally {
+	        // Clean up
+	        if (input.parentNode) {
+	          document.body.removeChild(input);
+	        }
+	      }
+	    };
+	    document.body.appendChild(input);
+	    input.click();
 	  };
 	  onExport = () => {
 	    const {
 	      elements
 	    } = this.state;
-	    const csvContent = "data:text/csv;charset=utf-8," + "id;type;width;height;depth;weight\n" + elements.filter(e => e.enabled).map(e => e.toExport()).join("\n");
+	    if (elements.length === 0) {
+	      alert('No elements to export');
+	      return;
+	    }
+
+	    // Show confirmation dialog for export options
+	    const exportAll = confirm('Export all elements? (Cancel - only enabled)');
+	    const elementsToExport = exportAll ? elements : elements.filter(e => e.enabled);
+	    if (elementsToExport.length === 0) {
+	      alert('No elements to export');
+	      return;
+	    }
+	    const csvContent = "data:text/csv;charset=utf-8," + "id;width;type;height;depth;weight\n" + elementsToExport.map(e => e.toExport()).join("\n");
 	    const link = document.createElement("a");
 	    link.setAttribute("href", encodeURI(csvContent));
-	    link.setAttribute("download", "export.csv");
+	    link.setAttribute("download", `boxpacker3-export-${new Date().toISOString().split('T')[0]}.csv`);
 	    link.click();
 	  };
 	  render({}, {
 	    elements,
 	    type,
 	    text,
-	    hasError
+	    hasError,
+	    packResult,
+	    selectedBox,
+	    showAnimation,
+	    animationSpeed,
+	    strategy
 	  }) {
-	    return /*#__PURE__*/Rn.createElement("nav", {
-	      className: "panel"
+	    const selectedBoxData = packResult && selectedBox ? packResult.boxes.find(b => b.id === selectedBox) : null;
+	    const selectedBoxStats = selectedBoxData ? this.calculateBoxStats(selectedBoxData) : null;
+	    return /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        display: 'flex',
+	        flexDirection: 'column',
+	        height: '100vh',
+	        overflowY: 'auto'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto'
+	      }
 	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-heading field"
 	    }, /*#__PURE__*/Rn.createElement("div", {
@@ -28700,7 +29370,227 @@ void main() {
 	      type: "checkbox",
 	      checked: datum.enabled,
 	      onChange: () => this.switchEnabled(datum.id)
-	    }), datum.toString())));
+	    }), datum.toString()))), /*#__PURE__*/Rn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto',
+	        marginTop: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "panel-heading"
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Packing Strategy")), /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("label", {
+	      className: "label is-small"
+	    }, "Strategy"), /*#__PURE__*/Rn.createElement("div", {
+	      className: "select is-fullwidth"
+	    }, /*#__PURE__*/Rn.createElement("select", {
+	      value: strategy,
+	      onChange: this.setStrategy
+	    }, STRATEGIES.map(s => /*#__PURE__*/Rn.createElement("option", {
+	      key: s.value,
+	      value: s.value
+	    }, s.name)))), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help"
+	    }, STRATEGIES.find(s => s.value === strategy)?.description || '')))), packResult && /*#__PURE__*/Rn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto',
+	        marginTop: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "panel-heading"
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Visualization")), /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/Rn.createElement("input", {
+	      type: "checkbox",
+	      checked: showAnimation,
+	      onChange: this.toggleAnimation
+	    }), ' ', "Show animation"))), showAnimation && /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("label", {
+	      className: "label is-small"
+	    }, "Animation Speed"), /*#__PURE__*/Rn.createElement("input", {
+	      className: "slider is-fullwidth is-small",
+	      step: "0.1",
+	      min: "0.1",
+	      max: "3",
+	      type: "range",
+	      value: animationSpeed,
+	      onChange: this.setAnimationSpeed
+	    }), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help"
+	    }, animationSpeed.toFixed(1), "x"))), /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "help",
+	      style: {
+	        margin: 0
+	      }
+	    }, "\uD83D\uDCA1 Click on boxes in 3D view or in the list to see details", /*#__PURE__*/Rn.createElement("br", null), "\u2328\uFE0F Use Ctrl+\u2190/\u2192 to navigate between boxes"))), packResult && packResult.boxes && packResult.boxes.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto',
+	        marginTop: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "panel-heading"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level",
+	      style: {
+	        margin: 0
+	      }
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-left"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-item"
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Packed Boxes (", packResult.boxes.length, ")"))), /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-right"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-item"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "field has-addons"
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "control"
+	    }, /*#__PURE__*/Rn.createElement("button", {
+	      className: "button is-small is-info",
+	      onClick: () => this.props.playground.selectPreviousBox(),
+	      title: "Previous box (Ctrl+\u2190)"
+	    }, "\u2190")), /*#__PURE__*/Rn.createElement("p", {
+	      className: "control"
+	    }, /*#__PURE__*/Rn.createElement("button", {
+	      className: "button is-small is-info",
+	      onClick: () => this.props.playground.selectNextBox(),
+	      title: "Next box (Ctrl+\u2192)"
+	    }, "\u2192"))))))), packResult.boxes.map((box, index) => {
+	      const stats = this.calculateBoxStats(box);
+	      const isSelected = selectedBox === box.id;
+	      return /*#__PURE__*/Rn.createElement("a", {
+	        key: box.id,
+	        href: "#",
+	        className: `panel-block ${isSelected ? 'is-active' : ''}`,
+	        onClick: e => {
+	          e.preventDefault();
+	          this.selectBox(box.id);
+	        }
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        style: {
+	          width: '100%'
+	        }
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level",
+	        style: {
+	          marginBottom: '0.25rem'
+	        }
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-left"
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-item"
+	      }, /*#__PURE__*/Rn.createElement("strong", null, "Box #", index + 1, " ", box.id.slice(0, 8), "..."), isSelected && /*#__PURE__*/Rn.createElement("span", {
+	        className: "tag is-success",
+	        style: {
+	          marginLeft: '0.5rem'
+	        }
+	      }, "Selected"))), /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-right"
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-item"
+	      }, /*#__PURE__*/Rn.createElement("span", {
+	        className: "tag is-info"
+	      }, stats.itemsCount, " items")))), /*#__PURE__*/Rn.createElement("div", {
+	        className: "content is-small"
+	      }, /*#__PURE__*/Rn.createElement("p", {
+	        style: {
+	          marginBottom: '0.25rem'
+	        }
+	      }, "Size: ", Math.round(box.width), "\xD7", Math.round(box.height), "\xD7", Math.round(box.depth)), /*#__PURE__*/Rn.createElement("progress", {
+	        className: "progress is-small is-success",
+	        value: stats.utilization,
+	        max: "100",
+	        style: {
+	          marginBottom: '0.25rem'
+	        }
+	      }, stats.utilization, "%"), /*#__PURE__*/Rn.createElement("p", {
+	        className: "help",
+	        style: {
+	          marginBottom: '0.25rem'
+	        }
+	      }, "Volume: ", stats.utilization, "% used (", stats.usedVolume, " / ", stats.totalVolume, ")"), /*#__PURE__*/Rn.createElement("p", {
+	        className: "help"
+	      }, "Weight: ", stats.weightUtilization, "% used (", stats.usedWeight, " / ", Math.round(box.weight), ")"))));
+	    })), selectedBoxData && selectedBoxStats && /*#__PURE__*/Rn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto',
+	        marginTop: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "panel-heading"
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Box Details")), /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "content",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Dimensions:"), " ", Math.round(selectedBoxData.width), " \xD7 ", Math.round(selectedBoxData.height), " \xD7 ", Math.round(selectedBoxData.depth)), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Max Weight:"), " ", Math.round(selectedBoxData.weight)), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Items:"), " ", selectedBoxStats.itemsCount), /*#__PURE__*/Rn.createElement("hr", null), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Volume Utilization:"), " ", selectedBoxStats.utilization, "%"), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help"
+	    }, "Used: ", selectedBoxStats.usedVolume, " / Total: ", selectedBoxStats.totalVolume), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help"
+	    }, "Free: ", selectedBoxStats.freeVolume), /*#__PURE__*/Rn.createElement("hr", null), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Weight Utilization:"), " ", selectedBoxStats.weightUtilization, "%"), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help"
+	    }, "Used: ", selectedBoxStats.usedWeight, " / Max: ", Math.round(selectedBoxData.weight)), /*#__PURE__*/Rn.createElement("hr", null), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Items in box:")), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        maxHeight: '200px',
+	        overflowY: 'auto'
+	      }
+	    }, selectedBoxData.items.map((item, idx) => /*#__PURE__*/Rn.createElement("div", {
+	      key: item.id,
+	      className: "box",
+	      style: {
+	        padding: '0.5rem',
+	        marginBottom: '0.25rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "help",
+	      style: {
+	        marginBottom: '0.25rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "#", idx + 1), " ", Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth), ' ', "wg:", Math.round(item.weight)), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help",
+	      style: {
+	        fontSize: '0.7rem',
+	        margin: 0
+	      }
+	    }, "Position: (", Math.round(item.position.x), ", ", Math.round(item.position.y), ", ", Math.round(item.position.z), ")"))))))), packResult && packResult.items && packResult.items.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto',
+	        marginTop: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", {
+	      className: "panel-heading has-background-danger-light"
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Unfit Items (", packResult.items.length, ")")), packResult.items.map(item => /*#__PURE__*/Rn.createElement("div", {
+	      key: item.id,
+	      className: "panel-block"
+	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth), " wg:", Math.round(item.weight)))));
 	  }
 	}
 
