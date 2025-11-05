@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" fill="#1a1a1a"/>
+  
+  <!-- Simple stacked boxes -->
+  <rect x="20" y="40" width="35" height="25" fill="#4a9eff"/>
+  <rect x="25" y="35" width="30" height="20" fill="#5aafff"/>
+  <rect x="30" y="30" width="25" height="15" fill="#6abfff"/>
+</svg>

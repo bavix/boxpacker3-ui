@@ -3,48 +3,24 @@ package app
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/bavix/boxpacker3"
 )
 
 const (
-	// BoxTypeF -- 220, 185, 50, 20000.
-	BoxTypeF = "8ec81501-11a4-4b3f-9a52-7cd2f9c8370c"
-
-	// BoxTypeE -- 165, 215, 100, 20000.
-	BoxTypeE = "9c69baf8-1ca3-46a0-9fc2-6f15ad9fef9a"
-
-	// BoxTypeG -- 265, 165, 190, 20000.
-	BoxTypeG = "2c5279d3-48ad-451b-b673-f6d9be7fc6f6"
-
-	// BoxTypeC -- 425, 165, 190, 20000.
-	BoxTypeC = "7f1cc68f-d554-4094-8734-c68df5c13154"
-
-	// BoxTypeB -- 425, 265, 190, 20000.
-	BoxTypeB = "76cede41-86bb-4487-bfb0-9513f032d53e"
-
-	// BoxTypeA -- 425, 265, 380, 20000.
-	BoxTypeA = "8e10cebf-cee6-4136-b060-1587b993d083"
-
-	// BoxTypeStd -- 530, 380, 265, 20000.
-	BoxTypeStd = "ba973206-aa64-493b-b37a-c53192cde8fd"
-
-	// BoxTypeNotStd1 -- 1000, 500, 500, 20000.
+	BoxTypeF       = "8ec81501-11a4-4b3f-9a52-7cd2f9c8370c"
+	BoxTypeE       = "9c69baf8-1ca3-46a0-9fc2-6f15ad9fef9a"
+	BoxTypeG       = "2c5279d3-48ad-451b-b673-f6d9be7fc6f6"
+	BoxTypeC       = "7f1cc68f-d554-4094-8734-c68df5c13154"
+	BoxTypeB       = "76cede41-86bb-4487-bfb0-9513f032d53e"
+	BoxTypeA       = "8e10cebf-cee6-4136-b060-1587b993d083"
+	BoxTypeStd     = "ba973206-aa64-493b-b37a-c53192cde8fd"
 	BoxTypeNotStd1 = "cb1ed5b8-7405-48c5-bfd0-d86f75c99261"
-
-	// BoxTypeNotStd2 -- 1000, 1000, 1000, 20000.
 	BoxTypeNotStd2 = "d91e2661-aebb-4a55-bfb5-4ff9c6e3c008"
-
-	// BoxTypeNotStd3 -- 2000, 500, 500, 20000.
 	BoxTypeNotStd3 = "a0ecd730-375a-4313-bbe8-820710606b3d"
-
-	// BoxTypeNotStd4 -- 2000, 2000, 2000, 20000.
 	BoxTypeNotStd4 = "6dff37f0-4dd1-4143-abdc-c19ab94f2e68"
-
-	// BoxTypeNotStd5 -- 2500, 2500, 2500, 20000.
 	BoxTypeNotStd5 = "abac6d59-b51f-4d62-a338-42aca7afe1cc"
-
-	// BoxTypeNotStd6 -- 3000, 3000, 3000, 20000.
 	BoxTypeNotStd6 = "981ffb30-a7b9-4d9e-820e-04de2145763e"
 )
 
@@ -81,8 +57,8 @@ type boxPack struct {
 }
 
 type request struct {
-	Boxes    []box           `json:"boxes"`
-	Items    []item          `json:"items"`
+	Boxes    []box            `json:"boxes"`
+	Items    []item           `json:"items"`
 	Strategy *packingStrategy `json:"strategy,omitempty"`
 }
 
@@ -91,8 +67,9 @@ type packingStrategy struct {
 }
 
 type response struct {
-	Boxes      []boxPack `json:"boxes"`
-	UnfitItems []item    `json:"items"`
+	Boxes         []boxPack `json:"boxes"`
+	UnfitItems    []item    `json:"items"`
+	ExecutionTime int64     `json:"executionTime"`
 }
 
 func Bp3Handle(w http.ResponseWriter, req *http.Request) {
@@ -100,7 +77,6 @@ func Bp3Handle(w http.ResponseWriter, req *http.Request) {
 
 	var t request
 	err := decoder.Decode(&t)
-
 	if err != nil {
 		return
 	}
@@ -122,7 +98,9 @@ func Bp3Handle(w http.ResponseWriter, req *http.Request) {
 
 	packer := boxpacker3.NewPacker(opts...)
 
+	startTime := time.Now()
 	packResult := packer.Pack(boxes, items)
+	executionTime := time.Since(startTime).Milliseconds()
 
 	boxResp := make([]boxPack, 0, len(packResult.Boxes))
 	for _, b := range packResult.Boxes {
@@ -165,26 +143,27 @@ func Bp3Handle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	_ = json.NewEncoder(w).Encode(response{
-		Boxes:      boxResp,
-		UnfitItems: unfitItems,
+		Boxes:         boxResp,
+		UnfitItems:    unfitItems,
+		ExecutionTime: executionTime,
 	})
 }
 
 func Bp3DefaultBoxesHandle(w http.ResponseWriter, req *http.Request) {
 	boxes := []box{
-		{BoxTypeF, 220, 185, 50, 20000},           // 0
-		{BoxTypeE, 165, 215, 100, 20000},          // 1
-		{BoxTypeG, 265, 165, 190, 20000},          // 2
-		{BoxTypeC, 425, 165, 190, 20000},          // 3
-		{BoxTypeB, 425, 265, 190, 20000},          // 4
-		{BoxTypeA, 425, 265, 380, 20000},          // 5
-		{BoxTypeStd, 530, 380, 265, 20000},        // 6
-		{BoxTypeNotStd1, 1000, 500, 500, 20000},   // 7
-		{BoxTypeNotStd2, 1000, 1000, 1000, 20000}, // 8
-		{BoxTypeNotStd3, 2000, 500, 500, 20000},   // 9
-		{BoxTypeNotStd4, 2000, 2000, 2000, 20000}, // 10
-		{BoxTypeNotStd5, 2500, 2500, 2500, 20000}, // 11
-		{BoxTypeNotStd6, 3000, 3000, 3000, 20000}, // 12
+		{BoxTypeF, 220, 185, 50, 20000},
+		{BoxTypeE, 165, 215, 100, 20000},
+		{BoxTypeG, 265, 165, 190, 20000},
+		{BoxTypeC, 425, 165, 190, 20000},
+		{BoxTypeB, 425, 265, 190, 20000},
+		{BoxTypeA, 425, 265, 380, 20000},
+		{BoxTypeStd, 530, 380, 265, 20000},
+		{BoxTypeNotStd1, 1000, 500, 500, 20000},
+		{BoxTypeNotStd2, 1000, 1000, 1000, 20000},
+		{BoxTypeNotStd3, 2000, 500, 500, 20000},
+		{BoxTypeNotStd4, 2000, 2000, 2000, 20000},
+		{BoxTypeNotStd5, 2500, 2500, 2500, 20000},
+		{BoxTypeNotStd6, 3000, 3000, 3000, 20000},
 	}
 
 	_ = json.NewEncoder(w).Encode(boxes)

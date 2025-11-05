@@ -32,7 +32,8 @@ export default {
         babel({
             presets: ["@babel/preset-react"],
             plugins: ["@babel/plugin-transform-react-jsx"],
-            babelHelpers: 'bundled'
+            babelHelpers: 'bundled',
+            compact: false // Disable compact output to avoid warnings for large files like three.js
         }),
         alias({
             entries: [

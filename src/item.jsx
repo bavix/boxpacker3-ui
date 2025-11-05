@@ -26,7 +26,6 @@ class Datum {
     }
 }
 
-// Packing strategies (matching boxpacker3 constants)
 const STRATEGIES = [
     { value: 0, name: 'Minimize Boxes', description: 'Minimizes the number of boxes used' },
     { value: 1, name: 'Greedy', description: 'First-fit strategy with ascending item order' },
@@ -45,7 +44,7 @@ export default class ItemComponent extends React.Component {
         selectedBox: null,
         showAnimation: true,
         animationSpeed: 1,
-        strategy: 0, // Default: Minimize Boxes
+        strategy: 0,
     };
 
     constructor() {
@@ -68,7 +67,6 @@ export default class ItemComponent extends React.Component {
 
         this.setState({ elements });
 
-        // Setup box selection callback
         this.props.playground.onBoxSelect = (boxId) => {
             this.setState({ selectedBox: boxId });
         }
@@ -78,21 +76,17 @@ export default class ItemComponent extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        // Auto-recalculate when elements, strategy, or animation settings change
         const elementsChanged = prevState.elements !== this.state.elements;
         const strategyChanged = prevState.strategy !== this.state.strategy;
         const showAnimationChanged = prevState.showAnimation !== this.state.showAnimation;
         
-        // Check if enabled state of elements changed
         const elementsSnapshot = this.getElementsSnapshot(this.state.elements);
         const enabledStateChanged = this.lastRenderElements !== elementsSnapshot;
         
-        // Only re-render if there are actual changes and we have elements
         if ((elementsChanged || strategyChanged || enabledStateChanged) && 
             this.state.elements.length > 0 &&
             this.state.elements.filter(e => e.enabled).length > 0) {
             
-            // Debounce rapid updates
             if (this.renderTimeout) {
                 clearTimeout(this.renderTimeout);
             }
@@ -100,19 +94,17 @@ export default class ItemComponent extends React.Component {
             this.renderTimeout = setTimeout(() => {
                 this.playgroundRender(this.state.elements);
                 this.lastRenderElements = this.getElementsSnapshot(this.state.elements);
-            }, 300); // 300ms debounce
+            }, 300);
         }
     }
 
     componentWillUnmount() {
-        // Cleanup timeout on unmount
         if (this.renderTimeout) {
             clearTimeout(this.renderTimeout);
         }
     }
 
     getElementsSnapshot(elements) {
-        // Create a snapshot string for enabled elements to detect changes
         return elements
             .filter(e => e.enabled)
             .map(e => `${e.id}:${e.enabled}:${e.type}`)
@@ -134,9 +126,7 @@ export default class ItemComponent extends React.Component {
 
         if (element) {
         element.enabled = !element.enabled
-            // Create new array to trigger React update
             this.setState({ elements: [...elements] })
-            // ComponentDidUpdate will handle the re-render
         }
     }
 
@@ -157,13 +147,11 @@ export default class ItemComponent extends React.Component {
             text: '', 
             hasError: false 
         });
-        // ComponentDidUpdate will handle the re-render
     }
 
     playgroundRender = async elements => {
         const items = elements.filter(e => e.enabled)
 
-        // Clear visualization first
         this.props.playground.destroy();
 
         const requestData = {
@@ -171,7 +159,6 @@ export default class ItemComponent extends React.Component {
                 items: items.filter(i => i.type === itemType),
         };
 
-        // Add strategy if not default
         if (this.state.strategy !== 0) {
             requestData.strategy = { value: this.state.strategy };
         }
@@ -180,7 +167,6 @@ export default class ItemComponent extends React.Component {
 
         this.setState({ packResult, selectedBox: null });
 
-        // Update animation settings
         this.props.playground.showAnimation = this.state.showAnimation;
         this.props.playground.animationSpeed = this.state.animationSpeed;
 
@@ -190,7 +176,6 @@ export default class ItemComponent extends React.Component {
     setStrategy = (e) => {
         const strategy = parseInt(e.target.value);
         this.setState({ strategy });
-        // ComponentDidUpdate will handle the re-render
     }
 
     selectBox = (boxId) => {
@@ -202,14 +187,12 @@ export default class ItemComponent extends React.Component {
         const newValue = !this.state.showAnimation;
         this.setState({ showAnimation: newValue });
         this.props.playground.showAnimation = newValue;
-        // ComponentDidUpdate will handle the re-render
     }
 
     setAnimationSpeed = (e) => {
         const speed = parseFloat(e.target.value);
         this.setState({ animationSpeed: speed });
         this.props.playground.animationSpeed = speed;
-        // ComponentDidUpdate will handle the re-render if needed
     }
 
     calculateBoxStats = (box) => {
@@ -233,7 +216,6 @@ export default class ItemComponent extends React.Component {
     }
 
     onImport = () => {
-        // Create file input element
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.csv';
@@ -254,7 +236,6 @@ export default class ItemComponent extends React.Component {
                     return;
                 }
 
-                // Skip header if present (check for common header patterns)
                 let startIndex = 0;
                 const firstLine = lines[0].trim().toLowerCase();
                 if (firstLine.includes('width') || firstLine.includes('height') || 
@@ -268,13 +249,10 @@ export default class ItemComponent extends React.Component {
                 
                 for (let i = startIndex; i < lines.length; i++) {
                     const line = lines[i].trim();
-                    if (!line || line.startsWith('#')) continue; // Skip empty lines and comments
+                    if (!line || line.startsWith('#')) continue;
                     
                     const parts = line.split(/[;,\t]/).map(p => p.trim()).filter(p => p);
                     
-                    // Support both formats:
-                    // Old: id;width;type;height;depth;weight (6 fields)
-                    // New: width;height;depth;weight;type (5 fields) or type;width;height;depth;weight
                     if (parts.length < 4) {
                         errors.push(`Line ${i + 1}: insufficient data (expected at least 4 fields: width, height, depth, weight)`);
                         continue;
@@ -283,10 +261,8 @@ export default class ItemComponent extends React.Component {
                     let widthNum, heightNum, depthNum, weightNum, typeNum;
                     
                     if (parts.length === 5) {
-                        // New simplified format: width;height;depth;weight;type
                         [widthNum, heightNum, depthNum, weightNum, typeNum] = parts.map(p => parseInt(p));
                     } else if (parts.length === 6) {
-                        // Old format: id;width;type;height;depth;weight
                         const [id, width, type, height, depth, weight] = parts;
                         widthNum = parseInt(width);
                         heightNum = parseInt(height);
@@ -294,19 +270,14 @@ export default class ItemComponent extends React.Component {
                         weightNum = parseInt(weight);
                         typeNum = parseInt(type);
                     } else {
-                        // Try to auto-detect: assume first number is type if it's 0 or 1
                         const firstNum = parseInt(parts[0]);
                         if (firstNum === 0 || firstNum === 1) {
-                            // Format: type;width;height;depth;weight
                             [typeNum, widthNum, heightNum, depthNum, weightNum] = parts.map(p => parseInt(p));
                         } else {
-                            // Format: width;height;depth;weight (type defaults to itemType)
                             [widthNum, heightNum, depthNum, weightNum] = parts.map(p => parseInt(p));
-                            typeNum = itemType; // Default to item if type not specified
+                            typeNum = itemType;
                         }
                     }
-
-                    // Validate data
                     if (isNaN(widthNum) || isNaN(heightNum) || isNaN(depthNum) || isNaN(weightNum)) {
                         errors.push(`Line ${i + 1}: invalid data format (expected numbers)`);
                         continue;
@@ -318,13 +289,12 @@ export default class ItemComponent extends React.Component {
                     }
 
                     if (typeNum === undefined || isNaN(typeNum)) {
-                        typeNum = itemType; // Default to item
+                        typeNum = itemType;
                     } else if (typeNum !== boxType && typeNum !== itemType) {
                         errors.push(`Line ${i + 1}: invalid type (must be 0 for boxes or 1 for items)`);
                         continue;
                     }
 
-                    // Generate ID automatically
                     const elementId = generateUUID();
                     
                     importedElements.push(new Datum(
@@ -342,25 +312,19 @@ export default class ItemComponent extends React.Component {
                     return;
                 }
 
-                // Clear any pending renders
                 if (this.renderTimeout) {
                     clearTimeout(this.renderTimeout);
                     this.renderTimeout = null;
                 }
 
-                // Replace all existing elements with imported ones (full cleanup)
-                // This includes boxes loaded from /bp3boxes endpoint
                 this.setState({ 
                     elements: importedElements,
-                    packResult: null, // Clear previous packing results
-                    selectedBox: null // Clear selection
+                    packResult: null,
+                    selectedBox: null
                 }, () => {
-                    // Immediate render after import (no debounce)
                     this.playgroundRender(importedElements);
                     this.lastRenderElements = this.getElementsSnapshot(importedElements);
                 });
-
-                // Show import result
                 let message = `Imported elements: ${importedElements.length}`;
                 const boxesCount = importedElements.filter(e => e.type === boxType).length;
                 const itemsCount = importedElements.filter(e => e.type === itemType).length;
@@ -379,7 +343,6 @@ export default class ItemComponent extends React.Component {
             } catch (error) {
                 alert('Error reading file: ' + error.message);
             } finally {
-                // Clean up
                 if (input.parentNode) {
                     document.body.removeChild(input);
                 }
@@ -398,7 +361,6 @@ export default class ItemComponent extends React.Component {
             return;
         }
 
-        // Show confirmation dialog for export options
         const exportAll = confirm('Export all elements? (Cancel - only enabled)');
         
         const elementsToExport = exportAll 
@@ -541,6 +503,22 @@ export default class ItemComponent extends React.Component {
                                 </div>
                             </div>
                         )}
+                        {packResult.executionTime !== undefined && (
+                            <div className="panel-block" style={{ background: '#1a1a1a', border: '1px solid #333', fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                                <div className="level is-mobile" style={{ margin: 0, width: '100%' }}>
+                                    <div className="level-left">
+                                        <div className="level-item">
+                                            <span style={{ color: '#888' }}>Execution time:</span>
+                                        </div>
+                                    </div>
+                                    <div className="level-right">
+                                        <div className="level-item">
+                                            <span style={{ color: '#4a9eff', fontWeight: 600 }}>{packResult.executionTime} ms</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <div className="panel-block" style={{ background: '#2a2a2a', border: '1px solid #333', fontSize: '0.75rem', color: '#bbb' }}>
                             <p className="help" style={{ margin: 0 }}>
                                 Click boxes in 3D or list to view details | Ctrl+←/→ to navigate
@@ -600,7 +578,9 @@ export default class ItemComponent extends React.Component {
                                         <div className="level is-mobile" style={{ marginBottom: '0.5rem' }}>
                                             <div className="level-left">
                                                 <div className="level-item" style={{ fontFamily: 'monospace', fontSize: '0.8125rem' }}>
-                                                    <strong>#{index + 1}</strong> {Math.round(box.width)}×{Math.round(box.height)}×{Math.round(box.depth)}
+                                                    <strong>#{index + 1}</strong>
+                                                    <span style={{ marginLeft: '1rem', color: '#888' }}>|</span>
+                                                    <span style={{ marginLeft: '0.75rem' }}>{Math.round(box.width)}×{Math.round(box.height)}×{Math.round(box.depth)}</span>
                                                     {isSelected && <span className="tag is-success" style={{ marginLeft: '0.5rem', fontSize: '0.7rem' }}>ACTIVE</span>}
                                                 </div>
                                             </div>
