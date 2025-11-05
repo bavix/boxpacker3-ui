@@ -24446,7 +24446,12 @@ void main() {
 	        opacity: 0.9
 	      });
 	      const itemMesh = new Mesh(itemGeometry, itemMaterial);
-	      itemMesh.position.set(item.position.x - boxData.width / 2 + item.width / 2, item.position.y - boxData.height / 2 + item.height / 2, item.position.z - boxData.depth / 2 + item.depth / 2);
+
+	      // In boxpacker3, item.position is the bottom-left-front corner (pivot point)
+	      // In Three.js, mesh position is the center of the geometry
+	      // BoxGeometry center is at (0,0,0) in local coordinates
+	      // So we need to convert from pivot point to center point
+	      itemMesh.position.set(item.position.x + item.width / 2 - boxData.width / 2, item.position.y + item.height / 2 - boxData.height / 2, item.position.z + item.depth / 2 - boxData.depth / 2);
 	      this.items = this.items.concat(itemMesh);
 	      this.itemMap.set(item.id, itemMesh);
 	      boxMesh.add(itemMesh);
@@ -24471,9 +24476,12 @@ void main() {
 
 	        // Start position (above the box)
 	        const startY = boxData.height + item.height / 2 + 100;
-	        const finalX = item.position.x - boxData.width / 2 + item.width / 2;
-	        const finalY = item.position.y - boxData.height / 2 + item.height / 2;
-	        const finalZ = item.position.z - boxData.depth / 2 + item.depth / 2;
+	        // In boxpacker3, item.position is the bottom-left-front corner (pivot point)
+	        // In Three.js, mesh position is the center of the geometry
+	        // BoxGeometry center is at (0,0,0) in local coordinates
+	        const finalX = item.position.x + item.width / 2 - boxData.width / 2;
+	        const finalY = item.position.y + item.height / 2 - boxData.height / 2;
+	        const finalZ = item.position.z + item.depth / 2 - boxData.depth / 2;
 	        itemMesh.position.set(finalX, startY, finalZ);
 	        itemMesh.scale.set(0.1, 0.1, 0.1);
 	        this.items = this.items.concat(itemMesh);
