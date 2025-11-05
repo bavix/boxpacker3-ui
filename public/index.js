@@ -24164,6 +24164,8 @@ void main() {
 	  showAnimation = true;
 	  cameraAnimation = null;
 	  boxList = [];
+	  mouseDownPos = null;
+	  isDragging = false;
 	  constructor(container) {
 	    this.camera = new PerspectiveCamera(45, container.offsetWidth / window.innerHeight, 1, 80000);
 	    this.camera.position.set(-600, 550, 1300);
@@ -24187,7 +24189,42 @@ void main() {
 	    // Add click handler for box selection
 	    this.raycaster = new Raycaster();
 	    this.mouse = new Vector2$1();
-	    this.renderer.domElement.addEventListener('click', e => this.onCanvasClick(e));
+	    const canvas = this.renderer.domElement;
+
+	    // Track mouse down position to detect dragging
+	    canvas.addEventListener('mousedown', e => {
+	      this.mouseDownPos = {
+	        x: e.clientX,
+	        y: e.clientY
+	      };
+	      this.isDragging = false;
+	    });
+
+	    // Track mouse movement to detect dragging
+	    canvas.addEventListener('mousemove', e => {
+	      if (this.mouseDownPos) {
+	        const dx = Math.abs(e.clientX - this.mouseDownPos.x);
+	        const dy = Math.abs(e.clientY - this.mouseDownPos.y);
+	        // If mouse moved more than 5 pixels, consider it a drag
+	        if (dx > 5 || dy > 5) {
+	          this.isDragging = true;
+	        }
+	      }
+	    });
+
+	    // Reset on mouse up
+	    canvas.addEventListener('mouseup', () => {
+	      this.mouseDownPos = null;
+	    });
+
+	    // Handle click - only if it wasn't a drag
+	    canvas.addEventListener('click', e => {
+	      // Only process click if it wasn't a drag
+	      if (!this.isDragging) {
+	        this.onCanvasClick(e);
+	      }
+	      this.isDragging = false;
+	    });
 	    this.materials['wireframe'] = new MeshBasicMaterial({
 	      wireframe: true,
 	      color: 0x888888,
@@ -29310,8 +29347,11 @@ void main() {
 	      style: {
 	        display: 'flex',
 	        flexDirection: 'column',
-	        height: '100vh',
-	        overflowY: 'auto'
+	        height: '100%',
+	        minHeight: '100vh',
+	        overflowY: 'auto',
+	        margin: 0,
+	        padding: 0
 	      }
 	    }, /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel",
@@ -29327,8 +29367,18 @@ void main() {
 	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-item"
 	    }, /*#__PURE__*/Rn.createElement("p", {
-	      className: "subtitle is-5"
-	    }, /*#__PURE__*/Rn.createElement("strong", null, "Settings")))), /*#__PURE__*/Rn.createElement("div", {
+	      className: "subtitle is-5",
+	      style: {
+	        margin: 0,
+	        fontSize: '0.875rem',
+	        color: '#ffffff',
+	        fontWeight: 700
+	      }
+	    }, /*#__PURE__*/Rn.createElement("strong", {
+	      style: {
+	        color: '#ffffff'
+	      }
+	    }, "Settings")))), /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-right"
 	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-item"
@@ -29339,14 +29389,16 @@ void main() {
 	    }, /*#__PURE__*/Rn.createElement("a", {
 	      href: "#",
 	      onClick: this.onImport,
-	      className: "button is-info is-light is-small is-rounded"
-	    }, "import")), /*#__PURE__*/Rn.createElement("p", {
+	      className: "button is-info is-small",
+	      title: "Import CSV file"
+	    }, "Import")), /*#__PURE__*/Rn.createElement("p", {
 	      className: "control"
 	    }, /*#__PURE__*/Rn.createElement("a", {
 	      href: "#",
 	      onClick: this.onExport,
-	      className: "button is-success is-light is-small is-rounded"
-	    }, "export"))))))), /*#__PURE__*/Rn.createElement("form", {
+	      className: "button is-success is-small",
+	      title: "Export to CSV"
+	    }, "Export"))))))), /*#__PURE__*/Rn.createElement("form", {
 	      onSubmit: this.addElement,
 	      action: "javascript:"
 	    }, /*#__PURE__*/Rn.createElement("div", {
@@ -29371,22 +29423,50 @@ void main() {
 	      href: "#",
 	      className: type === itemType ? "is-active" : "",
 	      onClick: () => this.setType(itemType)
-	    }, "Items"))), elements.filter(datum => datum.type === type).map(datum => /*#__PURE__*/Rn.createElement("label", {
+	    }, "Items"))), elements.filter(datum => datum.type === type).length === 0 ? /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block",
+	      style: {
+	        textAlign: 'center',
+	        padding: '1.5rem',
+	        color: '#bbb',
+	        fontSize: '0.75rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("p", null, "No ", type === boxType ? 'boxes' : 'items')) : elements.filter(datum => datum.type === type).map(datum => /*#__PURE__*/Rn.createElement("label", {
 	      key: datum.id,
-	      className: "panel-block"
+	      className: "panel-block",
+	      style: {
+	        cursor: 'pointer',
+	        userSelect: 'none',
+	        display: 'flex',
+	        alignItems: 'center'
+	      }
 	    }, /*#__PURE__*/Rn.createElement("input", {
 	      type: "checkbox",
 	      checked: datum.enabled,
-	      onChange: () => this.switchEnabled(datum.id)
-	    }), datum.toString()))), /*#__PURE__*/Rn.createElement("nav", {
+	      onChange: () => this.switchEnabled(datum.id),
+	      style: {
+	        marginRight: '0.75rem'
+	      }
+	    }), /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        flex: 1,
+	        fontFamily: 'monospace',
+	        fontSize: '0.8125rem'
+	      }
+	    }, datum.toString()), !datum.enabled && /*#__PURE__*/Rn.createElement("span", {
+	      className: "tag is-light",
+	      style: {
+	        fontSize: '0.7rem',
+	        marginLeft: '0.5rem'
+	      }
+	    }, "OFF")))), /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel",
 	      style: {
-	        flex: '0 0 auto',
-	        marginTop: '0.5rem'
+	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-heading"
-	    }, /*#__PURE__*/Rn.createElement("strong", null, "Packing Strategy")), /*#__PURE__*/Rn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Strategy")), /*#__PURE__*/Rn.createElement("div", {
 	      className: "panel-block"
 	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "field",
@@ -29408,8 +29488,7 @@ void main() {
 	    }, STRATEGIES.find(s => s.value === strategy)?.description || '')))), packResult && /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel",
 	      style: {
-	        flex: '0 0 auto',
-	        marginTop: '0.5rem'
+	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-heading"
@@ -29425,8 +29504,11 @@ void main() {
 	    }, /*#__PURE__*/Rn.createElement("input", {
 	      type: "checkbox",
 	      checked: showAnimation,
-	      onChange: this.toggleAnimation
-	    }), ' ', "Show animation"))), showAnimation && /*#__PURE__*/Rn.createElement("div", {
+	      onChange: this.toggleAnimation,
+	      style: {
+	        marginRight: '0.5rem'
+	      }
+	    }), "Show animation"))), showAnimation && /*#__PURE__*/Rn.createElement("div", {
 	      className: "panel-block"
 	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "field",
@@ -29446,17 +29528,22 @@ void main() {
 	    }), /*#__PURE__*/Rn.createElement("p", {
 	      className: "help"
 	    }, animationSpeed.toFixed(1), "x"))), /*#__PURE__*/Rn.createElement("div", {
-	      className: "panel-block"
+	      className: "panel-block",
+	      style: {
+	        background: '#2a2a2a',
+	        border: '1px solid #333',
+	        fontSize: '0.75rem',
+	        color: '#bbb'
+	      }
 	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "help",
 	      style: {
 	        margin: 0
 	      }
-	    }, "\uD83D\uDCA1 Click on boxes in 3D view or in the list to see details", /*#__PURE__*/Rn.createElement("br", null), "\u2328\uFE0F Use Ctrl+\u2190/\u2192 to navigate between boxes"))), packResult && packResult.boxes && packResult.boxes.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
+	    }, "Click boxes in 3D or list to view details | Ctrl+\u2190/\u2192 to navigate"))), packResult && packResult.boxes && packResult.boxes.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel",
 	      style: {
-	        flex: '0 0 auto',
-	        marginTop: '0.5rem'
+	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-heading"
@@ -29469,7 +29556,7 @@ void main() {
 	      className: "level-left"
 	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-item"
-	    }, /*#__PURE__*/Rn.createElement("strong", null, "Packed Boxes (", packResult.boxes.length, ")"))), /*#__PURE__*/Rn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Boxes (", packResult.boxes.length, ")"))), /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-right"
 	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "level-item"
@@ -29480,14 +29567,22 @@ void main() {
 	    }, /*#__PURE__*/Rn.createElement("button", {
 	      className: "button is-small is-info",
 	      onClick: () => this.props.playground.selectPreviousBox(),
-	      title: "Previous box (Ctrl+\u2190)"
-	    }, "\u2190")), /*#__PURE__*/Rn.createElement("p", {
+	      title: "Previous (Ctrl+\u2190)",
+	      style: {
+	        minWidth: '2rem',
+	        padding: '0.25rem 0.5rem'
+	      }
+	    }, "\u25C0")), /*#__PURE__*/Rn.createElement("p", {
 	      className: "control"
 	    }, /*#__PURE__*/Rn.createElement("button", {
 	      className: "button is-small is-info",
 	      onClick: () => this.props.playground.selectNextBox(),
-	      title: "Next box (Ctrl+\u2192)"
-	    }, "\u2192"))))))), packResult.boxes.map((box, index) => {
+	      title: "Next (Ctrl+\u2192)",
+	      style: {
+	        minWidth: '2rem',
+	        padding: '0.25rem 0.5rem'
+	      }
+	    }, "\u25B6"))))))), packResult.boxes.map((box, index) => {
 	      const stats = this.calculateBoxStats(box);
 	      const isSelected = selectedBox === box.id;
 	      return /*#__PURE__*/Rn.createElement("a", {
@@ -29503,68 +29598,260 @@ void main() {
 	          width: '100%'
 	        }
 	      }, /*#__PURE__*/Rn.createElement("div", {
-	        className: "level",
+	        className: "level is-mobile",
+	        style: {
+	          marginBottom: '0.5rem'
+	        }
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-left"
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-item",
+	        style: {
+	          fontFamily: 'monospace',
+	          fontSize: '0.8125rem'
+	        }
+	      }, /*#__PURE__*/Rn.createElement("strong", null, "#", index + 1), " ", Math.round(box.width), "\xD7", Math.round(box.height), "\xD7", Math.round(box.depth), isSelected && /*#__PURE__*/Rn.createElement("span", {
+	        className: "tag is-success",
+	        style: {
+	          marginLeft: '0.5rem',
+	          fontSize: '0.7rem'
+	        }
+	      }, "ACTIVE"))), /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-right"
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-item"
+	      }, /*#__PURE__*/Rn.createElement("span", {
+	        className: "tag is-info",
+	        style: {
+	          fontSize: '0.7rem'
+	        }
+	      }, stats.itemsCount)))), /*#__PURE__*/Rn.createElement("div", {
+	        style: {
+	          fontSize: '0.75rem',
+	          fontFamily: 'monospace'
+	        }
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        style: {
+	          marginBottom: '0.5rem'
+	        }
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level is-mobile",
 	        style: {
 	          marginBottom: '0.25rem'
 	        }
 	      }, /*#__PURE__*/Rn.createElement("div", {
 	        className: "level-left"
-	      }, /*#__PURE__*/Rn.createElement("div", {
-	        className: "level-item"
-	      }, /*#__PURE__*/Rn.createElement("strong", null, "Box #", index + 1, " ", box.id.slice(0, 8), "..."), isSelected && /*#__PURE__*/Rn.createElement("span", {
-	        className: "tag is-success",
-	        style: {
-	          marginLeft: '0.5rem'
-	        }
-	      }, "Selected"))), /*#__PURE__*/Rn.createElement("div", {
-	        className: "level-right"
-	      }, /*#__PURE__*/Rn.createElement("div", {
-	        className: "level-item"
 	      }, /*#__PURE__*/Rn.createElement("span", {
-	        className: "tag is-info"
-	      }, stats.itemsCount, " items")))), /*#__PURE__*/Rn.createElement("div", {
-	        className: "content is-small"
-	      }, /*#__PURE__*/Rn.createElement("p", {
 	        style: {
-	          marginBottom: '0.25rem'
+	          color: '#bbb'
 	        }
-	      }, "Size: ", Math.round(box.width), "\xD7", Math.round(box.height), "\xD7", Math.round(box.depth)), /*#__PURE__*/Rn.createElement("progress", {
-	        className: "progress is-small is-success",
+	      }, "VOL")), /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-right"
+	      }, /*#__PURE__*/Rn.createElement("span", {
+	        style: {
+	          color: stats.utilization > 80 ? '#f14668' : stats.utilization > 60 ? '#ffa726' : '#48c774',
+	          fontWeight: 600
+	        }
+	      }, stats.utilization.toFixed(1), "%"))), /*#__PURE__*/Rn.createElement("progress", {
+	        className: "progress",
 	        value: stats.utilization,
 	        max: "100",
 	        style: {
-	          marginBottom: '0.25rem'
+	          marginBottom: '0.25rem',
+	          height: '3px'
 	        }
-	      }, stats.utilization, "%"), /*#__PURE__*/Rn.createElement("p", {
-	        className: "help",
+	      }), /*#__PURE__*/Rn.createElement("div", {
+	        style: {
+	          color: '#bbb',
+	          fontSize: '0.7rem'
+	        }
+	      }, stats.usedVolume.toLocaleString(), "/", stats.totalVolume.toLocaleString(), " mm\xB3")), /*#__PURE__*/Rn.createElement("div", null, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level is-mobile",
 	        style: {
 	          marginBottom: '0.25rem'
 	        }
-	      }, "Volume: ", stats.utilization, "% used (", stats.usedVolume, " / ", stats.totalVolume, ")"), /*#__PURE__*/Rn.createElement("p", {
-	        className: "help"
-	      }, "Weight: ", stats.weightUtilization, "% used (", stats.usedWeight, " / ", Math.round(box.weight), ")"))));
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-left"
+	      }, /*#__PURE__*/Rn.createElement("span", {
+	        style: {
+	          color: '#bbb'
+	        }
+	      }, "WGT")), /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-right"
+	      }, /*#__PURE__*/Rn.createElement("span", {
+	        style: {
+	          color: stats.weightUtilization > 80 ? '#f14668' : stats.weightUtilization > 60 ? '#ffa726' : '#48c774',
+	          fontWeight: 600
+	        }
+	      }, stats.weightUtilization.toFixed(1), "%"))), /*#__PURE__*/Rn.createElement("progress", {
+	        className: "progress",
+	        value: stats.weightUtilization,
+	        max: "100",
+	        style: {
+	          height: '3px',
+	          marginBottom: '0.25rem'
+	        }
+	      }), /*#__PURE__*/Rn.createElement("div", {
+	        style: {
+	          color: '#bbb',
+	          fontSize: '0.7rem'
+	        }
+	      }, stats.usedWeight.toLocaleString(), "/", Math.round(box.weight).toLocaleString(), " g")))));
 	    })), selectedBoxData && selectedBoxStats && /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel",
 	      style: {
-	        flex: '0 0 auto',
-	        marginTop: '0.5rem'
+	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-heading"
-	    }, /*#__PURE__*/Rn.createElement("strong", null, "Box Details")), /*#__PURE__*/Rn.createElement("div", {
-	      className: "panel-block"
-	    }, /*#__PURE__*/Rn.createElement("div", {
-	      className: "content",
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Details")), /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block",
 	      style: {
-	        width: '100%'
+	        flexDirection: 'column',
+	        alignItems: 'stretch',
+	        padding: '1rem'
 	      }
-	    }, /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Dimensions:"), " ", Math.round(selectedBoxData.width), " \xD7 ", Math.round(selectedBoxData.height), " \xD7 ", Math.round(selectedBoxData.depth)), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Max Weight:"), " ", Math.round(selectedBoxData.weight)), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Items:"), " ", selectedBoxStats.itemsCount), /*#__PURE__*/Rn.createElement("hr", null), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Volume Utilization:"), " ", selectedBoxStats.utilization, "%"), /*#__PURE__*/Rn.createElement("p", {
-	      className: "help"
-	    }, "Used: ", selectedBoxStats.usedVolume, " / Total: ", selectedBoxStats.totalVolume), /*#__PURE__*/Rn.createElement("p", {
-	      className: "help"
-	    }, "Free: ", selectedBoxStats.freeVolume), /*#__PURE__*/Rn.createElement("hr", null), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Weight Utilization:"), " ", selectedBoxStats.weightUtilization, "%"), /*#__PURE__*/Rn.createElement("p", {
-	      className: "help"
-	    }, "Used: ", selectedBoxStats.usedWeight, " / Max: ", Math.round(selectedBoxData.weight)), /*#__PURE__*/Rn.createElement("hr", null), /*#__PURE__*/Rn.createElement("p", null, /*#__PURE__*/Rn.createElement("strong", null, "Items in box:")), /*#__PURE__*/Rn.createElement("div", {
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        fontFamily: 'monospace',
+	        fontSize: '0.8125rem',
+	        marginBottom: '1rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        marginBottom: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: '#bbb',
+	        fontSize: '0.7rem',
+	        textTransform: 'uppercase'
+	      }
+	    }, "Size"), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        color: '#f0f0f0',
+	        marginTop: '0.25rem'
+	      }
+	    }, Math.round(selectedBoxData.width), " \xD7 ", Math.round(selectedBoxData.height), " \xD7 ", Math.round(selectedBoxData.depth), " mm")), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        marginBottom: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: '#bbb',
+	        fontSize: '0.7rem',
+	        textTransform: 'uppercase'
+	      }
+	    }, "Max Weight"), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        color: '#f0f0f0',
+	        marginTop: '0.25rem'
+	      }
+	    }, Math.round(selectedBoxData.weight).toLocaleString(), " g")), /*#__PURE__*/Rn.createElement("div", null, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: '#bbb',
+	        fontSize: '0.7rem',
+	        textTransform: 'uppercase'
+	      }
+	    }, "Items"), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        color: '#f0f0f0',
+	        marginTop: '0.25rem'
+	      }
+	    }, selectedBoxStats.itemsCount))), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        borderTop: '1px solid #333',
+	        paddingTop: '1rem',
+	        marginTop: '1rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        marginBottom: '1rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level is-mobile",
+	      style: {
+	        marginBottom: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-left"
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: '#bbb',
+	        fontSize: '0.7rem',
+	        textTransform: 'uppercase'
+	      }
+	    }, "Volume")), /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-right"
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: selectedBoxStats.utilization > 80 ? '#f14668' : selectedBoxStats.utilization > 60 ? '#ffa726' : '#48c774',
+	        fontFamily: 'monospace',
+	        fontWeight: 600
+	      }
+	    }, selectedBoxStats.utilization.toFixed(1), "%"))), /*#__PURE__*/Rn.createElement("progress", {
+	      className: "progress",
+	      value: selectedBoxStats.utilization,
+	      max: "100",
+	      style: {
+	        height: '3px',
+	        marginBottom: '0.5rem'
+	      }
+	    }), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        fontFamily: 'monospace',
+	        fontSize: '0.7rem',
+	        color: '#bbb'
+	      }
+	    }, selectedBoxStats.usedVolume.toLocaleString(), " / ", selectedBoxStats.totalVolume.toLocaleString(), " mm\xB3", /*#__PURE__*/Rn.createElement("br", null), "Free: ", selectedBoxStats.freeVolume.toLocaleString(), " mm\xB3")), /*#__PURE__*/Rn.createElement("div", null, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level is-mobile",
+	      style: {
+	        marginBottom: '0.5rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-left"
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: '#bbb',
+	        fontSize: '0.7rem',
+	        textTransform: 'uppercase'
+	      }
+	    }, "Weight")), /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-right"
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: selectedBoxStats.weightUtilization > 80 ? '#f14668' : selectedBoxStats.weightUtilization > 60 ? '#ffa726' : '#48c774',
+	        fontFamily: 'monospace',
+	        fontWeight: 600
+	      }
+	    }, selectedBoxStats.weightUtilization.toFixed(1), "%"))), /*#__PURE__*/Rn.createElement("progress", {
+	      className: "progress",
+	      value: selectedBoxStats.weightUtilization,
+	      max: "100",
+	      style: {
+	        height: '3px',
+	        marginBottom: '0.5rem'
+	      }
+	    }), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        fontFamily: 'monospace',
+	        fontSize: '0.7rem',
+	        color: '#bbb'
+	      }
+	    }, selectedBoxStats.usedWeight.toLocaleString(), " / ", Math.round(selectedBoxData.weight).toLocaleString(), " g"))), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        borderTop: '1px solid #333',
+	        paddingTop: '1rem',
+	        marginTop: '1rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        color: '#bbb',
+	        fontSize: '0.7rem',
+	        textTransform: 'uppercase',
+	        marginBottom: '0.75rem'
+	      }
+	    }, "Items (", selectedBoxData.items.length, ")"), /*#__PURE__*/Rn.createElement("div", {
 	      style: {
 	        maxHeight: '200px',
 	        overflowY: 'auto'
@@ -29573,32 +29860,71 @@ void main() {
 	      key: item.id,
 	      className: "box",
 	      style: {
-	        padding: '0.5rem',
-	        marginBottom: '0.25rem'
+	        marginBottom: '0.5rem'
 	      }
-	    }, /*#__PURE__*/Rn.createElement("p", {
-	      className: "help",
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level is-mobile",
 	      style: {
 	        marginBottom: '0.25rem'
 	      }
-	    }, /*#__PURE__*/Rn.createElement("strong", null, "#", idx + 1), " ", Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth), ' ', "wg:", Math.round(item.weight)), /*#__PURE__*/Rn.createElement("p", {
-	      className: "help",
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-left"
+	    }, /*#__PURE__*/Rn.createElement("span", {
 	      style: {
+	        color: '#4a9eff',
+	        fontFamily: 'monospace'
+	      }
+	    }, "#", idx + 1), /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        marginLeft: '0.5rem',
+	        fontFamily: 'monospace'
+	      }
+	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth))), /*#__PURE__*/Rn.createElement("div", {
+	      className: "level-right"
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: '#bbb',
+	        fontFamily: 'monospace',
+	        fontSize: '0.7rem'
+	      }
+	    }, Math.round(item.weight), "g"))), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        fontFamily: 'monospace',
 	        fontSize: '0.7rem',
-	        margin: 0
+	        color: '#999'
 	      }
-	    }, "Position: (", Math.round(item.position.x), ", ", Math.round(item.position.y), ", ", Math.round(item.position.z), ")"))))))), packResult && packResult.items && packResult.items.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
+	    }, "(", Math.round(item.position.x), ", ", Math.round(item.position.y), ", ", Math.round(item.position.z), ")"))))))), packResult && packResult.items && packResult.items.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel",
 	      style: {
 	        flex: '0 0 auto',
-	        marginTop: '0.5rem'
+	        border: '1px solid #f14668'
 	      }
 	    }, /*#__PURE__*/Rn.createElement("p", {
-	      className: "panel-heading has-background-danger-light"
-	    }, /*#__PURE__*/Rn.createElement("strong", null, "Unfit Items (", packResult.items.length, ")")), packResult.items.map(item => /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-heading",
+	      style: {
+	        background: '#2a1a1a',
+	        borderBottomColor: '#f14668'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("strong", null, "Unfit (", packResult.items.length, ")")), packResult.items.map(item => /*#__PURE__*/Rn.createElement("div", {
 	      key: item.id,
-	      className: "panel-block"
-	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth), " wg:", Math.round(item.weight)))));
+	      className: "panel-block",
+	      style: {
+	        borderLeft: '2px solid #f14668',
+	        fontFamily: 'monospace',
+	        fontSize: '0.8125rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        flex: 1,
+	        color: '#f0f0f0'
+	      }
+	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth)), /*#__PURE__*/Rn.createElement("span", {
+	      style: {
+	        color: '#bbb',
+	        marginLeft: '0.5rem',
+	        fontSize: '0.75rem'
+	      }
+	    }, Math.round(item.weight), "g")))));
 	  }
 	}
 

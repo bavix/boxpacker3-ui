@@ -88,6 +88,8 @@ export class Playground {
     showAnimation = true;
     cameraAnimation = null;
     boxList = [];
+    mouseDownPos = null;
+    isDragging = false;
 
     constructor(container) {
         this.camera = new THREE.PerspectiveCamera(45, container.offsetWidth / window.innerHeight, 1, 80000);
@@ -116,7 +118,39 @@ export class Playground {
         // Add click handler for box selection
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
-        this.renderer.domElement.addEventListener('click', (e) => this.onCanvasClick(e));
+        const canvas = this.renderer.domElement;
+        
+        // Track mouse down position to detect dragging
+        canvas.addEventListener('mousedown', (e) => {
+            this.mouseDownPos = { x: e.clientX, y: e.clientY };
+            this.isDragging = false;
+        });
+        
+        // Track mouse movement to detect dragging
+        canvas.addEventListener('mousemove', (e) => {
+            if (this.mouseDownPos) {
+                const dx = Math.abs(e.clientX - this.mouseDownPos.x);
+                const dy = Math.abs(e.clientY - this.mouseDownPos.y);
+                // If mouse moved more than 5 pixels, consider it a drag
+                if (dx > 5 || dy > 5) {
+                    this.isDragging = true;
+                }
+            }
+        });
+        
+        // Reset on mouse up
+        canvas.addEventListener('mouseup', () => {
+            this.mouseDownPos = null;
+        });
+        
+        // Handle click - only if it wasn't a drag
+        canvas.addEventListener('click', (e) => {
+            // Only process click if it wasn't a drag
+            if (!this.isDragging) {
+                this.onCanvasClick(e);
+            }
+            this.isDragging = false;
+        });
 
         this.materials['wireframe'] = new THREE.MeshBasicMaterial({
             wireframe: true,

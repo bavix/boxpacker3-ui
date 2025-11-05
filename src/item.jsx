@@ -133,7 +133,7 @@ export default class ItemComponent extends React.Component {
         )
 
         if (element) {
-            element.enabled = !element.enabled
+        element.enabled = !element.enabled
             // Create new array to trigger React update
             this.setState({ elements: [...elements] })
             // ComponentDidUpdate will handle the re-render
@@ -162,13 +162,13 @@ export default class ItemComponent extends React.Component {
 
     playgroundRender = async elements => {
         const items = elements.filter(e => e.enabled)
-        
+
         // Clear visualization first
         this.props.playground.destroy();
 
         const requestData = {
-            boxes: items.filter(i => i.type === boxType),
-            items: items.filter(i => i.type === itemType),
+                boxes: items.filter(i => i.type === boxType),
+                items: items.filter(i => i.type === itemType),
         };
 
         // Add strategy if not default
@@ -427,14 +427,14 @@ export default class ItemComponent extends React.Component {
         const selectedBoxStats = selectedBoxData ? this.calculateBoxStats(selectedBoxData) : null;
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh', overflowY: 'auto', margin: 0, padding: 0 }}>
                 <nav className="panel" style={{ flex: '0 0 auto' }}>
                 <p className="panel-heading field">
                     <div className="level">
                         <div className="level-left">
                             <div className="level-item">
-                                <p className="subtitle is-5">
-                                    <strong>Settings</strong>
+                                <p className="subtitle is-5" style={{ margin: 0, fontSize: '0.875rem', color: '#ffffff', fontWeight: 700 }}>
+                                    <strong style={{ color: '#ffffff' }}>Settings</strong>
                                 </p>
                             </div>
                         </div>
@@ -442,10 +442,14 @@ export default class ItemComponent extends React.Component {
                             <div className="level-item">
                                 <div className="field has-addons">
                                     <p className="control">
-                                        <a href="#" onClick={this.onImport} className="button is-info is-light is-small is-rounded">import</a>
+                                        <a href="#" onClick={this.onImport} className="button is-info is-small" title="Import CSV file">
+                                            Import
+                                        </a>
                                     </p>
                                     <p className="control">
-                                        <a href="#" onClick={this.onExport} className="button is-success is-light is-small is-rounded">export</a>
+                                        <a href="#" onClick={this.onExport} className="button is-success is-small" title="Export to CSV">
+                                            Export
+                                        </a>
                                     </p>
                                 </div>
                             </div>
@@ -467,17 +471,26 @@ export default class ItemComponent extends React.Component {
                         <a href="#" className={type === itemType ? "is-active" : ""} onClick={() => this.setType(itemType)}>Items</a>
                     </p>
                 </form>
-                { elements.filter(datum => datum.type === type).map(datum => (
-                    <label key={datum.id} className="panel-block">
-                        <input type="checkbox" checked={datum.enabled} onChange={() => this.switchEnabled(datum.id)} />
+                { elements.filter(datum => datum.type === type).length === 0 ? (
+                    <div className="panel-block" style={{ textAlign: 'center', padding: '1.5rem', color: '#bbb', fontSize: '0.75rem' }}>
+                        <p>No {type === boxType ? 'boxes' : 'items'}</p>
+                    </div>
+                ) : (
+                    elements.filter(datum => datum.type === type).map(datum => (
+                        <label key={datum.id} className="panel-block" style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', alignItems: 'center' }}>
+                            <input type="checkbox" checked={datum.enabled} onChange={() => this.switchEnabled(datum.id)} style={{ marginRight: '0.75rem' }} />
+                            <span style={{ flex: 1, fontFamily: 'monospace', fontSize: '0.8125rem' }}>
                         {datum.toString()}
+                            </span>
+                            {!datum.enabled && <span className="tag is-light" style={{ fontSize: '0.7rem', marginLeft: '0.5rem' }}>OFF</span>}
                     </label>
-                ))}
+                    ))
+                )}
             </nav>
 
-                <nav className="panel" style={{ flex: '0 0 auto', marginTop: '0.5rem' }}>
+                <nav className="panel" style={{ flex: '0 0 auto' }}>
                     <p className="panel-heading">
-                        <strong>Packing Strategy</strong>
+                        <strong>Strategy</strong>
                     </p>
                     <div className="panel-block">
                         <div className="field" style={{ width: '100%' }}>
@@ -499,15 +512,15 @@ export default class ItemComponent extends React.Component {
                 </nav>
 
                 {packResult && (
-                    <nav className="panel" style={{ flex: '0 0 auto', marginTop: '0.5rem' }}>
+                    <nav className="panel" style={{ flex: '0 0 auto' }}>
                         <p className="panel-heading">
                             <strong>Visualization</strong>
                         </p>
                         <div className="panel-block">
                             <div className="field" style={{ width: '100%' }}>
                                 <label className="checkbox">
-                                    <input type="checkbox" checked={showAnimation} onChange={this.toggleAnimation} />
-                                    {' '}Show animation
+                                    <input type="checkbox" checked={showAnimation} onChange={this.toggleAnimation} style={{ marginRight: '0.5rem' }} />
+                                    Show animation
                                 </label>
                             </div>
                         </div>
@@ -528,22 +541,21 @@ export default class ItemComponent extends React.Component {
                                 </div>
                             </div>
                         )}
-                        <div className="panel-block">
+                        <div className="panel-block" style={{ background: '#2a2a2a', border: '1px solid #333', fontSize: '0.75rem', color: '#bbb' }}>
                             <p className="help" style={{ margin: 0 }}>
-                                💡 Click on boxes in 3D view or in the list to see details<br />
-                                ⌨️ Use Ctrl+←/→ to navigate between boxes
+                                Click boxes in 3D or list to view details | Ctrl+←/→ to navigate
                             </p>
                         </div>
                     </nav>
                 )}
 
                 {packResult && packResult.boxes && packResult.boxes.length > 0 && (
-                    <nav className="panel" style={{ flex: '0 0 auto', marginTop: '0.5rem' }}>
+                    <nav className="panel" style={{ flex: '0 0 auto' }}>
                         <p className="panel-heading">
                             <div className="level" style={{ margin: 0 }}>
                                 <div className="level-left">
                                     <div className="level-item">
-                                        <strong>Packed Boxes ({packResult.boxes.length})</strong>
+                                        <strong>Boxes ({packResult.boxes.length})</strong>
                                     </div>
                                 </div>
                                 <div className="level-right">
@@ -553,18 +565,20 @@ export default class ItemComponent extends React.Component {
                                                 <button 
                                                     className="button is-small is-info" 
                                                     onClick={() => this.props.playground.selectPreviousBox()}
-                                                    title="Previous box (Ctrl+←)"
+                                                    title="Previous (Ctrl+←)"
+                                                    style={{ minWidth: '2rem', padding: '0.25rem 0.5rem' }}
                                                 >
-                                                    ←
+                                                    ◀
                                                 </button>
                                             </p>
                                             <p className="control">
                                                 <button 
                                                     className="button is-small is-info" 
                                                     onClick={() => this.props.playground.selectNextBox()}
-                                                    title="Next box (Ctrl+→)"
+                                                    title="Next (Ctrl+→)"
+                                                    style={{ minWidth: '2rem', padding: '0.25rem 0.5rem' }}
                                                 >
-                                                    →
+                                                    ▶
                                                 </button>
                                             </p>
                                         </div>
@@ -583,37 +597,62 @@ export default class ItemComponent extends React.Component {
                                     onClick={(e) => { e.preventDefault(); this.selectBox(box.id); }}
                                 >
                                     <div style={{ width: '100%' }}>
-                                        <div className="level" style={{ marginBottom: '0.25rem' }}>
+                                        <div className="level is-mobile" style={{ marginBottom: '0.5rem' }}>
                                             <div className="level-left">
-                                                <div className="level-item">
-                                                    <strong>Box #{index + 1} {box.id.slice(0, 8)}...</strong>
-                                                    {isSelected && <span className="tag is-success" style={{ marginLeft: '0.5rem' }}>Selected</span>}
+                                                <div className="level-item" style={{ fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+                                                    <strong>#{index + 1}</strong> {Math.round(box.width)}×{Math.round(box.height)}×{Math.round(box.depth)}
+                                                    {isSelected && <span className="tag is-success" style={{ marginLeft: '0.5rem', fontSize: '0.7rem' }}>ACTIVE</span>}
                                                 </div>
                                             </div>
                                             <div className="level-right">
                                                 <div className="level-item">
-                                                    <span className="tag is-info">{stats.itemsCount} items</span>
+                                                    <span className="tag is-info" style={{ fontSize: '0.7rem' }}>{stats.itemsCount}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="content is-small">
-                                            <p style={{ marginBottom: '0.25rem' }}>
-                                                Size: {Math.round(box.width)}×{Math.round(box.height)}×{Math.round(box.depth)}
-                                            </p>
-                                            <progress 
-                                                className="progress is-small is-success" 
-                                                value={stats.utilization} 
-                                                max="100"
-                                                style={{ marginBottom: '0.25rem' }}
-                                            >
-                                                {stats.utilization}%
-                                            </progress>
-                                            <p className="help" style={{ marginBottom: '0.25rem' }}>
-                                                Volume: {stats.utilization}% used ({stats.usedVolume} / {stats.totalVolume})
-                                            </p>
-                                            <p className="help">
-                                                Weight: {stats.weightUtilization}% used ({stats.usedWeight} / {Math.round(box.weight)})
-                                            </p>
+                                        <div style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                                            <div style={{ marginBottom: '0.5rem' }}>
+                                                <div className="level is-mobile" style={{ marginBottom: '0.25rem' }}>
+                                                    <div className="level-left">
+                                                        <span style={{ color: '#bbb' }}>VOL</span>
+                                                    </div>
+                                                    <div className="level-right">
+                                                        <span style={{ color: stats.utilization > 80 ? '#f14668' : stats.utilization > 60 ? '#ffa726' : '#48c774', fontWeight: 600 }}>
+                                                            {stats.utilization.toFixed(1)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <progress 
+                                                    className="progress" 
+                                                    value={stats.utilization} 
+                                                    max="100"
+                                                    style={{ marginBottom: '0.25rem', height: '3px' }}
+                                                />
+                                                <div style={{ color: '#bbb', fontSize: '0.7rem' }}>
+                                                    {stats.usedVolume.toLocaleString()}/{stats.totalVolume.toLocaleString()} mm³
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="level is-mobile" style={{ marginBottom: '0.25rem' }}>
+                                                    <div className="level-left">
+                                                        <span style={{ color: '#bbb' }}>WGT</span>
+                                                    </div>
+                                                    <div className="level-right">
+                                                        <span style={{ color: stats.weightUtilization > 80 ? '#f14668' : stats.weightUtilization > 60 ? '#ffa726' : '#48c774', fontWeight: 600 }}>
+                                                            {stats.weightUtilization.toFixed(1)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <progress 
+                                                    className="progress" 
+                                                    value={stats.weightUtilization} 
+                                                    max="100"
+                                                    style={{ height: '3px', marginBottom: '0.25rem' }}
+                                                />
+                                                <div style={{ color: '#bbb', fontSize: '0.7rem' }}>
+                                                    {stats.usedWeight.toLocaleString()}/{Math.round(box.weight).toLocaleString()} g
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </a>
@@ -623,34 +662,93 @@ export default class ItemComponent extends React.Component {
                 )}
 
                 {selectedBoxData && selectedBoxStats && (
-                    <nav className="panel" style={{ flex: '0 0 auto', marginTop: '0.5rem' }}>
+                    <nav className="panel" style={{ flex: '0 0 auto' }}>
                         <p className="panel-heading">
-                            <strong>Box Details</strong>
+                            <strong>Details</strong>
                         </p>
-                        <div className="panel-block">
-                            <div className="content" style={{ width: '100%' }}>
-                                <p><strong>Dimensions:</strong> {Math.round(selectedBoxData.width)} × {Math.round(selectedBoxData.height)} × {Math.round(selectedBoxData.depth)}</p>
-                                <p><strong>Max Weight:</strong> {Math.round(selectedBoxData.weight)}</p>
-                                <p><strong>Items:</strong> {selectedBoxStats.itemsCount}</p>
-                                <hr />
-                                <p><strong>Volume Utilization:</strong> {selectedBoxStats.utilization}%</p>
-                                <p className="help">Used: {selectedBoxStats.usedVolume} / Total: {selectedBoxStats.totalVolume}</p>
-                                <p className="help">Free: {selectedBoxStats.freeVolume}</p>
-                                <hr />
-                                <p><strong>Weight Utilization:</strong> {selectedBoxStats.weightUtilization}%</p>
-                                <p className="help">Used: {selectedBoxStats.usedWeight} / Max: {Math.round(selectedBoxData.weight)}</p>
-                                <hr />
-                                <p><strong>Items in box:</strong></p>
+                        <div className="panel-block" style={{ flexDirection: 'column', alignItems: 'stretch', padding: '1rem' }}>
+                                <div style={{ fontFamily: 'monospace', fontSize: '0.8125rem', marginBottom: '1rem' }}>
+                                <div style={{ marginBottom: '0.5rem' }}>
+                                    <span style={{ color: '#bbb', fontSize: '0.7rem', textTransform: 'uppercase' }}>Size</span>
+                                    <div style={{ color: '#f0f0f0', marginTop: '0.25rem' }}>
+                                        {Math.round(selectedBoxData.width)} × {Math.round(selectedBoxData.height)} × {Math.round(selectedBoxData.depth)} mm
+                                    </div>
+                                </div>
+                                <div style={{ marginBottom: '0.5rem' }}>
+                                    <span style={{ color: '#bbb', fontSize: '0.7rem', textTransform: 'uppercase' }}>Max Weight</span>
+                                    <div style={{ color: '#f0f0f0', marginTop: '0.25rem' }}>
+                                        {Math.round(selectedBoxData.weight).toLocaleString()} g
+                                    </div>
+                                </div>
+                                <div>
+                                    <span style={{ color: '#bbb', fontSize: '0.7rem', textTransform: 'uppercase' }}>Items</span>
+                                    <div style={{ color: '#f0f0f0', marginTop: '0.25rem' }}>
+                                        {selectedBoxStats.itemsCount}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style={{ borderTop: '1px solid #333', paddingTop: '1rem', marginTop: '1rem' }}>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <div className="level is-mobile" style={{ marginBottom: '0.5rem' }}>
+                                        <div className="level-left">
+                                            <span style={{ color: '#bbb', fontSize: '0.7rem', textTransform: 'uppercase' }}>Volume</span>
+                                        </div>
+                                        <div className="level-right">
+                                            <span style={{ color: selectedBoxStats.utilization > 80 ? '#f14668' : selectedBoxStats.utilization > 60 ? '#ffa726' : '#48c774', fontFamily: 'monospace', fontWeight: 600 }}>
+                                                {selectedBoxStats.utilization.toFixed(1)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <progress className="progress" value={selectedBoxStats.utilization} max="100" style={{ height: '3px', marginBottom: '0.5rem' }} />
+                                    <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#bbb' }}>
+                                        {selectedBoxStats.usedVolume.toLocaleString()} / {selectedBoxStats.totalVolume.toLocaleString()} mm³
+                                        <br />
+                                        Free: {selectedBoxStats.freeVolume.toLocaleString()} mm³
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div className="level is-mobile" style={{ marginBottom: '0.5rem' }}>
+                                        <div className="level-left">
+                                            <span style={{ color: '#bbb', fontSize: '0.7rem', textTransform: 'uppercase' }}>Weight</span>
+                                        </div>
+                                        <div className="level-right">
+                                            <span style={{ color: selectedBoxStats.weightUtilization > 80 ? '#f14668' : selectedBoxStats.weightUtilization > 60 ? '#ffa726' : '#48c774', fontFamily: 'monospace', fontWeight: 600 }}>
+                                                {selectedBoxStats.weightUtilization.toFixed(1)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <progress className="progress" value={selectedBoxStats.weightUtilization} max="100" style={{ height: '3px', marginBottom: '0.5rem' }} />
+                                    <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#bbb' }}>
+                                        {selectedBoxStats.usedWeight.toLocaleString()} / {Math.round(selectedBoxData.weight).toLocaleString()} g
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style={{ borderTop: '1px solid #333', paddingTop: '1rem', marginTop: '1rem' }}>
+                                <div style={{ color: '#bbb', fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+                                    Items ({selectedBoxData.items.length})
+                                </div>
                                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
                                     {selectedBoxData.items.map((item, idx) => (
-                                        <div key={item.id} className="box" style={{ padding: '0.5rem', marginBottom: '0.25rem' }}>
-                                            <p className="help" style={{ marginBottom: '0.25rem' }}>
-                                                <strong>#{idx + 1}</strong> {Math.round(item.width)}×{Math.round(item.height)}×{Math.round(item.depth)} 
-                                                {' '}wg:{Math.round(item.weight)}
-                                            </p>
-                                            <p className="help" style={{ fontSize: '0.7rem', margin: 0 }}>
-                                                Position: ({Math.round(item.position.x)}, {Math.round(item.position.y)}, {Math.round(item.position.z)})
-                                            </p>
+                                        <div key={item.id} className="box" style={{ marginBottom: '0.5rem' }}>
+                                            <div className="level is-mobile" style={{ marginBottom: '0.25rem' }}>
+                                                <div className="level-left">
+                                                    <span style={{ color: '#4a9eff', fontFamily: 'monospace' }}>#{idx + 1}</span>
+                                                    <span style={{ marginLeft: '0.5rem', fontFamily: 'monospace' }}>
+                                                        {Math.round(item.width)}×{Math.round(item.height)}×{Math.round(item.depth)}
+                                                    </span>
+                                                </div>
+                                                <div className="level-right">
+                                                    <span style={{ color: '#bbb', fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                                                        {Math.round(item.weight)}g
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#999' }}>
+                                                ({Math.round(item.position.x)}, {Math.round(item.position.y)}, {Math.round(item.position.z)})
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -660,13 +758,18 @@ export default class ItemComponent extends React.Component {
                 )}
 
                 {packResult && packResult.items && packResult.items.length > 0 && (
-                    <nav className="panel" style={{ flex: '0 0 auto', marginTop: '0.5rem' }}>
-                        <p className="panel-heading has-background-danger-light">
-                            <strong>Unfit Items ({packResult.items.length})</strong>
+                    <nav className="panel" style={{ flex: '0 0 auto', border: '1px solid #f14668' }}>
+                        <p className="panel-heading" style={{ background: '#2a1a1a', borderBottomColor: '#f14668' }}>
+                            <strong>Unfit ({packResult.items.length})</strong>
                         </p>
                         {packResult.items.map(item => (
-                            <div key={item.id} className="panel-block">
-                                {Math.round(item.width)}×{Math.round(item.height)}×{Math.round(item.depth)} wg:{Math.round(item.weight)}
+                            <div key={item.id} className="panel-block" style={{ borderLeft: '2px solid #f14668', fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+                                <span style={{ flex: 1, color: '#f0f0f0' }}>
+                                    {Math.round(item.width)}×{Math.round(item.height)}×{Math.round(item.depth)}
+                                </span>
+                                <span style={{ color: '#bbb', marginLeft: '0.5rem', fontSize: '0.75rem' }}>
+                                    {Math.round(item.weight)}g
+                                </span>
                             </div>
                         ))}
                     </nav>
@@ -675,3 +778,4 @@ export default class ItemComponent extends React.Component {
         );
     }
 }
+
