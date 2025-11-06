@@ -51155,7 +51155,7 @@ void main() {
 	    return this.width + 'x' + this.height + 'x' + this.depth + ' wg' + this.weight;
 	  }
 	  toExport() {
-	    return [this.id, this.width, this.type, this.height, this.depth, this.weight].join(';');
+	    return [this.width, this.height, this.depth, this.weight, this.type].join(';');
 	  }
 	}
 	const STRATEGIES = [{
@@ -51466,7 +51466,7 @@ void main() {
 	      alert('No elements to export');
 	      return;
 	    }
-	    const csvContent = "data:text/csv;charset=utf-8," + "id;width;type;height;depth;weight\n" + elementsToExport.map(e => e.toExport()).join("\n");
+	    const csvContent = "data:text/csv;charset=utf-8," + elementsToExport.map(e => e.toExport()).join("\n");
 	    const link = document.createElement("a");
 	    link.setAttribute("href", encodeURI(csvContent));
 	    link.setAttribute("download", `boxpacker3-export-${new Date().toISOString().split('T')[0]}.csv`);

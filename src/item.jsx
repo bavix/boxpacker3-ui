@@ -22,7 +22,7 @@ class Datum {
     }
 
     toExport() {
-        return [this.id, this.width, this.type, this.height, this.depth, this.weight].join(';')
+        return [this.width, this.height, this.depth, this.weight, this.type].join(';')
     }
 }
 
@@ -373,7 +373,6 @@ export default class ItemComponent extends React.Component {
         }
 
         const csvContent = "data:text/csv;charset=utf-8,"
-            + "id;width;type;height;depth;weight\n"
             + elementsToExport.map(e => e.toExport()).join("\n")
 
         const link = document.createElement("a")
