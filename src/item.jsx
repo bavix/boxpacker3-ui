@@ -26,6 +26,48 @@ class Datum {
     }
 }
 
+/**
+ * Available packing strategies for the bin packing algorithm.
+ * 
+ * Each strategy offers different trade-offs between packing efficiency, 
+ * execution speed, and box utilization.
+ * 
+ * @type {Array<{value: number, name: string, description: string}>}
+ * 
+ * Strategy Details:
+ * 
+ * - **Minimize Boxes (0)**: Optimizes for the fewest number of boxes.
+ *   Use when: You want to reduce shipping costs or minimize the number of packages.
+ *   Performance: Slower execution time due to optimization, but best box utilization.
+ *   Trade-off: Higher computation time for optimal results.
+ * 
+ * - **Greedy (1)**: Fast first-fit approach processing items in their original order.
+ *   Use when: You need quick results and item order doesn't matter much.
+ *   Performance: Fastest execution time, but may use more boxes than optimal.
+ *   Trade-off: Speed over efficiency - can result in suboptimal packing.
+ * 
+ * - **First Fit Decreasing (FFD) (2)**: Sorts items by size (largest first) then uses first-fit.
+ *   Use when: You want a good balance between speed and efficiency.
+ *   Performance: Moderate execution time with good packing results.
+ *   Trade-off: Better packing than Greedy, slightly slower execution.
+ * 
+ * - **Best Fit (3)**: Places each item in the box where it fits best (tightest fit).
+ *   Use when: You want better space utilization than first-fit strategies.
+ *   Performance: Slower than first-fit methods but better utilization.
+ *   Trade-off: More computation per item for improved packing density.
+ * 
+ * - **Best Fit Decreasing (BFD) (4)**: Combines best-fit with size-based sorting (largest first).
+ *   Use when: You need high packing efficiency with reasonable execution time.
+ *   Performance: Good balance between optimization and speed.
+ *   Trade-off: Near-optimal results with acceptable computation time.
+ * 
+ * Recommended Strategy Selection:
+ * - Small item sets (< 50 items): Any strategy works well, prefer Minimize Boxes for best results.
+ * - Medium item sets (50-500 items): Use BFD or FFD for balanced performance.
+ * - Large item sets (> 500 items): Use Greedy or FFD to maintain reasonable execution times.
+ * - Cost-sensitive shipping: Use Minimize Boxes or BFD to reduce box count.
+ * - Time-sensitive operations: Use Greedy for fastest results.
+ */
 const STRATEGIES = [
     { value: 0, name: 'Minimize Boxes', description: 'Minimizes the number of boxes used' },
     { value: 1, name: 'Greedy', description: 'First-fit strategy with ascending item order' },
