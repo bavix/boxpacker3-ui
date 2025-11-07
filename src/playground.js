@@ -83,6 +83,7 @@ export class Playground {
     materials = {};
     animationFrameId = null;
     selectedBox = null;
+    selectedItem = null;
     onBoxSelect = null;
     animationSpeed = 1;
     showAnimation = true;
@@ -170,6 +171,15 @@ export class Playground {
         });
         this.materials['smooth'] = new THREE.MeshLambertMaterial({side: THREE.DoubleSide});
         this.materials['glossy'] = new THREE.MeshPhongMaterial({side: THREE.DoubleSide});
+        this.materials['item_selected'] = new THREE.MeshPhongMaterial({
+            color: 0xffff00,
+            flatShading: true,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 1.0,
+            emissive: 0xffff00,
+            emissiveIntensity: 0.5
+        });
 
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x0a0a0a); // Very dark background
@@ -208,6 +218,22 @@ export class Playground {
             if (oldBox) {
                 oldBox.material = this.materials['wireframe'];
             }
+        }
+
+        // Reset selected item when selecting a box
+        if (this.selectedItem) {
+            const oldItem = this.itemMap.get(this.selectedItem);
+            if (oldItem) {
+                const color = colorFromUuid(this.selectedItem);
+                oldItem.material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    flatShading: true,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.9
+                });
+            }
+            this.selectedItem = null;
         }
 
         this.selectedBox = boxId;
@@ -268,6 +294,71 @@ export class Playground {
 
         if (this.onBoxSelect) {
             this.onBoxSelect(boxId);
+        }
+    }
+
+    selectItem(itemId, animate = true) {
+        // Reset previously selected item
+        if (this.selectedItem) {
+            const oldItem = this.itemMap.get(this.selectedItem);
+            if (oldItem) {
+                // Restore original color based on item ID
+                const color = colorFromUuid(this.selectedItem);
+                oldItem.material = new THREE.MeshPhongMaterial({
+                    color: color,
+                    flatShading: true,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.9
+                });
+            }
+        }
+
+        this.selectedItem = itemId;
+        const item = this.itemMap.get(itemId);
+        if (item) {
+            // Highlight selected item with yellow color
+            item.material = this.materials['item_selected'];
+            
+            // Calculate optimal camera position to focus on the item
+            if (animate) {
+                const itemPosition = new THREE.Vector3();
+                item.getWorldPosition(itemPosition);
+                
+                const itemData = item.userData?.itemData;
+                if (itemData) {
+                    const itemSize = Math.max(itemData.width, itemData.height, itemData.depth);
+                    const diagonal = Math.sqrt(
+                        itemData.width * itemData.width + 
+                        itemData.height * itemData.height + 
+                        itemData.depth * itemData.depth
+                    );
+                    const distance = diagonal * 2; // Distance to view the item
+                    
+                    const angle = Math.PI / 4; // 45 degrees
+                    const height = itemData.height * 0.5;
+                    
+                    const targetPosition = new THREE.Vector3(
+                        itemPosition.x + Math.cos(angle) * distance,
+                        itemPosition.y + height,
+                        itemPosition.z + Math.sin(angle) * distance
+                    );
+                    
+                    const targetLookAt = itemPosition.clone();
+                    
+                    if (this.cameraAnimation) {
+                        this.cameraAnimation.stop();
+                    }
+                    
+                    this.cameraAnimation = new CameraAnimation(
+                        this.camera,
+                        this.cameraControls,
+                        targetPosition,
+                        targetLookAt,
+                        800 // 0.8 second animation
+                    );
+                }
+            }
         }
     }
 
@@ -379,6 +470,7 @@ export class Playground {
         this.boxMap.clear()
         this.itemMap.clear()
         this.selectedBox = null
+        this.selectedItem = null
     }
 
     createObjects(request) {
@@ -473,6 +565,9 @@ export class Playground {
                 item.position.z + item.depth / 2 - boxData.depth / 2,
             )
 
+            // Store item data for camera positioning
+            itemMesh.userData.itemData = item;
+
             this.items = this.items.concat(itemMesh)
             this.itemMap.set(item.id, itemMesh)
             boxMesh.add(itemMesh)
@@ -508,6 +603,9 @@ export class Playground {
 
                 itemMesh.position.set(finalX, startY, finalZ)
                 itemMesh.scale.set(0.1, 0.1, 0.1)
+
+                // Store item data for camera positioning
+                itemMesh.userData.itemData = item;
 
                 this.items = this.items.concat(itemMesh)
                 this.itemMap.set(item.id, itemMesh)

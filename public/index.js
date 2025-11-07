@@ -46354,6 +46354,7 @@ void main() {
 	  materials = {};
 	  animationFrameId = null;
 	  selectedBox = null;
+	  selectedItem = null;
 	  onBoxSelect = null;
 	  animationSpeed = 1;
 	  showAnimation = true;
@@ -46442,6 +46443,15 @@ void main() {
 	    this.materials['glossy'] = new MeshPhongMaterial({
 	      side: DoubleSide
 	    });
+	    this.materials['item_selected'] = new MeshPhongMaterial({
+	      color: 0xffff00,
+	      flatShading: true,
+	      side: DoubleSide,
+	      transparent: true,
+	      opacity: 1.0,
+	      emissive: 0xffff00,
+	      emissiveIntensity: 0.5
+	    });
 	    this.scene = new Scene();
 	    this.scene.background = new Color(0x0a0a0a); // Very dark background
 
@@ -46470,6 +46480,22 @@ void main() {
 	      if (oldBox) {
 	        oldBox.material = this.materials['wireframe'];
 	      }
+	    }
+
+	    // Reset selected item when selecting a box
+	    if (this.selectedItem) {
+	      const oldItem = this.itemMap.get(this.selectedItem);
+	      if (oldItem) {
+	        const color = libExports.colorFromUuid(this.selectedItem);
+	        oldItem.material = new MeshPhongMaterial({
+	          color: color,
+	          flatShading: true,
+	          side: DoubleSide,
+	          transparent: true,
+	          opacity: 0.9
+	        });
+	      }
+	      this.selectedItem = null;
 	    }
 	    this.selectedBox = boxId;
 	    const box = this.boxMap.get(boxId);
@@ -46508,6 +46534,51 @@ void main() {
 	    }
 	    if (this.onBoxSelect) {
 	      this.onBoxSelect(boxId);
+	    }
+	  }
+	  selectItem(itemId, animate = true) {
+	    // Reset previously selected item
+	    if (this.selectedItem) {
+	      const oldItem = this.itemMap.get(this.selectedItem);
+	      if (oldItem) {
+	        // Restore original color based on item ID
+	        const color = libExports.colorFromUuid(this.selectedItem);
+	        oldItem.material = new MeshPhongMaterial({
+	          color: color,
+	          flatShading: true,
+	          side: DoubleSide,
+	          transparent: true,
+	          opacity: 0.9
+	        });
+	      }
+	    }
+	    this.selectedItem = itemId;
+	    const item = this.itemMap.get(itemId);
+	    if (item) {
+	      // Highlight selected item with yellow color
+	      item.material = this.materials['item_selected'];
+
+	      // Calculate optimal camera position to focus on the item
+	      if (animate) {
+	        const itemPosition = new Vector3$1();
+	        item.getWorldPosition(itemPosition);
+	        const itemData = item.userData?.itemData;
+	        if (itemData) {
+	          Math.max(itemData.width, itemData.height, itemData.depth);
+	          const diagonal = Math.sqrt(itemData.width * itemData.width + itemData.height * itemData.height + itemData.depth * itemData.depth);
+	          const distance = diagonal * 2; // Distance to view the item
+
+	          const angle = Math.PI / 4; // 45 degrees
+	          const height = itemData.height * 0.5;
+	          const targetPosition = new Vector3$1(itemPosition.x + Math.cos(angle) * distance, itemPosition.y + height, itemPosition.z + Math.sin(angle) * distance);
+	          const targetLookAt = itemPosition.clone();
+	          if (this.cameraAnimation) {
+	            this.cameraAnimation.stop();
+	          }
+	          this.cameraAnimation = new CameraAnimation(this.camera, this.cameraControls, targetPosition, targetLookAt, 800 // 0.8 second animation
+	          );
+	        }
+	      }
 	    }
 	  }
 	  selectNextBox() {
@@ -46602,6 +46673,7 @@ void main() {
 	    this.boxMap.clear();
 	    this.itemMap.clear();
 	    this.selectedBox = null;
+	    this.selectedItem = null;
 	  }
 	  createObjects(request) {
 	    this.destroy();
@@ -46684,6 +46756,9 @@ void main() {
 	      // BoxGeometry center is at (0,0,0) in local coordinates
 	      // So we need to convert from pivot point to center point
 	      itemMesh.position.set(item.position.x + item.width / 2 - boxData.width / 2, item.position.y + item.height / 2 - boxData.height / 2, item.position.z + item.depth / 2 - boxData.depth / 2);
+
+	      // Store item data for camera positioning
+	      itemMesh.userData.itemData = item;
 	      this.items = this.items.concat(itemMesh);
 	      this.itemMap.set(item.id, itemMesh);
 	      boxMesh.add(itemMesh);
@@ -46716,6 +46791,9 @@ void main() {
 	        const finalZ = item.position.z + item.depth / 2 - boxData.depth / 2;
 	        itemMesh.position.set(finalX, startY, finalZ);
 	        itemMesh.scale.set(0.1, 0.1, 0.1);
+
+	        // Store item data for camera positioning
+	        itemMesh.userData.itemData = item;
 	        this.items = this.items.concat(itemMesh);
 	        this.itemMap.set(item.id, itemMesh);
 	        boxMesh.add(itemMesh);
@@ -51195,6 +51273,7 @@ void main() {
 	    elements: [],
 	    packResult: null,
 	    selectedBox: null,
+	    selectedItem: null,
 	    showAnimation: true,
 	    animationSpeed: 1,
 	    strategy: 0
@@ -51216,7 +51295,8 @@ void main() {
 	    });
 	    this.props.playground.onBoxSelect = boxId => {
 	      this.setState({
-	        selectedBox: boxId
+	        selectedBox: boxId,
+	        selectedItem: null
 	      });
 	    };
 	    await this.playgroundRender(elements);
@@ -51304,7 +51384,8 @@ void main() {
 	    const packResult = await api('/bp3', requestData);
 	    this.setState({
 	      packResult,
-	      selectedBox: null
+	      selectedBox: null,
+	      selectedItem: null
 	    });
 	    this.props.playground.showAnimation = this.state.showAnimation;
 	    this.props.playground.animationSpeed = this.state.animationSpeed;
@@ -51319,7 +51400,14 @@ void main() {
 	  selectBox = boxId => {
 	    this.props.playground.selectBox(boxId);
 	    this.setState({
-	      selectedBox: boxId
+	      selectedBox: boxId,
+	      selectedItem: null
+	    });
+	  };
+	  selectItem = itemId => {
+	    this.props.playground.selectItem(itemId);
+	    this.setState({
+	      selectedItem: itemId
 	    });
 	  };
 	  toggleAnimation = () => {
@@ -51487,6 +51575,7 @@ void main() {
 	    hasError,
 	    packResult,
 	    selectedBox,
+	    selectedItem,
 	    showAnimation,
 	    animationSpeed,
 	    strategy
@@ -52046,44 +52135,56 @@ void main() {
 	        maxHeight: '200px',
 	        overflowY: 'auto'
 	      }
-	    }, selectedBoxData.items.map((item, idx) => /*#__PURE__*/Rn.createElement("div", {
-	      key: item.id,
-	      className: "box",
-	      style: {
-	        marginBottom: '0.5rem'
-	      }
-	    }, /*#__PURE__*/Rn.createElement("div", {
-	      className: "level is-mobile",
-	      style: {
-	        marginBottom: '0.25rem'
-	      }
-	    }, /*#__PURE__*/Rn.createElement("div", {
-	      className: "level-left"
-	    }, /*#__PURE__*/Rn.createElement("span", {
-	      style: {
-	        color: '#4a9eff',
-	        fontFamily: 'monospace'
-	      }
-	    }, "#", idx + 1), /*#__PURE__*/Rn.createElement("span", {
-	      style: {
-	        marginLeft: '0.5rem',
-	        fontFamily: 'monospace'
-	      }
-	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth))), /*#__PURE__*/Rn.createElement("div", {
-	      className: "level-right"
-	    }, /*#__PURE__*/Rn.createElement("span", {
-	      style: {
-	        color: '#bbb',
-	        fontFamily: 'monospace',
-	        fontSize: '0.7rem'
-	      }
-	    }, Math.round(item.weight), "g"))), /*#__PURE__*/Rn.createElement("div", {
-	      style: {
-	        fontFamily: 'monospace',
-	        fontSize: '0.7rem',
-	        color: '#999'
-	      }
-	    }, "(", Math.round(item.position.x), ", ", Math.round(item.position.y), ", ", Math.round(item.position.z), ")"))))))), packResult && packResult.items && packResult.items.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
+	    }, selectedBoxData.items.map((item, idx) => {
+	      const isSelected = selectedItem === item.id;
+	      return /*#__PURE__*/Rn.createElement("div", {
+	        key: item.id,
+	        className: "box",
+	        style: {
+	          marginBottom: '0.5rem',
+	          cursor: 'pointer',
+	          border: isSelected ? '2px solid #ffff00' : '1px solid #333',
+	          backgroundColor: isSelected ? 'rgba(255, 255, 0, 0.1)' : 'transparent',
+	          padding: isSelected ? '0.5rem' : '0.5rem',
+	          borderRadius: '4px',
+	          transition: 'all 0.2s ease'
+	        },
+	        onClick: () => this.selectItem(item.id)
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level is-mobile",
+	        style: {
+	          marginBottom: '0.25rem'
+	        }
+	      }, /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-left"
+	      }, /*#__PURE__*/Rn.createElement("span", {
+	        style: {
+	          color: isSelected ? '#ffff00' : '#4a9eff',
+	          fontFamily: 'monospace',
+	          fontWeight: isSelected ? 'bold' : 'normal'
+	        }
+	      }, "#", idx + 1), /*#__PURE__*/Rn.createElement("span", {
+	        style: {
+	          marginLeft: '0.5rem',
+	          fontFamily: 'monospace',
+	          color: isSelected ? '#ffff00' : '#f0f0f0'
+	        }
+	      }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth))), /*#__PURE__*/Rn.createElement("div", {
+	        className: "level-right"
+	      }, /*#__PURE__*/Rn.createElement("span", {
+	        style: {
+	          color: isSelected ? '#ffff00' : '#bbb',
+	          fontFamily: 'monospace',
+	          fontSize: '0.7rem'
+	        }
+	      }, Math.round(item.weight), "g"))), /*#__PURE__*/Rn.createElement("div", {
+	        style: {
+	          fontFamily: 'monospace',
+	          fontSize: '0.7rem',
+	          color: isSelected ? '#ffff00' : '#999'
+	        }
+	      }, "(", Math.round(item.position.x), ", ", Math.round(item.position.y), ", ", Math.round(item.position.z), ")"));
+	    }))))), packResult && packResult.items && packResult.items.length > 0 && /*#__PURE__*/Rn.createElement("nav", {
 	      className: "panel",
 	      style: {
 	        flex: '0 0 auto',
