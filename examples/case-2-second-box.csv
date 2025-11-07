@@ -1,0 +1,14 @@
+# Fill second box - Medium box with items
+# Format: width;height;depth;weight;type
+
+# Box
+425;265;190;20000;0
+
+# Items
+150;120;80;1000;1
+130;100;70;900;1
+120;90;60;800;1
+110;80;55;700;1
+100;75;50;600;1
+90;70;45;500;1
+80;60;40;400;1
