@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.0 - 2025-11-07
+
+### What's Changed
+
+* Update boxpacker3 dependency to version 1.2.3 and enhance packing error handling by [@rez1dent3](https://github.com/rez1dent3) in https://github.com/bavix/boxpacker3-ui/pull/340
+
+**Full Changelog**: https://github.com/bavix/boxpacker3-ui/compare/v1.0.0...v1.1.0
+
 ## 1.0.0 - 2025-11-07
 
 ### What's Changed
