@@ -1,5 +1,7 @@
 # boxpacker3-ui
 
+![Preview](assets/preview.png)
+
 Debug helper boxpacker3
 
 ### Usage
