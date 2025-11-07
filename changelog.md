@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.2 - 2025-11-07
+
+### What's Changed
+
+* Enhance item and box deselection functionality by [@rez1dent3](https://github.com/rez1dent3) in https://github.com/bavix/boxpacker3-ui/pull/342
+
+**Full Changelog**: https://github.com/bavix/boxpacker3-ui/compare/v1.1.1...v1.1.2
+
 ## v1.1.1 - 2025-11-07
 
 ### What's Changed
