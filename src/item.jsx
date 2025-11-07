@@ -27,11 +27,13 @@ class Datum {
 }
 
 const STRATEGIES = [
-    { value: 0, name: 'Minimize Boxes', description: 'Minimizes the number of boxes used' },
-    { value: 1, name: 'Greedy', description: 'First-fit strategy with ascending item order' },
-    { value: 2, name: 'First Fit Decreasing (FFD)', description: 'First-fit decreasing strategy' },
-    { value: 3, name: 'Best Fit', description: 'Best-fit strategy' },
-    { value: 4, name: 'Best Fit Decreasing (BFD)', description: 'Best-fit decreasing strategy' },
+    { value: 0, name: 'Minimize Boxes', description: 'Minimizes the number of boxes used. Sorts items by volume in descending order and uses First Fit algorithm to place each item in the first box where it fits' },
+    { value: 1, name: 'Greedy', description: 'Greedy packing strategy (First Fit with ascending sort). Sorts items by volume in ascending order and uses First Fit algorithm. Simple and fast, but may use more boxes than optimal' },
+    { value: 2, name: 'Best Fit', description: 'Best-fit strategy. For each item, finds the box with the smallest remaining space that can accommodate the item. Minimizes wasted space but requires checking all boxes for each item' },
+    { value: 3, name: 'Best Fit Decreasing (BFD)', description: 'Best-fit decreasing strategy. Items sorted by volume in descending order, and for each item finds the box with the smallest remaining space. Typically provides 2-5% better space utilization' },
+    { value: 4, name: 'Next Fit', description: 'Next-fit strategy. Items are placed in the current box if it fits, otherwise a new box is used. Simpler than First Fit but may use more boxes' },
+    { value: 5, name: 'Worst Fit', description: 'Worst-fit strategy. For each item, finds the box with the largest remaining space that can accommodate the item. Helps distribute items more evenly across boxes' },
+    { value: 6, name: 'Almost Worst Fit', description: 'Almost-worst-fit strategy. Similar to Worst Fit, but excludes boxes that are too large (almost empty). Prevents items from being placed in boxes that are nearly empty' },
 ];
 
 export default class ItemComponent extends React.Component {
