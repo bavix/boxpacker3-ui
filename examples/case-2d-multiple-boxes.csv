@@ -1,0 +1,20 @@
+# 2D Packing Example - Multiple Boxes
+# Format: width;height;depth;weight;type
+# For 2D mode, use depth=1 for all items
+
+# Boxes (2D rectangles)
+300;200;1;10000;0
+400;300;1;15000;0
+500;400;1;20000;0
+
+# Items to pack
+150;100;1;800;1
+120;80;1;600;1
+100;70;1;500;1
+80;60;1;400;1
+60;50;1;300;1
+50;40;1;250;1
+40;30;1;200;1
+30;20;1;150;1
+20;15;1;100;1
+

@@ -99,7 +99,11 @@ func Bp3Handle(w http.ResponseWriter, req *http.Request) {
 	packer := boxpacker3.NewPacker(opts...)
 
 	startTime := time.Now()
-	packResult := packer.Pack(boxes, items)
+	packResult, err := packer.PackCtx(req.Context(), boxes, items)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	executionTime := time.Since(startTime).Milliseconds()
 
 	boxResp := make([]boxPack, 0, len(packResult.Boxes))

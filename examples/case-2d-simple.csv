@@ -1,0 +1,16 @@
+# 2D Packing Example - Simple
+# Format: width;height;depth;weight;type
+# type: 0 = box, 1 = item
+# For 2D mode, use depth=1 for all items
+
+# Box (2D: width x height, depth=1)
+500;400;1;20000;0
+
+# Items to fill the box (2D rectangles)
+100;80;1;500;1
+80;60;1;400;1
+60;50;1;300;1
+50;40;1;250;1
+40;30;1;200;1
+30;20;1;150;1
+

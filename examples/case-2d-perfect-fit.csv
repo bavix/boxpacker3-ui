@@ -1,0 +1,13 @@
+# 2D Packing Example - Perfect Fit
+# Format: width;height;depth;weight;type
+# This example demonstrates perfect 2D packing
+
+# Box (2D: 200x200)
+200;200;1;10000;0
+
+# Items that perfectly fill the box (4 items of 100x100 each)
+100;100;1;2500;1
+100;100;1;2500;1
+100;100;1;2500;1
+100;100;1;2500;1
+
