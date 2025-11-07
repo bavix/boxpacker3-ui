@@ -46356,6 +46356,8 @@ void main() {
 	  selectedBox = null;
 	  selectedItem = null;
 	  onBoxSelect = null;
+	  onBoxDeselect = null;
+	  onItemDeselect = null;
 	  animationSpeed = 1;
 	  showAnimation = true;
 	  cameraAnimation = null;
@@ -46581,6 +46583,41 @@ void main() {
 	      }
 	    }
 	  }
+	  deselectItem() {
+	    if (this.selectedItem) {
+	      const oldItem = this.itemMap.get(this.selectedItem);
+	      if (oldItem) {
+	        // Restore original color based on item ID
+	        const color = libExports.colorFromUuid(this.selectedItem);
+	        oldItem.material = new MeshPhongMaterial({
+	          color: color,
+	          flatShading: true,
+	          side: DoubleSide,
+	          transparent: true,
+	          opacity: 0.9
+	        });
+	      }
+	      this.selectedItem = null;
+	      if (this.onItemDeselect) {
+	        this.onItemDeselect();
+	      }
+	    }
+	  }
+	  deselectBox() {
+	    if (this.selectedBox) {
+	      const oldBox = this.boxMap.get(this.selectedBox);
+	      if (oldBox) {
+	        oldBox.material = this.materials['wireframe'];
+	      }
+	      this.selectedBox = null;
+
+	      // Also deselect item if selected
+	      this.deselectItem();
+	      if (this.onBoxDeselect) {
+	        this.onBoxDeselect();
+	      }
+	    }
+	  }
 	  selectNextBox() {
 	    if (this.boxList.length === 0) return;
 	    const currentIndex = this.boxList.findIndex(id => id === this.selectedBox);
@@ -46602,6 +46639,18 @@ void main() {
 	    this.render();
 	  }
 	  onKeyboard(e) {
+	    // ESC key to deselect
+	    if (e.key === 'Escape') {
+	      e.preventDefault();
+	      if (this.selectedItem) {
+	        this.deselectItem();
+	        return;
+	      } else if (this.selectedBox) {
+	        this.deselectBox();
+	        return;
+	      }
+	    }
+
 	    // Navigation between boxes with Ctrl+Arrow keys
 	    if (e.ctrlKey || e.metaKey) {
 	      if (e.key === 'ArrowLeft') {
@@ -51296,6 +51345,17 @@ void main() {
 	    this.props.playground.onBoxSelect = boxId => {
 	      this.setState({
 	        selectedBox: boxId,
+	        selectedItem: null
+	      });
+	    };
+	    this.props.playground.onBoxDeselect = () => {
+	      this.setState({
+	        selectedBox: null,
+	        selectedItem: null
+	      });
+	    };
+	    this.props.playground.onItemDeselect = () => {
+	      this.setState({
 	        selectedItem: null
 	      });
 	    };

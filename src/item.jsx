@@ -74,6 +74,14 @@ export default class ItemComponent extends React.Component {
             this.setState({ selectedBox: boxId, selectedItem: null });
         }
 
+        this.props.playground.onBoxDeselect = () => {
+            this.setState({ selectedBox: null, selectedItem: null });
+        }
+
+        this.props.playground.onItemDeselect = () => {
+            this.setState({ selectedItem: null });
+        }
+
         await this.playgroundRender(elements)
         this.lastRenderElements = this.getElementsSnapshot(elements);
     }
