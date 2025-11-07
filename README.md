@@ -38,11 +38,15 @@ The interface consists of:
   - **Animation controls**: Toggle animation and adjust speed
   - **Box list**: View packed boxes with statistics (volume/weight utilization)
   - **Details panel**: Detailed information about selected box
+    - **Items list**: Click on any item to highlight it in the 3D visualization
+    - Selected item is highlighted with yellow border and background
 
 - **Right Panel**: 3D/2D visualization
   - Interactive 3D view with camera controls
   - Click boxes to select and view details
+  - Click items in the details panel to highlight them in 3D
   - Navigate between boxes with `Ctrl+←/→` or arrow buttons
+  - Camera automatically focuses on selected box or item
 
 ## Features
 
@@ -50,6 +54,8 @@ The interface consists of:
 - Multiple packing strategies
 - CSV import/export
 - Animation and statistics
+- Interactive item selection - click items in the details panel to highlight them in 3D
+- Automatic camera positioning for selected boxes and items
 
 ## CSV Format
 
@@ -69,6 +75,9 @@ Example:
 ## Keyboard Shortcuts
 
 - `Ctrl+←` / `Ctrl+→` (or `Cmd+←` / `Cmd+→` on Mac) - Navigate between boxes
+- `ESC` - Deselect current item or box
+  - If an item is selected, deselects the item
+  - If a box is selected (and no item), deselects the box
 - `W` / `↑` - Move camera forward (3D mode)
 - `S` / `↓` - Move camera backward (3D mode)
 - `A` / `←` - Move camera left (3D mode)
