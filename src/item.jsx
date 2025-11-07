@@ -44,6 +44,7 @@ export default class ItemComponent extends React.Component {
         elements: [],
         packResult: null,
         selectedBox: null,
+        selectedItem: null,
         showAnimation: true,
         animationSpeed: 1,
         strategy: 0,
@@ -70,7 +71,7 @@ export default class ItemComponent extends React.Component {
         this.setState({ elements });
 
         this.props.playground.onBoxSelect = (boxId) => {
-            this.setState({ selectedBox: boxId });
+            this.setState({ selectedBox: boxId, selectedItem: null });
         }
 
         await this.playgroundRender(elements)
@@ -167,7 +168,7 @@ export default class ItemComponent extends React.Component {
 
         const packResult = await api('/bp3', requestData)
 
-        this.setState({ packResult, selectedBox: null });
+        this.setState({ packResult, selectedBox: null, selectedItem: null });
 
         this.props.playground.showAnimation = this.state.showAnimation;
         this.props.playground.animationSpeed = this.state.animationSpeed;
@@ -182,7 +183,12 @@ export default class ItemComponent extends React.Component {
 
     selectBox = (boxId) => {
         this.props.playground.selectBox(boxId);
-        this.setState({ selectedBox: boxId });
+        this.setState({ selectedBox: boxId, selectedItem: null });
+    }
+
+    selectItem = (itemId) => {
+        this.props.playground.selectItem(itemId);
+        this.setState({ selectedItem: itemId });
     }
 
     toggleAnimation = () => {
@@ -383,7 +389,7 @@ export default class ItemComponent extends React.Component {
         link.click()
     }
 
-    render({ }, { elements, type, text, hasError, packResult, selectedBox, showAnimation, animationSpeed, strategy }) {
+    render({ }, { elements, type, text, hasError, packResult, selectedBox, selectedItem, showAnimation, animationSpeed, strategy }) {
         const selectedBoxData = packResult && selectedBox 
             ? packResult.boxes.find(b => b.id === selectedBox)
             : null;
@@ -712,26 +718,42 @@ export default class ItemComponent extends React.Component {
                                     Items ({selectedBoxData.items.length})
                                 </div>
                                 <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    {selectedBoxData.items.map((item, idx) => (
-                                        <div key={item.id} className="box" style={{ marginBottom: '0.5rem' }}>
-                                            <div className="level is-mobile" style={{ marginBottom: '0.25rem' }}>
-                                                <div className="level-left">
-                                                    <span style={{ color: '#4a9eff', fontFamily: 'monospace' }}>#{idx + 1}</span>
-                                                    <span style={{ marginLeft: '0.5rem', fontFamily: 'monospace' }}>
-                                                        {Math.round(item.width)}×{Math.round(item.height)}×{Math.round(item.depth)}
-                                                    </span>
+                                    {selectedBoxData.items.map((item, idx) => {
+                                        const isSelected = selectedItem === item.id;
+                                        return (
+                                            <div 
+                                                key={item.id} 
+                                                className="box" 
+                                                style={{ 
+                                                    marginBottom: '0.5rem',
+                                                    cursor: 'pointer',
+                                                    border: isSelected ? '2px solid #ffff00' : '1px solid #333',
+                                                    backgroundColor: isSelected ? 'rgba(255, 255, 0, 0.1)' : 'transparent',
+                                                    padding: isSelected ? '0.5rem' : '0.5rem',
+                                                    borderRadius: '4px',
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                                onClick={() => this.selectItem(item.id)}
+                                            >
+                                                <div className="level is-mobile" style={{ marginBottom: '0.25rem' }}>
+                                                    <div className="level-left">
+                                                        <span style={{ color: isSelected ? '#ffff00' : '#4a9eff', fontFamily: 'monospace', fontWeight: isSelected ? 'bold' : 'normal' }}>#{idx + 1}</span>
+                                                        <span style={{ marginLeft: '0.5rem', fontFamily: 'monospace', color: isSelected ? '#ffff00' : '#f0f0f0' }}>
+                                                            {Math.round(item.width)}×{Math.round(item.height)}×{Math.round(item.depth)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="level-right">
+                                                        <span style={{ color: isSelected ? '#ffff00' : '#bbb', fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                                                            {Math.round(item.weight)}g
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div className="level-right">
-                                                    <span style={{ color: '#bbb', fontFamily: 'monospace', fontSize: '0.7rem' }}>
-                                                        {Math.round(item.weight)}g
-                                                    </span>
+                                                <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: isSelected ? '#ffff00' : '#999' }}>
+                                                    ({Math.round(item.position.x)}, {Math.round(item.position.y)}, {Math.round(item.position.z)})
                                                 </div>
                                             </div>
-                                            <div style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#999' }}>
-                                                ({Math.round(item.position.x)}, {Math.round(item.position.y)}, {Math.round(item.position.z)})
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
