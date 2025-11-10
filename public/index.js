@@ -22674,7 +22674,7 @@
 	const MAX_SAMPLES = 20;
 
 	// GGX VNDF importance sampling configuration
-	const GGX_SAMPLES = 512;
+	const GGX_SAMPLES = 256;
 	const _flatCamera = /*@__PURE__*/new OrthographicCamera();
 	const _clearColor = /*@__PURE__*/new Color();
 	let _oldTarget = null;
@@ -23219,8 +23219,8 @@
 	    vertexShader: _getCommonVertexShader(),
 	    fragmentShader: /* glsl */`
 
-			precision mediump float;
-			precision mediump int;
+			precision highp float;
+			precision highp int;
 
 			varying vec3 vOutputDirection;
 
