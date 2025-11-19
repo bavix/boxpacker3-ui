@@ -22886,6 +22886,7 @@
 	        sigmas: this._sigmas
 	      } = _createPlanes(_lodMax));
 	      this._blurMaterial = _getBlurShader(_lodMax, width, height);
+	      this._ggxMaterial = _getGGXShader(_lodMax, width, height);
 	    }
 	    return cubeUVRenderTarget;
 	  }
@@ -23012,11 +23013,6 @@
 	  _applyGGXFilter(cubeUVRenderTarget, lodIn, lodOut) {
 	    const renderer = this._renderer;
 	    const pingPongRenderTarget = this._pingPongRenderTarget;
-	    if (this._ggxMaterial === null) {
-	      const width = 3 * Math.max(this._cubeSize, 16);
-	      const height = 4 * this._cubeSize;
-	      this._ggxMaterial = _getGGXShader(this._lodMax, width, height);
-	    }
 	    const ggxMaterial = this._ggxMaterial;
 	    const ggxMesh = this._lodMeshes[lodOut];
 	    ggxMesh.material = ggxMaterial;
