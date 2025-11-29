@@ -36,6 +36,12 @@ const STRATEGIES = [
     { value: 6, name: 'Almost Worst Fit', description: 'Almost-worst-fit strategy. Similar to Worst Fit, but excludes boxes that are too large (almost empty). Prevents items from being placed in boxes that are nearly empty' },
 ];
 
+const GOALS = [
+    { value: 'MinimizeBoxes', name: 'Minimize Boxes', description: 'Prioritizes using the fewest number of boxes possible. Ideal for reducing shipping label costs.' },
+    { value: 'TightestPacking', name: 'Tightest Packing', description: 'Prioritizes high density / volume utilization. Ideal when shipping costs are calculated based on dimensional weight or total volume.' },
+    { value: 'MaximizeItems', name: 'Maximize Items', description: 'Prioritizes fitting the maximum number of items, regardless of box efficiency. Ideal for fixed-container scenarios.' },
+];
+
 export default class ItemComponent extends React.Component {
     state = {
         hasError: false,
@@ -48,6 +54,9 @@ export default class ItemComponent extends React.Component {
         showAnimation: true,
         animationSpeed: 1,
         strategy: 0,
+        parallel: false,
+        selectedAlgorithms: [0, 1, 2], // Default: MinimizeBoxes, Greedy, BestFit
+        goal: 'MinimizeBoxes', // Default goal
     };
 
     constructor() {
@@ -89,12 +98,15 @@ export default class ItemComponent extends React.Component {
     componentDidUpdate(prevProps, prevState) {
         const elementsChanged = prevState.elements !== this.state.elements;
         const strategyChanged = prevState.strategy !== this.state.strategy;
+        const parallelChanged = prevState.parallel !== this.state.parallel;
+        const algorithmsChanged = JSON.stringify(prevState.selectedAlgorithms) !== JSON.stringify(this.state.selectedAlgorithms);
+        const goalChanged = prevState.goal !== this.state.goal;
         const showAnimationChanged = prevState.showAnimation !== this.state.showAnimation;
         
         const elementsSnapshot = this.getElementsSnapshot(this.state.elements);
         const enabledStateChanged = this.lastRenderElements !== elementsSnapshot;
         
-        if ((elementsChanged || strategyChanged || enabledStateChanged) && 
+        if ((elementsChanged || strategyChanged || parallelChanged || algorithmsChanged || goalChanged || enabledStateChanged) && 
             this.state.elements.length > 0 &&
             this.state.elements.filter(e => e.enabled).length > 0) {
             
@@ -170,7 +182,16 @@ export default class ItemComponent extends React.Component {
                 items: items.filter(i => i.type === itemType),
         };
 
-        if (this.state.strategy !== 0) {
+        if (this.state.parallel) {
+            if (this.state.selectedAlgorithms.length > 0) {
+                requestData.parallel = true;
+                requestData.algorithms = this.state.selectedAlgorithms;
+                requestData.goal = this.state.goal;
+            } else {
+                // Fallback to default strategy if parallel is enabled but no algorithms selected
+                requestData.strategy = { value: 0 };
+            }
+        } else if (this.state.strategy !== 0) {
             requestData.strategy = { value: this.state.strategy };
         }
 
@@ -187,6 +208,30 @@ export default class ItemComponent extends React.Component {
     setStrategy = (e) => {
         const strategy = parseInt(e.target.value);
         this.setState({ strategy });
+    }
+
+    toggleParallel = () => {
+        this.setState({ parallel: !this.state.parallel });
+    }
+
+    toggleAlgorithm = (algorithmValue) => {
+        const { selectedAlgorithms } = this.state;
+        const index = selectedAlgorithms.indexOf(algorithmValue);
+        
+        if (index > -1) {
+            // Remove if already selected
+            const newAlgorithms = [...selectedAlgorithms];
+            newAlgorithms.splice(index, 1);
+            this.setState({ selectedAlgorithms: newAlgorithms });
+        } else {
+            // Add if not selected
+            this.setState({ selectedAlgorithms: [...selectedAlgorithms, algorithmValue].sort() });
+        }
+    }
+
+    setGoal = (e) => {
+        const goal = e.target.value;
+        this.setState({ goal });
     }
 
     selectBox = (boxId) => {
@@ -397,7 +442,7 @@ export default class ItemComponent extends React.Component {
         link.click()
     }
 
-    render({ }, { elements, type, text, hasError, packResult, selectedBox, selectedItem, showAnimation, animationSpeed, strategy }) {
+    render({ }, { elements, type, text, hasError, packResult, selectedBox, selectedItem, showAnimation, animationSpeed, strategy, parallel, selectedAlgorithms, goal }) {
         const selectedBoxData = packResult && selectedBox 
             ? packResult.boxes.find(b => b.id === selectedBox)
             : null;
@@ -471,21 +516,82 @@ export default class ItemComponent extends React.Component {
                     </p>
                     <div className="panel-block">
                         <div className="field" style={{ width: '100%' }}>
-                            <label className="label is-small">Strategy</label>
-                            <div className="select is-fullwidth">
-                                <select value={strategy} onChange={this.setStrategy}>
-                                    {STRATEGIES.map(s => (
-                                        <option key={s.value} value={s.value}>
-                                            {s.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <p className="help">
-                                {STRATEGIES.find(s => s.value === strategy)?.description || ''}
+                            <label className="checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    checked={parallel} 
+                                    onChange={this.toggleParallel}
+                                    style={{ marginRight: '0.5rem' }} 
+                                />
+                                Parallel mode (run multiple algorithms concurrently)
+                            </label>
+                            <p className="help" style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                                When enabled, selected algorithms run in parallel and the best result is chosen
                             </p>
                         </div>
                     </div>
+                    {parallel ? (
+                        <>
+                            <div className="panel-block">
+                                <div className="field" style={{ width: '100%' }}>
+                                    <label className="label is-small">Select Algorithms</label>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        {STRATEGIES.map(s => (
+                                            <label key={s.value} className="checkbox" style={{ cursor: 'pointer', fontSize: '0.875rem' }}>
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={selectedAlgorithms.includes(s.value)}
+                                                    onChange={() => this.toggleAlgorithm(s.value)}
+                                                    style={{ marginRight: '0.5rem' }} 
+                                                />
+                                                {s.name}
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {selectedAlgorithms.length === 0 && (
+                                        <p className="help is-danger" style={{ marginTop: '0.5rem' }}>
+                                            At least one algorithm must be selected
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="panel-block">
+                                <div className="field" style={{ width: '100%' }}>
+                                    <label className="label is-small">Goal</label>
+                                    <div className="select is-fullwidth">
+                                        <select value={goal} onChange={this.setGoal}>
+                                            {GOALS.map(g => (
+                                                <option key={g.value} value={g.value}>
+                                                    {g.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <p className="help">
+                                        {GOALS.find(g => g.value === goal)?.description || ''}
+                                    </p>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="panel-block">
+                            <div className="field" style={{ width: '100%' }}>
+                                <label className="label is-small">Strategy</label>
+                                <div className="select is-fullwidth">
+                                    <select value={strategy} onChange={this.setStrategy}>
+                                        {STRATEGIES.map(s => (
+                                            <option key={s.value} value={s.value}>
+                                                {s.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <p className="help">
+                                    {STRATEGIES.find(s => s.value === strategy)?.description || ''}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </nav>
 
                 {packResult && (
