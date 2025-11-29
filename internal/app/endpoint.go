@@ -57,9 +57,12 @@ type boxPack struct {
 }
 
 type request struct {
-	Boxes    []box            `json:"boxes"`
-	Items    []item           `json:"items"`
-	Strategy *packingStrategy `json:"strategy,omitempty"`
+	Boxes      []box            `json:"boxes"`
+	Items      []item           `json:"items"`
+	Strategy   *packingStrategy `json:"strategy,omitempty"`
+	Parallel   bool             `json:"parallel,omitempty"`
+	Algorithms []int            `json:"algorithms,omitempty"`
+	Goal       *string          `json:"goal,omitempty"`
 }
 
 type packingStrategy struct {
@@ -92,7 +95,51 @@ func Bp3Handle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	var opts []boxpacker3.PackerOption
-	if t.Strategy != nil {
+
+	if t.Parallel && len(t.Algorithms) > 0 {
+		algorithms := make([]boxpacker3.PackingAlgorithm, 0, len(t.Algorithms))
+		for _, algoValue := range t.Algorithms {
+			switch boxpacker3.PackingStrategy(algoValue) {
+			case boxpacker3.StrategyMinimizeBoxes:
+				algorithms = append(algorithms, boxpacker3.NewMinimizeBoxesStrategy())
+			case boxpacker3.StrategyGreedy:
+				algorithms = append(algorithms, boxpacker3.NewGreedyStrategy())
+			case boxpacker3.StrategyBestFit:
+				algorithms = append(algorithms, boxpacker3.NewBestFitStrategy())
+			case boxpacker3.StrategyBestFitDecreasing:
+				algorithms = append(algorithms, boxpacker3.NewBestFitDecreasingStrategy())
+			case boxpacker3.StrategyNextFit:
+				algorithms = append(algorithms, boxpacker3.NewNextFitStrategy())
+			case boxpacker3.StrategyWorstFit:
+				algorithms = append(algorithms, boxpacker3.NewWorstFitStrategy())
+			case boxpacker3.StrategyAlmostWorstFit:
+				algorithms = append(algorithms, boxpacker3.NewAlmostWorstFitStrategy())
+			}
+		}
+
+		if len(algorithms) > 0 {
+			parallelOpts := []boxpacker3.ParallelOption{
+				boxpacker3.WithAlgorithms(algorithms...),
+			}
+
+			if t.Goal != nil {
+				var goal boxpacker3.ComparatorFunc
+				switch *t.Goal {
+				case "TightestPacking":
+					goal = boxpacker3.TightestPackingGoal
+				case "MaximizeItems":
+					goal = boxpacker3.MaximizeItemsGoal
+				default:
+					goal = boxpacker3.MinimizeBoxesGoal
+				}
+				parallelOpts = append(parallelOpts, boxpacker3.WithGoal(goal))
+			}
+
+			opts = append(opts, boxpacker3.WithAlgorithm(boxpacker3.NewParallelStrategy(parallelOpts...)))
+		} else {
+			opts = append(opts, boxpacker3.WithStrategy(boxpacker3.StrategyMinimizeBoxes))
+		}
+	} else if t.Strategy != nil {
 		opts = append(opts, boxpacker3.WithStrategy(boxpacker3.PackingStrategy(t.Strategy.Value)))
 	}
 
