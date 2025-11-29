@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.0 - 2025-11-29
+
+### What's Changed
+
+* Bump rollup from 4.52.5 to 4.53.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/343
+* Bump three from 0.181.0 to 0.181.1 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/344
+* Bump bavix/.github/.github/workflows/changelog.yml from 0.4.0 to 0.4.1 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/349
+* Bump bavix/.github/.github/workflows/go-release-binary.yml from 0.4.0 to 0.4.1 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/348
+* Bump bavix/.github/.github/workflows/compile-assets.yml from 0.4.0 to 0.4.1 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/347
+* Update boxpacker3 dependency to v1.3.0 and enhance packing options by [@rez1dent3](https://github.com/rez1dent3) in https://github.com/bavix/boxpacker3-ui/pull/350
+
+**Full Changelog**: https://github.com/bavix/boxpacker3-ui/compare/v1.1.2...v1.2.0
+
 ## v1.1.2 - 2025-11-07
 
 ### What's Changed
