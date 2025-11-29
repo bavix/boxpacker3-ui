@@ -22886,6 +22886,7 @@
 	        sigmas: this._sigmas
 	      } = _createPlanes(_lodMax));
 	      this._blurMaterial = _getBlurShader(_lodMax, width, height);
+	      this._ggxMaterial = _getGGXShader(_lodMax, width, height);
 	    }
 	    return cubeUVRenderTarget;
 	  }
@@ -23012,11 +23013,6 @@
 	  _applyGGXFilter(cubeUVRenderTarget, lodIn, lodOut) {
 	    const renderer = this._renderer;
 	    const pingPongRenderTarget = this._pingPongRenderTarget;
-	    if (this._ggxMaterial === null) {
-	      const width = 3 * Math.max(this._cubeSize, 16);
-	      const height = 4 * this._cubeSize;
-	      this._ggxMaterial = _getGGXShader(this._lodMax, width, height);
-	    }
 	    const ggxMaterial = this._ggxMaterial;
 	    const ggxMesh = this._lodMeshes[lodOut];
 	    ggxMesh.material = ggxMaterial;
@@ -51314,6 +51310,19 @@ void main() {
 	  name: 'Almost Worst Fit',
 	  description: 'Almost-worst-fit strategy. Similar to Worst Fit, but excludes boxes that are too large (almost empty). Prevents items from being placed in boxes that are nearly empty'
 	}];
+	const GOALS = [{
+	  value: 'MinimizeBoxes',
+	  name: 'Minimize Boxes',
+	  description: 'Prioritizes using the fewest number of boxes possible. Ideal for reducing shipping label costs.'
+	}, {
+	  value: 'TightestPacking',
+	  name: 'Tightest Packing',
+	  description: 'Prioritizes high density / volume utilization. Ideal when shipping costs are calculated based on dimensional weight or total volume.'
+	}, {
+	  value: 'MaximizeItems',
+	  name: 'Maximize Items',
+	  description: 'Prioritizes fitting the maximum number of items, regardless of box efficiency. Ideal for fixed-container scenarios.'
+	}];
 	class ItemComponent extends Rn.Component {
 	  state = {
 	    hasError: false,
@@ -51325,7 +51334,11 @@ void main() {
 	    selectedItem: null,
 	    showAnimation: true,
 	    animationSpeed: 1,
-	    strategy: 0
+	    strategy: 0,
+	    parallel: false,
+	    selectedAlgorithms: [0, 1, 2],
+	    // Default: MinimizeBoxes, Greedy, BestFit
+	    goal: 'MinimizeBoxes' // Default goal
 	  };
 	  constructor() {
 	    super(...arguments);
@@ -51365,10 +51378,13 @@ void main() {
 	  componentDidUpdate(prevProps, prevState) {
 	    const elementsChanged = prevState.elements !== this.state.elements;
 	    const strategyChanged = prevState.strategy !== this.state.strategy;
+	    const parallelChanged = prevState.parallel !== this.state.parallel;
+	    const algorithmsChanged = JSON.stringify(prevState.selectedAlgorithms) !== JSON.stringify(this.state.selectedAlgorithms);
+	    const goalChanged = prevState.goal !== this.state.goal;
 	    prevState.showAnimation !== this.state.showAnimation;
 	    const elementsSnapshot = this.getElementsSnapshot(this.state.elements);
 	    const enabledStateChanged = this.lastRenderElements !== elementsSnapshot;
-	    if ((elementsChanged || strategyChanged || enabledStateChanged) && this.state.elements.length > 0 && this.state.elements.filter(e => e.enabled).length > 0) {
+	    if ((elementsChanged || strategyChanged || parallelChanged || algorithmsChanged || goalChanged || enabledStateChanged) && this.state.elements.length > 0 && this.state.elements.filter(e => e.enabled).length > 0) {
 	      if (this.renderTimeout) {
 	        clearTimeout(this.renderTimeout);
 	      }
@@ -51436,7 +51452,18 @@ void main() {
 	      boxes: items.filter(i => i.type === boxType),
 	      items: items.filter(i => i.type === itemType)
 	    };
-	    if (this.state.strategy !== 0) {
+	    if (this.state.parallel) {
+	      if (this.state.selectedAlgorithms.length > 0) {
+	        requestData.parallel = true;
+	        requestData.algorithms = this.state.selectedAlgorithms;
+	        requestData.goal = this.state.goal;
+	      } else {
+	        // Fallback to default strategy if parallel is enabled but no algorithms selected
+	        requestData.strategy = {
+	          value: 0
+	        };
+	      }
+	    } else if (this.state.strategy !== 0) {
 	      requestData.strategy = {
 	        value: this.state.strategy
 	      };
@@ -51455,6 +51482,36 @@ void main() {
 	    const strategy = parseInt(e.target.value);
 	    this.setState({
 	      strategy
+	    });
+	  };
+	  toggleParallel = () => {
+	    this.setState({
+	      parallel: !this.state.parallel
+	    });
+	  };
+	  toggleAlgorithm = algorithmValue => {
+	    const {
+	      selectedAlgorithms
+	    } = this.state;
+	    const index = selectedAlgorithms.indexOf(algorithmValue);
+	    if (index > -1) {
+	      // Remove if already selected
+	      const newAlgorithms = [...selectedAlgorithms];
+	      newAlgorithms.splice(index, 1);
+	      this.setState({
+	        selectedAlgorithms: newAlgorithms
+	      });
+	    } else {
+	      // Add if not selected
+	      this.setState({
+	        selectedAlgorithms: [...selectedAlgorithms, algorithmValue].sort()
+	      });
+	    }
+	  };
+	  setGoal = e => {
+	    const goal = e.target.value;
+	    this.setState({
+	      goal
 	    });
 	  };
 	  selectBox = boxId => {
@@ -51638,7 +51695,10 @@ void main() {
 	    selectedItem,
 	    showAnimation,
 	    animationSpeed,
-	    strategy
+	    strategy,
+	    parallel,
+	    selectedAlgorithms,
+	    goal
 	  }) {
 	    const selectedBoxData = packResult && selectedBox ? packResult.boxes.find(b => b.id === selectedBox) : null;
 	    const selectedBoxStats = selectedBoxData ? this.calculateBoxStats(selectedBoxData) : null;
@@ -51766,6 +51826,81 @@ void main() {
 	    }, /*#__PURE__*/Rn.createElement("p", {
 	      className: "panel-heading"
 	    }, /*#__PURE__*/Rn.createElement("strong", null, "Strategy")), /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/Rn.createElement("input", {
+	      type: "checkbox",
+	      checked: parallel,
+	      onChange: this.toggleParallel,
+	      style: {
+	        marginRight: '0.5rem'
+	      }
+	    }), "Parallel mode (run multiple algorithms concurrently)"), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help",
+	      style: {
+	        marginTop: '0.5rem',
+	        marginBottom: '0.5rem'
+	      }
+	    }, "When enabled, selected algorithms run in parallel and the best result is chosen"))), parallel ? /*#__PURE__*/Rn.createElement(Rn.Fragment, null, /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("label", {
+	      className: "label is-small"
+	    }, "Select Algorithms"), /*#__PURE__*/Rn.createElement("div", {
+	      style: {
+	        display: 'flex',
+	        flexDirection: 'column',
+	        gap: '0.5rem'
+	      }
+	    }, STRATEGIES.map(s => /*#__PURE__*/Rn.createElement("label", {
+	      key: s.value,
+	      className: "checkbox",
+	      style: {
+	        cursor: 'pointer',
+	        fontSize: '0.875rem'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("input", {
+	      type: "checkbox",
+	      checked: selectedAlgorithms.includes(s.value),
+	      onChange: () => this.toggleAlgorithm(s.value),
+	      style: {
+	        marginRight: '0.5rem'
+	      }
+	    }), s.name))), selectedAlgorithms.length === 0 && /*#__PURE__*/Rn.createElement("p", {
+	      className: "help is-danger",
+	      style: {
+	        marginTop: '0.5rem'
+	      }
+	    }, "At least one algorithm must be selected"))), /*#__PURE__*/Rn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/Rn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/Rn.createElement("label", {
+	      className: "label is-small"
+	    }, "Goal"), /*#__PURE__*/Rn.createElement("div", {
+	      className: "select is-fullwidth"
+	    }, /*#__PURE__*/Rn.createElement("select", {
+	      value: goal,
+	      onChange: this.setGoal
+	    }, GOALS.map(g => /*#__PURE__*/Rn.createElement("option", {
+	      key: g.value,
+	      value: g.value
+	    }, g.name)))), /*#__PURE__*/Rn.createElement("p", {
+	      className: "help"
+	    }, GOALS.find(g => g.value === goal)?.description || '')))) : /*#__PURE__*/Rn.createElement("div", {
 	      className: "panel-block"
 	    }, /*#__PURE__*/Rn.createElement("div", {
 	      className: "field",
