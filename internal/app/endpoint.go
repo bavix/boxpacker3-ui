@@ -129,6 +129,10 @@ func Bp3Handle(w http.ResponseWriter, req *http.Request) {
 					goal = boxpacker3.TightestPackingGoal
 				case "MaximizeItems":
 					goal = boxpacker3.MaximizeItemsGoal
+				case "MaxAverageFillRate":
+					goal = boxpacker3.MaxAverageFillRateGoal
+				case "BalancedPacking":
+					goal = boxpacker3.BalancedPackingGoal
 				default:
 					goal = boxpacker3.MinimizeBoxesGoal
 				}
