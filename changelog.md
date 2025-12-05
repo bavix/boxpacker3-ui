@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.1 - 2025-12-05
+
+### What's Changed
+
+* Bump preact from 10.27.2 to 10.28.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/351
+* Update boxpacker3 dependency to v1.3.2 and enhance packing goals by [@rez1dent3](https://github.com/rez1dent3) in https://github.com/bavix/boxpacker3-ui/pull/352
+
+**Full Changelog**: https://github.com/bavix/boxpacker3-ui/compare/v1.2.0...v1.2.1
+
 ## v1.2.0 - 2025-11-29
 
 ### What's Changed
