@@ -1,5 +1,7 @@
 github.com/bavix/boxpacker3 v1.3.0 h1:Yj+y763+fXNUR9jEfmWSJe+pIB+25OFcbPPc7ciCBN4=
 github.com/bavix/boxpacker3 v1.3.0/go.mod h1:RpyBKwHfaSeDDzQPwqNaWlFJvniKK+F5KiGPv1m+1To=
+github.com/bavix/boxpacker3 v1.3.2 h1:y3yjlk8YMsLh0XC7nxOKkCvEia0F1hyRp2GlllYwEKo=
+github.com/bavix/boxpacker3 v1.3.2/go.mod h1:RpyBKwHfaSeDDzQPwqNaWlFJvniKK+F5KiGPv1m+1To=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=

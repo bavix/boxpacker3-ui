@@ -51316,15 +51316,23 @@ void main() {
 	const GOALS = [{
 	  value: 'MinimizeBoxes',
 	  name: 'Minimize Boxes',
-	  description: 'Prioritizes using the fewest number of boxes possible. Ideal for reducing shipping label costs.'
+	  description: 'Unfit ↓, then boxes count ↓, then total used box volume ↓.'
 	}, {
 	  value: 'TightestPacking',
 	  name: 'Tightest Packing',
-	  description: 'Prioritizes high density / volume utilization. Ideal when shipping costs are calculated based on dimensional weight or total volume.'
+	  description: 'Unfit ↓, then total used box volume ↓ (less air), then boxes count ↓.'
 	}, {
 	  value: 'MaximizeItems',
 	  name: 'Maximize Items',
-	  description: 'Prioritizes fitting the maximum number of items, regardless of box efficiency. Ideal for fixed-container scenarios.'
+	  description: 'Unfit ↓ (fit as many items as possible), ignoring efficiency.'
+	}, {
+	  value: 'MaxAverageFillRate',
+	  name: 'Max Average Fill Rate',
+	  description: 'Unfit ↓, then maximize average fill rate (itemsVolume/boxVolume) of used boxes.'
+	}, {
+	  value: 'BalancedPacking',
+	  name: 'Balanced Packing',
+	  description: 'Unfit ↓, then minimize weight deviation across boxes, then boxes count ↓.'
 	}];
 	class ItemComponent extends Rn.Component {
 	  state = {
