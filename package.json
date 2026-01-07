@@ -30,7 +30,7 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-replace": "^6.0.3",
     "axios": "^1.13.2",
-    "preact": "^10.28.1",
+    "preact": "^10.28.2",
     "rollup": "^4.54.0",
     "three": "^0.182.0",
     "uuid-color": "^0.1.1"
