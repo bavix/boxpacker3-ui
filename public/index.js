@@ -48087,7 +48087,7 @@ void main() {
 	  if (void 0 !== u.constructor) return null;
 	  128 & t.__u && (c = !!(32 & t.__u), o = [f = u.__e = t.__e]), (a = l$1.__b) && a(u);
 	  n: if ("function" == typeof T) try {
-	    if (S = u.props, C = T.prototype && T.prototype.render, M = (a = T.contextType) && i[a.__c], $ = a ? M ? M.props.value : a.__ : i, t.__c ? b = (h = u.__c = t.__c).__ = h.__E : (C ? u.__c = h = new T(S, $) : (u.__c = h = new x$2(S, $), h.constructor = T, h.render = G$1), M && M.sub(h), h.state || (h.state = {}), h.__n = i, p = h.__d = !0, h.__h = [], h._sb = []), C && null == h.__s && (h.__s = h.state), C && null != T.getDerivedStateFromProps && (h.__s == h.state && (h.__s = w$2({}, h.__s)), w$2(h.__s, T.getDerivedStateFromProps(S, h.__s))), y = h.props, _ = h.state, h.__v = u, p) C && null == T.getDerivedStateFromProps && null != h.componentWillMount && h.componentWillMount(), C && null != h.componentDidMount && h.__h.push(h.componentDidMount);else {
+	    if (S = u.props, C = T.prototype && T.prototype.render, M = (a = T.contextType) && i[a.__c], $ = a ? M ? M.props.value : a.__ : i, t.__c ? b = (h = u.__c = t.__c).__ = h.__E : (C ? u.__c = h = new T(S, $) : (u.__c = h = new x$2(S, $), h.constructor = T, h.render = G$2), M && M.sub(h), h.state || (h.state = {}), h.__n = i, p = h.__d = !0, h.__h = [], h._sb = []), C && null == h.__s && (h.__s = h.state), C && null != T.getDerivedStateFromProps && (h.__s == h.state && (h.__s = w$2({}, h.__s)), w$2(h.__s, T.getDerivedStateFromProps(S, h.__s))), y = h.props, _ = h.state, h.__v = u, p) C && null == T.getDerivedStateFromProps && null != h.componentWillMount && h.componentWillMount(), C && null != h.componentDidMount && h.__h.push(h.componentDidMount);else {
 	      if (C && null == T.getDerivedStateFromProps && S !== y && null != h.componentWillReceiveProps && h.componentWillReceiveProps(S, $), u.__v == t.__v || !h.__e && null != h.shouldComponentUpdate && !1 === h.shouldComponentUpdate(S, h.__s, $)) {
 	        u.__v != t.__v && (h.props = S, h.state = h.__s, h.__d = !1), u.__e = t.__e, u.__k = t.__k, u.__k.some(function (n) {
 	          n && (n.__ = u);
@@ -48185,7 +48185,7 @@ void main() {
 	  if (i = n.__k) for (r = 0; r < i.length; r++) i[r] && E$1(i[r], u, t || "function" != typeof n.type);
 	  t || g$2(n.__e), n.__c = n.__ = n.__e = void 0;
 	}
-	function G$1(n, l, u) {
+	function G$2(n, l, u) {
 	  return this.constructor(n, u);
 	}
 	function J$1(u, t, i) {
@@ -48691,7 +48691,7 @@ void main() {
 	  });
 	};
 	var q = "undefined" != typeof Symbol && Symbol.for && Symbol.for("react.element") || 60103,
-	  G = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,
+	  G$1 = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/,
 	  J = /^on(Ani|Tra|Tou|BeforeInp|Compo)/,
 	  K = /[A-Z0-9]/g,
 	  Q = "undefined" != typeof document,
@@ -48745,7 +48745,7 @@ void main() {
 	      var l = t[i];
 	      if (!("value" === i && "defaultValue" in t && null == l || Q && "children" === i && "noscript" === e || "class" === i || "className" === i)) {
 	        var c = i.toLowerCase();
-	        "defaultValue" === i && "value" in t && null == t.value ? i = "value" : "download" === i && true === l ? l = "" : "translate" === c && "no" === l ? l = false : "o" === c[0] && "n" === c[1] ? "ondoubleclick" === c ? i = "ondblclick" : "onchange" !== c || "input" !== e && "textarea" !== e || X(t.type) ? "onfocus" === c ? i = "onfocusin" : "onblur" === c ? i = "onfocusout" : J.test(i) && (i = c) : c = i = "oninput" : o && G.test(i) ? i = i.replace(K, "-$&").toLowerCase() : null === l && (l = void 0), "oninput" === c && u[i = c] && (i = "oninputCapture"), u[i] = l;
+	        "defaultValue" === i && "value" in t && null == t.value ? i = "value" : "download" === i && true === l ? l = "" : "translate" === c && "no" === l ? l = false : "o" === c[0] && "n" === c[1] ? "ondoubleclick" === c ? i = "ondblclick" : "onchange" !== c || "input" !== e && "textarea" !== e || X(t.type) ? "onfocus" === c ? i = "onfocusin" : "onblur" === c ? i = "onfocusout" : J.test(i) && (i = c) : c = i = "oninput" : o && G$1.test(i) ? i = i.replace(K, "-$&").toLowerCase() : null === l && (l = void 0), "oninput" === c && u[i = c] && (i = "oninputCapture"), u[i] = l;
 	      }
 	    }
 	    "select" == e && (u.multiple && Array.isArray(u.value) && (u.value = L$1(t.children).forEach(function (n) {
@@ -48906,7 +48906,7 @@ void main() {
 	const typeOfTest = type => thing => typeof thing === type;
 
 	/**
-	 * Determine if a value is an Array
+	 * Determine if a value is a non-null object
 	 *
 	 * @param {Object} val The value to test
 	 *
@@ -49059,6 +49059,31 @@ void main() {
 	const isFile = kindOfTest('File');
 
 	/**
+	 * Determine if a value is a React Native Blob
+	 * React Native "blob": an object with a `uri` attribute. Optionally, it can
+	 * also have a `name` and `type` attribute to specify filename and content type
+	 *
+	 * @see https://github.com/facebook/react-native/blob/26684cf3adf4094eb6c405d345a75bf8c7c0bf88/Libraries/Network/FormData.js#L68-L71
+	 * 
+	 * @param {*} value The value to test
+	 * 
+	 * @returns {boolean} True if value is a React Native Blob, otherwise false
+	 */
+	const isReactNativeBlob = value => {
+	  return !!(value && typeof value.uri !== 'undefined');
+	};
+
+	/**
+	 * Determine if environment is React Native
+	 * ReactNative `FormData` has a non-standard `getParts()` method
+	 * 
+	 * @param {*} formData The formData to test
+	 * 
+	 * @returns {boolean} True if environment is React Native, otherwise false
+	 */
+	const isReactNative = formData => formData && typeof formData.getParts !== 'undefined';
+
+	/**
 	 * Determine if a value is a Blob
 	 *
 	 * @param {*} val The value to test
@@ -49092,9 +49117,18 @@ void main() {
 	 *
 	 * @returns {boolean} True if value is an FormData, otherwise false
 	 */
+	function getGlobal() {
+	  if (typeof globalThis !== 'undefined') return globalThis;
+	  if (typeof self !== 'undefined') return self;
+	  if (typeof window !== 'undefined') return window;
+	  if (typeof global !== 'undefined') return global;
+	  return {};
+	}
+	const G = getGlobal();
+	const FormDataCtor = typeof G.FormData !== 'undefined' ? G.FormData : undefined;
 	const isFormData = thing => {
 	  let kind;
-	  return thing && (typeof FormData === 'function' && thing instanceof FormData || isFunction$1(thing.append) && ((kind = kindOf(thing)) === 'formdata' ||
+	  return thing && (FormDataCtor && thing instanceof FormDataCtor || isFunction$1(thing.append) && ((kind = kindOf(thing)) === 'formdata' ||
 	  // detect form-data instance
 	  kind === 'object' && isFunction$1(thing.toString) && thing.toString() === '[object FormData]'));
 	};
@@ -49116,8 +49150,9 @@ void main() {
 	 *
 	 * @returns {String} The String freed of excess whitespace
 	 */
-	const trim = str => str.trim ? str.trim() : str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-
+	const trim = str => {
+	  return str.trim ? str.trim() : str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+	};
 	/**
 	 * Iterate over an Array or an Object invoking a function for each item.
 	 *
@@ -49127,10 +49162,11 @@ void main() {
 	 * If 'obj' is an Object callback will be called passing
 	 * the value, key, and complete object for each property.
 	 *
-	 * @param {Object|Array} obj The object to iterate
+	 * @param {Object|Array<unknown>} obj The object to iterate
 	 * @param {Function} fn The callback to invoke for each item
 	 *
-	 * @param {Boolean} [allOwnKeys = false]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.allOwnKeys = false]
 	 * @returns {any}
 	 */
 	function forEach(obj, fn, {
@@ -49169,6 +49205,15 @@ void main() {
 	    }
 	  }
 	}
+
+	/**
+	 * Finds a key in an object, case-insensitive, returning the actual key name.
+	 * Returns null if the object is a Buffer or if no match is found.
+	 *
+	 * @param {Object} obj - The object to search.
+	 * @param {string} key - The key to find (case-insensitive).
+	 * @returns {?string} The actual key name if found, otherwise null.
+	 */
 	function findKey(obj, key) {
 	  if (isBuffer(obj)) {
 	    return null;
@@ -49187,8 +49232,8 @@ void main() {
 	}
 	const _global = (() => {
 	  /*eslint no-undef:0*/
-	  if (typeof globalThis !== "undefined") return globalThis;
-	  return typeof self !== "undefined" ? self : typeof window !== 'undefined' ? window : global;
+	  if (typeof globalThis !== 'undefined') return globalThis;
+	  return typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : global;
 	})();
 	const isContextDefined = context => !isUndefined(context) && context !== _global;
 
@@ -49202,7 +49247,7 @@ void main() {
 	 * Example:
 	 *
 	 * ```js
-	 * var result = merge({foo: 123}, {foo: 456});
+	 * const result = merge({foo: 123}, {foo: 456});
 	 * console.log(result.foo); // outputs 456
 	 * ```
 	 *
@@ -49218,6 +49263,10 @@ void main() {
 	  } = isContextDefined(this) && this || {};
 	  const result = {};
 	  const assignValue = (val, key) => {
+	    // Skip dangerous property names to prevent prototype pollution
+	    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+	      return;
+	    }
 	    const targetKey = caseless && findKey(result, key) || key;
 	    if (isPlainObject(result[targetKey]) && isPlainObject(val)) {
 	      result[targetKey] = merge(result[targetKey], val);
@@ -49242,7 +49291,8 @@ void main() {
 	 * @param {Object} b The object to copy properties from
 	 * @param {Object} thisArg The object to bind function to
 	 *
-	 * @param {Boolean} [allOwnKeys]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.allOwnKeys]
 	 * @returns {Object} The resulting value of object a
 	 */
 	const extend = (a, b, thisArg, {
@@ -49250,9 +49300,19 @@ void main() {
 	} = {}) => {
 	  forEach(b, (val, key) => {
 	    if (thisArg && isFunction$1(val)) {
-	      a[key] = bind(val, thisArg);
+	      Object.defineProperty(a, key, {
+	        value: bind(val, thisArg),
+	        writable: true,
+	        enumerable: true,
+	        configurable: true
+	      });
 	    } else {
-	      a[key] = val;
+	      Object.defineProperty(a, key, {
+	        value: val,
+	        writable: true,
+	        enumerable: true,
+	        configurable: true
+	      });
 	    }
 	  }, {
 	    allOwnKeys
@@ -49268,7 +49328,7 @@ void main() {
 	 * @returns {string} content value without BOM
 	 */
 	const stripBOM = content => {
-	  if (content.charCodeAt(0) === 0xFEFF) {
+	  if (content.charCodeAt(0) === 0xfeff) {
 	    content = content.slice(1);
 	  }
 	  return content;
@@ -49285,7 +49345,12 @@ void main() {
 	 */
 	const inherits = (constructor, superConstructor, props, descriptors) => {
 	  constructor.prototype = Object.create(superConstructor.prototype, descriptors);
-	  constructor.prototype.constructor = constructor;
+	  Object.defineProperty(constructor.prototype, 'constructor', {
+	    value: constructor,
+	    writable: true,
+	    enumerable: false,
+	    configurable: true
+	  });
 	  Object.defineProperty(constructor, 'super', {
 	    value: superConstructor.prototype
 	  });
@@ -49466,11 +49531,20 @@ void main() {
 	    }
 	    if (!descriptor.set) {
 	      descriptor.set = () => {
-	        throw Error('Can not rewrite read-only method \'' + name + '\'');
+	        throw Error("Can not rewrite read-only method '" + name + "'");
 	      };
 	    }
 	  });
 	};
+
+	/**
+	 * Converts an array or a delimited string into an object set with values as keys and true as values.
+	 * Useful for fast membership checks.
+	 *
+	 * @param {Array|string} arrayOrString - The array or string to convert.
+	 * @param {string} delimiter - The delimiter to use if input is a string.
+	 * @returns {Object} An object with keys from the array or string, values set to true.
+	 */
 	const toObjectSet = (arrayOrString, delimiter) => {
 	  const obj = {};
 	  const define = arr => {
@@ -49496,6 +49570,13 @@ void main() {
 	function isSpecCompliantForm(thing) {
 	  return !!(thing && isFunction$1(thing.append) && thing[toStringTag] === 'FormData' && thing[iterator]);
 	}
+
+	/**
+	 * Recursively converts an object to a JSON-compatible object, handling circular references and Buffers.
+	 *
+	 * @param {Object} obj - The object to convert.
+	 * @returns {Object} The JSON-compatible object.
+	 */
 	const toJSONObject = obj => {
 	  const stack = new Array(10);
 	  const visit = (source, i) => {
@@ -49523,18 +49604,40 @@ void main() {
 	  };
 	  return visit(obj, 0);
 	};
+
+	/**
+	 * Determines if a value is an async function.
+	 *
+	 * @param {*} thing - The value to test.
+	 * @returns {boolean} True if value is an async function, otherwise false.
+	 */
 	const isAsyncFn = kindOfTest('AsyncFunction');
+
+	/**
+	 * Determines if a value is thenable (has then and catch methods).
+	 *
+	 * @param {*} thing - The value to test.
+	 * @returns {boolean} True if value is thenable, otherwise false.
+	 */
 	const isThenable = thing => thing && (isObject(thing) || isFunction$1(thing)) && isFunction$1(thing.then) && isFunction$1(thing.catch);
 
 	// original code
 	// https://github.com/DigitalBrainJS/AxiosPromise/blob/16deab13710ec09779922131f3fa5954320f83ab/lib/utils.js#L11-L34
 
+	/**
+	 * Provides a cross-platform setImmediate implementation.
+	 * Uses native setImmediate if available, otherwise falls back to postMessage or setTimeout.
+	 *
+	 * @param {boolean} setImmediateSupported - Whether setImmediate is supported.
+	 * @param {boolean} postMessageSupported - Whether postMessage is supported.
+	 * @returns {Function} A function to schedule a callback asynchronously.
+	 */
 	const _setImmediate = ((setImmediateSupported, postMessageSupported) => {
 	  if (setImmediateSupported) {
 	    return setImmediate;
 	  }
 	  return postMessageSupported ? ((token, callbacks) => {
-	    _global.addEventListener("message", ({
+	    _global.addEventListener('message', ({
 	      source,
 	      data
 	    }) => {
@@ -49544,10 +49647,17 @@ void main() {
 	    }, false);
 	    return cb => {
 	      callbacks.push(cb);
-	      _global.postMessage(token, "*");
+	      _global.postMessage(token, '*');
 	    };
 	  })(`axios@${Math.random()}`, []) : cb => setTimeout(cb);
 	})(typeof setImmediate === 'function', isFunction$1(_global.postMessage));
+
+	/**
+	 * Schedules a microtask or asynchronous callback as soon as possible.
+	 * Uses queueMicrotask if available, otherwise falls back to process.nextTick or _setImmediate.
+	 *
+	 * @type {Function}
+	 */
 	const asap = typeof queueMicrotask !== 'undefined' ? queueMicrotask.bind(_global) : typeof process !== 'undefined' && process.nextTick || _setImmediate;
 
 	// *********************
@@ -49572,6 +49682,8 @@ void main() {
 	  isUndefined,
 	  isDate,
 	  isFile,
+	  isReactNativeBlob,
+	  isReactNative,
 	  isBlob,
 	  isRegExp,
 	  isFunction: isFunction$1,
@@ -49614,36 +49726,54 @@ void main() {
 	  isIterable
 	};
 
-	/**
-	 * Create an Error with the specified message, config, error code, request and response.
-	 *
-	 * @param {string} message The error message.
-	 * @param {string} [code] The error code (for example, 'ECONNABORTED').
-	 * @param {Object} [config] The config.
-	 * @param {Object} [request] The request.
-	 * @param {Object} [response] The response.
-	 *
-	 * @returns {Error} The created error.
-	 */
-	function AxiosError$1(message, code, config, request, response) {
-	  Error.call(this);
-	  if (Error.captureStackTrace) {
-	    Error.captureStackTrace(this, this.constructor);
-	  } else {
-	    this.stack = new Error().stack;
+	let AxiosError$1 = class AxiosError extends Error {
+	  static from(error, code, config, request, response, customProps) {
+	    const axiosError = new AxiosError(error.message, code || error.code, config, request, response);
+	    axiosError.cause = error;
+	    axiosError.name = error.name;
+
+	    // Preserve status from the original error if not already set from response
+	    if (error.status != null && axiosError.status == null) {
+	      axiosError.status = error.status;
+	    }
+	    customProps && Object.assign(axiosError, customProps);
+	    return axiosError;
 	  }
-	  this.message = message;
-	  this.name = 'AxiosError';
-	  code && (this.code = code);
-	  config && (this.config = config);
-	  request && (this.request = request);
-	  if (response) {
-	    this.response = response;
-	    this.status = response.status ? response.status : null;
+
+	  /**
+	   * Create an Error with the specified message, config, error code, request and response.
+	   *
+	   * @param {string} message The error message.
+	   * @param {string} [code] The error code (for example, 'ECONNABORTED').
+	   * @param {Object} [config] The config.
+	   * @param {Object} [request] The request.
+	   * @param {Object} [response] The response.
+	   *
+	   * @returns {Error} The created error.
+	   */
+	  constructor(message, code, config, request, response) {
+	    super(message);
+
+	    // Make message enumerable to maintain backward compatibility
+	    // The native Error constructor sets message as non-enumerable,
+	    // but axios < v1.13.3 had it as enumerable
+	    Object.defineProperty(this, 'message', {
+	      value: message,
+	      enumerable: true,
+	      writable: true,
+	      configurable: true
+	    });
+	    this.name = 'AxiosError';
+	    this.isAxiosError = true;
+	    code && (this.code = code);
+	    config && (this.config = config);
+	    request && (this.request = request);
+	    if (response) {
+	      this.response = response;
+	      this.status = response.status;
+	    }
 	  }
-	}
-	utils$1.inherits(AxiosError$1, Error, {
-	  toJSON: function toJSON() {
+	  toJSON() {
 	    return {
 	      // Standard
 	      message: this.message,
@@ -49662,46 +49792,21 @@ void main() {
 	      status: this.status
 	    };
 	  }
-	});
-	const prototype$1 = AxiosError$1.prototype;
-	const descriptors = {};
-	['ERR_BAD_OPTION_VALUE', 'ERR_BAD_OPTION', 'ECONNABORTED', 'ETIMEDOUT', 'ERR_NETWORK', 'ERR_FR_TOO_MANY_REDIRECTS', 'ERR_DEPRECATED', 'ERR_BAD_RESPONSE', 'ERR_BAD_REQUEST', 'ERR_CANCELED', 'ERR_NOT_SUPPORT', 'ERR_INVALID_URL'
-	// eslint-disable-next-line func-names
-	].forEach(code => {
-	  descriptors[code] = {
-	    value: code
-	  };
-	});
-	Object.defineProperties(AxiosError$1, descriptors);
-	Object.defineProperty(prototype$1, 'isAxiosError', {
-	  value: true
-	});
-
-	// eslint-disable-next-line func-names
-	AxiosError$1.from = (error, code, config, request, response, customProps) => {
-	  const axiosError = Object.create(prototype$1);
-	  utils$1.toFlatObject(error, axiosError, function filter(obj) {
-	    return obj !== Error.prototype;
-	  }, prop => {
-	    return prop !== 'isAxiosError';
-	  });
-	  const msg = error && error.message ? error.message : 'Error';
-
-	  // Prefer explicit code; otherwise copy the low-level error's code (e.g. ECONNREFUSED)
-	  const errCode = code == null && error ? error.code : code;
-	  AxiosError$1.call(axiosError, msg, errCode, config, request, response);
-
-	  // Chain the original error on the standard field; non-enumerable to avoid JSON noise
-	  if (error && axiosError.cause == null) {
-	    Object.defineProperty(axiosError, 'cause', {
-	      value: error,
-	      configurable: true
-	    });
-	  }
-	  axiosError.name = error && error.name || 'Error';
-	  customProps && Object.assign(axiosError, customProps);
-	  return axiosError;
 	};
+
+	// This can be changed to static properties as soon as the parser options in .eslint.cjs are updated.
+	AxiosError$1.ERR_BAD_OPTION_VALUE = 'ERR_BAD_OPTION_VALUE';
+	AxiosError$1.ERR_BAD_OPTION = 'ERR_BAD_OPTION';
+	AxiosError$1.ECONNABORTED = 'ECONNABORTED';
+	AxiosError$1.ETIMEDOUT = 'ETIMEDOUT';
+	AxiosError$1.ERR_NETWORK = 'ERR_NETWORK';
+	AxiosError$1.ERR_FR_TOO_MANY_REDIRECTS = 'ERR_FR_TOO_MANY_REDIRECTS';
+	AxiosError$1.ERR_DEPRECATED = 'ERR_DEPRECATED';
+	AxiosError$1.ERR_BAD_RESPONSE = 'ERR_BAD_RESPONSE';
+	AxiosError$1.ERR_BAD_REQUEST = 'ERR_BAD_REQUEST';
+	AxiosError$1.ERR_CANCELED = 'ERR_CANCELED';
+	AxiosError$1.ERR_NOT_SUPPORT = 'ERR_NOT_SUPPORT';
+	AxiosError$1.ERR_INVALID_URL = 'ERR_INVALID_URL';
 
 	// eslint-disable-next-line strict
 	var httpAdapter = null;
@@ -49839,6 +49944,10 @@ void main() {
 	   */
 	  function defaultVisitor(value, key, path) {
 	    let arr = value;
+	    if (utils$1.isReactNative(formData) && utils$1.isReactNativeBlob(value)) {
+	      formData.append(renderKey(path, key, dots), convertValue(value));
+	      return false;
+	    }
 	    if (value && !path && typeof value === 'object') {
 	      if (utils$1.endsWith(key, '{}')) {
 	        // eslint-disable-next-line no-param-reassign
@@ -49959,25 +50068,22 @@ void main() {
 	 * @returns {string} The formatted url
 	 */
 	function buildURL(url, params, options) {
-	  /*eslint no-param-reassign:0*/
 	  if (!params) {
 	    return url;
 	  }
 	  const _encode = options && options.encode || encode;
-	  if (utils$1.isFunction(options)) {
-	    options = {
-	      serialize: options
-	    };
-	  }
-	  const serializeFn = options && options.serialize;
+	  const _options = utils$1.isFunction(options) ? {
+	    serialize: options
+	  } : options;
+	  const serializeFn = _options && _options.serialize;
 	  let serializedParams;
 	  if (serializeFn) {
-	    serializedParams = serializeFn(params, options);
+	    serializedParams = serializeFn(params, _options);
 	  } else {
-	    serializedParams = utils$1.isURLSearchParams(params) ? params.toString() : new AxiosURLSearchParams(params, options).toString(_encode);
+	    serializedParams = utils$1.isURLSearchParams(params) ? params.toString() : new AxiosURLSearchParams(params, _options).toString(_encode);
 	  }
 	  if (serializedParams) {
-	    const hashmarkIndex = url.indexOf("#");
+	    const hashmarkIndex = url.indexOf('#');
 	    if (hashmarkIndex !== -1) {
 	      url = url.slice(0, hashmarkIndex);
 	    }
@@ -49996,6 +50102,7 @@ void main() {
 	   *
 	   * @param {Function} fulfilled The function to handle `then` for a `Promise`
 	   * @param {Function} rejected The function to handle `reject` for a `Promise`
+	   * @param {Object} options The options for the interceptor, synchronous and runWhen
 	   *
 	   * @return {Number} An ID used to remove interceptor later
 	   */
@@ -50055,7 +50162,8 @@ void main() {
 	var transitionalDefaults = {
 	  silentJSONParsing: true,
 	  forcedJSONParsing: true,
-	  clarifyTimeoutError: false
+	  clarifyTimeoutError: false,
+	  legacyInterceptorReqResOrdering: true
 	};
 
 	var URLSearchParams$1 = typeof URLSearchParams !== 'undefined' ? URLSearchParams : AxiosURLSearchParams;
@@ -50323,7 +50431,7 @@ void main() {
 	  },
 	  headers: {
 	    common: {
-	      'Accept': 'application/json, text/plain, */*',
+	      Accept: 'application/json, text/plain, */*',
 	      'Content-Type': undefined
 	    }
 	  }
@@ -50562,7 +50670,7 @@ void main() {
 	    return Object.entries(this.toJSON()).map(([header, value]) => header + ': ' + value).join('\n');
 	  }
 	  getSetCookie() {
-	    return this.get("set-cookie") || [];
+	    return this.get('set-cookie') || [];
 	  }
 	  get [Symbol.toStringTag]() {
 	    return 'AxiosHeaders';
@@ -50632,23 +50740,22 @@ void main() {
 	  return !!(value && value.__CANCEL__);
 	}
 
-	/**
-	 * A `CanceledError` is an object that is thrown when an operation is canceled.
-	 *
-	 * @param {string=} message The message.
-	 * @param {Object=} config The config.
-	 * @param {Object=} request The request.
-	 *
-	 * @returns {CanceledError} The created error.
-	 */
-	function CanceledError$1(message, config, request) {
-	  // eslint-disable-next-line no-eq-null,eqeqeq
-	  AxiosError$1.call(this, message == null ? 'canceled' : message, AxiosError$1.ERR_CANCELED, config, request);
-	  this.name = 'CanceledError';
-	}
-	utils$1.inherits(CanceledError$1, AxiosError$1, {
-	  __CANCEL__: true
-	});
+	let CanceledError$1 = class CanceledError extends AxiosError$1 {
+	  /**
+	   * A `CanceledError` is an object that is thrown when an operation is canceled.
+	   *
+	   * @param {string=} message The message.
+	   * @param {Object=} config The config.
+	   * @param {Object=} request The request.
+	   *
+	   * @returns {CanceledError} The created error.
+	   */
+	  constructor(message, config, request) {
+	    super(message == null ? 'canceled' : message, AxiosError$1.ERR_CANCELED, config, request);
+	    this.name = 'CanceledError';
+	    this.__CANCEL__ = true;
+	  }
+	};
 
 	/**
 	 * Resolve or reject a Promise based on response status.
@@ -50843,6 +50950,9 @@ void main() {
 	  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
 	  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
 	  // by any combination of letters, digits, plus, period, or hyphen.
+	  if (typeof url !== 'string') {
+	    return false;
+	  }
 	  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
 	}
 
@@ -50905,8 +51015,6 @@ void main() {
 	    }
 	    return source;
 	  }
-
-	  // eslint-disable-next-line consistent-return
 	  function mergeDeepProperties(a, b, prop, caseless) {
 	    if (!utils$1.isUndefined(b)) {
 	      return getMergedValue(a, b, prop, caseless);
@@ -50974,7 +51082,8 @@ void main() {
 	    ...config1,
 	    ...config2
 	  }), function computeConfigValue(prop) {
-	    const merge = mergeMap[prop] || mergeDeepProperties;
+	    if (prop === '__proto__' || prop === 'constructor' || prop === 'prototype') return;
+	    const merge = utils$1.hasOwnProp(mergeMap, prop) ? mergeMap[prop] : mergeDeepProperties;
 	    const configValue = merge(config1[prop], config2[prop], prop);
 	    utils$1.isUndefined(configValue) && merge !== mergeDirectKeys || (config[prop] = configValue);
 	  });
@@ -51219,7 +51328,7 @@ void main() {
 	    };
 	    let timer = timeout && setTimeout(() => {
 	      timer = null;
-	      onabort(new AxiosError$1(`timeout ${timeout} of ms exceeded`, AxiosError$1.ETIMEDOUT));
+	      onabort(new AxiosError$1(`timeout of ${timeout}ms exceeded`, AxiosError$1.ETIMEDOUT));
 	    }, timeout);
 	    const unsubscribe = () => {
 	      if (signals) {
@@ -51444,7 +51553,7 @@ void main() {
 	        let _request = new Request(url, {
 	          method: 'POST',
 	          body: data,
-	          duplex: "half"
+	          duplex: 'half'
 	        });
 	        let contentTypeHeader;
 	        if (utils$1.isFormData(data) && (contentTypeHeader = _request.headers.get('content-type'))) {
@@ -51461,14 +51570,14 @@ void main() {
 
 	      // Cloudflare Workers throws when credentials are defined
 	      // see https://github.com/cloudflare/workerd/issues/902
-	      const isCredentialsSupported = isRequestSupported && "credentials" in Request.prototype;
+	      const isCredentialsSupported = isRequestSupported && 'credentials' in Request.prototype;
 	      const resolvedOptions = {
 	        ...fetchOptions,
 	        signal: composedSignal,
 	        method: method.toUpperCase(),
 	        headers: headers.normalize().toJSON(),
 	        body: data,
-	        duplex: "half",
+	        duplex: 'half',
 	        credentials: isCredentialsSupported ? withCredentials : undefined
 	      };
 	      request = isRequestSupported && new Request(url, resolvedOptions);
@@ -51502,11 +51611,11 @@ void main() {
 	    } catch (err) {
 	      unsubscribe && unsubscribe();
 	      if (err && err.name === 'TypeError' && /Load failed|fetch/i.test(err.message)) {
-	        throw Object.assign(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request), {
+	        throw Object.assign(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request, err && err.response), {
 	          cause: err.cause || err
 	        });
 	      }
-	      throw AxiosError$1.from(err, err && err.code, config, request);
+	      throw AxiosError$1.from(err, err && err.code, config, request, err && err.response);
 	    }
 	  };
 	};
@@ -51540,7 +51649,7 @@ void main() {
 	 * - `http` for Node.js
 	 * - `xhr` for browsers
 	 * - `fetch` for fetch API-based requests
-	 * 
+	 *
 	 * @type {Object<string, Function|Object>}
 	 */
 	const knownAdapters = {
@@ -51569,7 +51678,7 @@ void main() {
 
 	/**
 	 * Render a rejection reason string for unknown or unsupported adapters
-	 * 
+	 *
 	 * @param {string} reason
 	 * @returns {string}
 	 */
@@ -51577,7 +51686,7 @@ void main() {
 
 	/**
 	 * Check if the adapter is resolved (function, null, or false)
-	 * 
+	 *
 	 * @param {Function|null|false} adapter
 	 * @returns {boolean}
 	 */
@@ -51587,7 +51696,7 @@ void main() {
 	 * Get the first suitable adapter from the provided list.
 	 * Tries each adapter in order until a supported one is found.
 	 * Throws an AxiosError if no adapter is suitable.
-	 * 
+	 *
 	 * @param {Array<string|Function>|string|Function} adapters - Adapter(s) by name or function.
 	 * @param {Object} config - Axios request configuration
 	 * @throws {AxiosError} If no suitable adapter is available
@@ -51694,7 +51803,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.13.2";
+	const VERSION$1 = "1.13.6";
 
 	const validators$1 = {};
 
@@ -51717,7 +51826,7 @@ void main() {
 	 */
 	validators$1.transitional = function transitional(validator, version, message) {
 	  function formatMessage(opt, desc) {
-	    return '[Axios v' + VERSION$1 + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+	    return '[Axios v' + VERSION$1 + "] Transitional option '" + opt + "'" + desc + (message ? '. ' + message : '');
 	  }
 
 	  // eslint-disable-next-line func-names
@@ -51847,7 +51956,8 @@ void main() {
 	      validator.assertOptions(transitional, {
 	        silentJSONParsing: validators.transitional(validators.boolean),
 	        forcedJSONParsing: validators.transitional(validators.boolean),
-	        clarifyTimeoutError: validators.transitional(validators.boolean)
+	        clarifyTimeoutError: validators.transitional(validators.boolean),
+	        legacyInterceptorReqResOrdering: validators.transitional(validators.boolean)
 	      }, false);
 	    }
 	    if (paramsSerializer != null) {
@@ -51892,7 +52002,13 @@ void main() {
 	        return;
 	      }
 	      synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
-	      requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+	      const transitional = config.transitional || transitionalDefaults;
+	      const legacyInterceptorReqResOrdering = transitional && transitional.legacyInterceptorReqResOrdering;
+	      if (legacyInterceptorReqResOrdering) {
+	        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+	      } else {
+	        requestInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+	      }
 	    });
 	    const responseInterceptorChain = [];
 	    this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
@@ -52095,7 +52211,7 @@ void main() {
 	 *
 	 *  ```js
 	 *  function f(x, y, z) {}
-	 *  var args = [1, 2, 3];
+	 *  const args = [1, 2, 3];
 	 *  f.apply(null, args);
 	 *  ```
 	 *
