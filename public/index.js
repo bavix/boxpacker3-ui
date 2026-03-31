@@ -32634,7 +32634,8 @@ void main() {
 	          generateMipmaps: true,
 	          type: hasHalfFloatSupport ? HalfFloatType : UnsignedByteType,
 	          minFilter: LinearMipmapLinearFilter,
-	          samples: capabilities.samples,
+	          samples: Math.max(4, capabilities.samples),
+	          // to avoid feedback loops, the transmission render target requires a resolve, see #26177
 	          stencilBuffer: stencil,
 	          resolveDepthBuffer: false,
 	          resolveStencilBuffer: false,
@@ -49532,8 +49533,8 @@ void main() {
 	};
 
 	/**
-	 * It replaces all instances of the characters `:`, `$`, `,`, `+`, `[`, and `]` with their
-	 * URI encoded counterparts
+	 * It replaces URL-encoded forms of `:`, `$`, `,`, and spaces with
+	 * their plain counterparts (`:`, `$`, `,`, `+`).
 	 *
 	 * @param {string} val The value to be encoded.
 	 *
@@ -49976,7 +49977,7 @@ void main() {
 	  if (value === false || value == null) {
 	    return value;
 	  }
-	  return utils$1.isArray(value) ? value.map(normalizeValue) : String(value);
+	  return utils$1.isArray(value) ? value.map(normalizeValue) : String(value).replace(/[\r\n]+$/, '');
 	}
 	function parseTokens(str) {
 	  const tokens = Object.create(null);
@@ -50957,14 +50958,16 @@ void main() {
 	  const encodeText = isFetchSupported && (typeof TextEncoder === 'function' ? (encoder => str => encoder.encode(str))(new TextEncoder()) : async str => new Uint8Array(await new Request(str).arrayBuffer()));
 	  const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
 	    let duplexAccessed = false;
+	    const body = new ReadableStream$1();
 	    const hasContentType = new Request(platform.origin, {
-	      body: new ReadableStream$1(),
+	      body,
 	      method: 'POST',
 	      get duplex() {
 	        duplexAccessed = true;
 	        return 'half';
 	      }
 	    }).headers.has('Content-Type');
+	    body.cancel();
 	    return duplexAccessed && !hasContentType;
 	  });
 	  const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test(() => utils$1.isReadableStream(new Response('').body));
@@ -51288,7 +51291,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.13.6";
+	const VERSION$1 = "1.14.0";
 
 	const validators$1 = {};
 
@@ -51556,8 +51559,6 @@ void main() {
 	  };
 	});
 	utils$1.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-	  /*eslint func-names:0*/
-
 	  function generateHTTPMethod(isForm) {
 	    return function httpMethod(url, data, config) {
 	      return this.request(mergeConfig$1(config || {}, {
