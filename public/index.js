@@ -49973,14 +49973,38 @@ void main() {
 	};
 
 	const $internals = Symbol('internals');
+	const isValidHeaderValue = value => !/[\r\n]/.test(value);
+	function assertValidHeaderValue(value, header) {
+	  if (value === false || value == null) {
+	    return;
+	  }
+	  if (utils$1.isArray(value)) {
+	    value.forEach(v => assertValidHeaderValue(v, header));
+	    return;
+	  }
+	  if (!isValidHeaderValue(String(value))) {
+	    throw new Error(`Invalid character in header content ["${header}"]`);
+	  }
+	}
 	function normalizeHeader(header) {
 	  return header && String(header).trim().toLowerCase();
+	}
+	function stripTrailingCRLF(str) {
+	  let end = str.length;
+	  while (end > 0) {
+	    const charCode = str.charCodeAt(end - 1);
+	    if (charCode !== 10 && charCode !== 13) {
+	      break;
+	    }
+	    end -= 1;
+	  }
+	  return end === str.length ? str : str.slice(0, end);
 	}
 	function normalizeValue(value) {
 	  if (value === false || value == null) {
 	    return value;
 	  }
-	  return utils$1.isArray(value) ? value.map(normalizeValue) : String(value).replace(/[\r\n]+$/, '');
+	  return utils$1.isArray(value) ? value.map(normalizeValue) : stripTrailingCRLF(String(value));
 	}
 	function parseTokens(str) {
 	  const tokens = Object.create(null);
@@ -50036,6 +50060,7 @@ void main() {
 	      }
 	      const key = utils$1.findKey(self, lHeader);
 	      if (!key || self[key] === undefined || _rewrite === true || _rewrite === undefined && self[key] !== false) {
+	        assertValidHeaderValue(_value, _header);
 	        self[key || _header] = normalizeValue(_value);
 	      }
 	    }
@@ -51294,7 +51319,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.14.0";
+	const VERSION$1 = "1.15.0";
 
 	const validators$1 = {};
 
@@ -51413,13 +51438,24 @@ void main() {
 	        Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
 
 	        // slice off the Error: ... line
-	        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, '') : '';
+	        const stack = (() => {
+	          if (!dummy.stack) {
+	            return '';
+	          }
+	          const firstNewlineIndex = dummy.stack.indexOf('\n');
+	          return firstNewlineIndex === -1 ? '' : dummy.stack.slice(firstNewlineIndex + 1);
+	        })();
 	        try {
 	          if (!err.stack) {
 	            err.stack = stack;
 	            // match without the 2 top stack lines
-	          } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ''))) {
-	            err.stack += '\n' + stack;
+	          } else if (stack) {
+	            const firstNewlineIndex = stack.indexOf('\n');
+	            const secondNewlineIndex = firstNewlineIndex === -1 ? -1 : stack.indexOf('\n', firstNewlineIndex + 1);
+	            const stackWithoutTwoTopLines = secondNewlineIndex === -1 ? '' : stack.slice(secondNewlineIndex + 1);
+	            if (!String(err.stack).endsWith(stackWithoutTwoTopLines)) {
+	              err.stack += '\n' + stack;
+	            }
 	          }
 	        } catch (e) {
 	          // ignore the case where "stack" is an un-writable property
