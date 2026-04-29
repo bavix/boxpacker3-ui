@@ -50858,7 +50858,18 @@ void main() {
 	function mergeConfig$1(config1, config2) {
 	  // eslint-disable-next-line no-param-reassign
 	  config2 = config2 || {};
-	  const config = {};
+
+	  // Use a null-prototype object so that downstream reads such as `config.auth`
+	  // or `config.baseURL` cannot inherit polluted values from Object.prototype
+	  // (see GHSA-q8qp-cvcw-x6jj). `hasOwnProperty` is restored as a non-enumerable
+	  // own slot to preserve ergonomics for user code that relies on it.
+	  const config = Object.create(null);
+	  Object.defineProperty(config, 'hasOwnProperty', {
+	    value: Object.prototype.hasOwnProperty,
+	    enumerable: false,
+	    writable: true,
+	    configurable: true
+	  });
 	  function getMergedValue(target, source, prop, caseless) {
 	    if (utils$1.isPlainObject(target) && utils$1.isPlainObject(source)) {
 	      return utils$1.merge.call({
@@ -50930,6 +50941,7 @@ void main() {
 	    httpsAgent: defaultToConfig2,
 	    cancelToken: defaultToConfig2,
 	    socketPath: defaultToConfig2,
+	    allowedSocketPaths: defaultToConfig2,
 	    responseEncoding: defaultToConfig2,
 	    validateStatus: mergeDirectKeys,
 	    headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
@@ -50950,16 +50962,21 @@ void main() {
 
 	var resolveConfig = config => {
 	  const newConfig = mergeConfig$1({}, config);
-	  let {
-	    data,
-	    withXSRFToken,
-	    xsrfHeaderName,
-	    xsrfCookieName,
-	    headers,
-	    auth
-	  } = newConfig;
+
+	  // Read only own properties to prevent prototype pollution gadgets
+	  // (e.g. Object.prototype.baseURL = 'https://evil.com'). See GHSA-q8qp-cvcw-x6jj.
+	  const own = key => utils$1.hasOwnProp(newConfig, key) ? newConfig[key] : undefined;
+	  const data = own('data');
+	  let withXSRFToken = own('withXSRFToken');
+	  const xsrfHeaderName = own('xsrfHeaderName');
+	  const xsrfCookieName = own('xsrfCookieName');
+	  let headers = own('headers');
+	  const auth = own('auth');
+	  const baseURL = own('baseURL');
+	  const allowAbsoluteUrls = own('allowAbsoluteUrls');
+	  const url = own('url');
 	  newConfig.headers = headers = AxiosHeaders$1.from(headers);
-	  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
+	  newConfig.url = buildURL(buildFullPath(baseURL, url, allowAbsoluteUrls), config.params, config.paramsSerializer);
 
 	  // HTTP basic authentication
 	  if (auth) {
@@ -51680,7 +51697,7 @@ void main() {
 	  });
 	}
 
-	const VERSION$1 = "1.15.1";
+	const VERSION$1 = "1.15.2";
 
 	const validators$1 = {};
 
@@ -51745,7 +51762,9 @@ void main() {
 	  let i = keys.length;
 	  while (i-- > 0) {
 	    const opt = keys[i];
-	    const validator = schema[opt];
+	    // Use hasOwnProperty so a polluted Object.prototype.<opt> cannot supply
+	    // a non-function validator and cause a TypeError. See GHSA-q8qp-cvcw-x6jj.
+	    const validator = Object.prototype.hasOwnProperty.call(schema, opt) ? schema[opt] : undefined;
 	    if (validator) {
 	      const value = options[opt];
 	      const result = value === undefined || validator(value, opt, options);
