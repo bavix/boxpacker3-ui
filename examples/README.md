@@ -41,6 +41,9 @@ Items only (no boxes). Will use default boxes from the system. Format without ty
 ### `case-6-challenge.csv`
 Challenge case with large boxes and large items requiring careful packing strategy.
 
+### `packrift-ecommerce-cartons.csv`
+Ecommerce cartonization fixture derived from Packrift's public solver fixture pack. Includes four carton sizes and eight ecommerce order items converted from inches to millimeters for visual debugging.
+
 ## Legacy Examples (with IDs)
 
 These examples use the old format with IDs (still supported):
@@ -80,4 +83,3 @@ The importer supports multiple formats:
 - IDs are automatically generated (no need to specify)
 - All dimensions must be positive numbers
 - Type must be exactly `0` (box) or `1` (item) if specified
-
