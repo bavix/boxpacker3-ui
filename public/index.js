@@ -47716,8 +47716,8 @@ void main() {
 	  e$1,
 	  f$1,
 	  c$1,
-	  s$1,
 	  a$1,
+	  s$1,
 	  h$1,
 	  p$1,
 	  v$1,
@@ -47801,8 +47801,8 @@ void main() {
 	    i$1.length = H$1.__r = 0;
 	  }
 	}
-	function L$1(n, l, u, t, i, r, o, e, f, c, s) {
-	  var a,
+	function L$1(n, l, u, t, i, r, o, e, f, c, a) {
+	  var s,
 	    h,
 	    p,
 	    v,
@@ -47811,7 +47811,7 @@ void main() {
 	    g,
 	    m = t && t.__k || w$2,
 	    b = l.length;
-	  for (f = T$2(u, l, m, f, b), a = 0; a < b; a++) null != (p = u.__k[a]) && (h = -1 != p.__i && m[p.__i] || d$1, p.__i = a, _ = q$2(n, p, h, i, r, o, e, f, c, s), v = p.__e, p.ref && h.ref != p.ref && (h.ref && J$1(h.ref, null, p), s.push(p.ref, p.__c || v, p)), null == y && null != v && (y = v), (g = !!(4 & p.__u)) || h.__k === p.__k ? (f = j$2(p, f, n, g), g && h.__e && (h.__e = null)) : "function" == typeof p.type && void 0 !== _ ? f = _ : v && (f = v.nextSibling), p.__u &= -7);
+	  for (f = T$2(u, l, m, f, b), s = 0; s < b; s++) null != (p = u.__k[s]) && (h = -1 != p.__i && m[p.__i] || d$1, p.__i = s, _ = q$2(n, p, h, i, r, o, e, f, c, a), v = p.__e, p.ref && h.ref != p.ref && (h.ref && J$1(h.ref, null, p), a.push(p.ref, p.__c || v, p)), null == y && null != v && (y = v), (g = !!(4 & p.__u)) || h.__k === p.__k ? (f = j$2(p, f, n, g), g && h.__e && (h.__e = null)) : "function" == typeof p.type && void 0 !== _ ? f = _ : v && (f = v.nextSibling), p.__u &= -7);
 	  return u.__e = y, f;
 	}
 	function T$2(n, l, u, t, i) {
@@ -47820,13 +47820,13 @@ void main() {
 	    e,
 	    f,
 	    c,
-	    s = u.length,
-	    a = s,
+	    a = u.length,
+	    s = a,
 	    h = 0;
 	  for (n.__k = new Array(i), r = 0; r < i; r++) null != (o = l[r]) && "boolean" != typeof o && "function" != typeof o ? ("string" == typeof o || "number" == typeof o || "bigint" == typeof o || o.constructor == String ? o = n.__k[r] = x$2(null, o, null, null, null) : g$2(o) ? o = n.__k[r] = x$2(S, {
 	    children: o
-	  }, null, null, null) : void 0 === o.constructor && o.__b > 0 ? o = n.__k[r] = x$2(o.type, o.props, o.key, o.ref ? o.ref : null, o.__v) : n.__k[r] = o, f = r + h, o.__ = n, o.__b = n.__b + 1, e = null, -1 != (c = o.__i = O$1(o, u, f, a)) && (a--, (e = u[c]) && (e.__u |= 2)), null == e || null == e.__v ? (-1 == c && (i > s ? h-- : i < s && h++), "function" != typeof o.type && (o.__u |= 4)) : c != f && (c == f - 1 ? h-- : c == f + 1 ? h++ : (c > f ? h-- : h++, o.__u |= 4))) : n.__k[r] = null;
-	  if (a) for (r = 0; r < s; r++) null != (e = u[r]) && 0 == (2 & e.__u) && (e.__e == t && (t = $$1(e)), K$1(e, e));
+	  }, null, null, null) : void 0 === o.constructor && o.__b > 0 ? o = n.__k[r] = x$2(o.type, o.props, o.key, o.ref ? o.ref : null, o.__v) : n.__k[r] = o, f = r + h, o.__ = n, o.__b = n.__b + 1, e = null, -1 != (c = o.__i = O$1(o, u, f, s)) && (s--, (e = u[c]) && (e.__u |= 2)), null == e || null == e.__v ? (-1 == c && (i > a ? h-- : i < a && h++), "function" != typeof o.type && (o.__u |= 4)) : c != f && (c == f - 1 ? h-- : c == f + 1 ? h++ : (c > f ? h-- : h++, o.__u |= 4))) : n.__k[r] = null;
+	  if (s) for (r = 0; r < a; r++) null != (e = u[r]) && 0 == (2 & e.__u) && (e.__e == t && (t = $$1(e)), K$1(e, e));
 	  return t;
 	}
 	function j$2(n, l, u, t) {
@@ -47853,9 +47853,9 @@ void main() {
 	    e = n.key,
 	    f = n.type,
 	    c = l[u],
-	    s = null != c && 0 == (2 & c.__u);
-	  if (null === c && null == e || s && e == c.key && f == c.type) return u;
-	  if (t > (s ? 1 : 0)) for (i = u - 1, r = u + 1; i >= 0 || r < l.length;) if (null != (c = l[o = i >= 0 ? i-- : r++]) && 0 == (2 & c.__u) && e == c.key && f == c.type) return o;
+	    a = null != c && 0 == (2 & c.__u);
+	  if (null === c && null == e || a && e == c.key && f == c.type) return u;
+	  if (t > (a ? 1 : 0)) for (i = u - 1, r = u + 1; i >= 0 || r < l.length;) if (null != (c = l[o = i >= 0 ? i-- : r++]) && 0 == (2 & c.__u) && e == c.key && f == c.type) return o;
 	  return -1;
 	}
 	function z$2(n, l, u) {
@@ -47868,7 +47868,7 @@ void main() {
 	      if ("string" == typeof t && (n.style.cssText = t = ""), t) for (l in t) u && l in u || z$2(n.style, l, "");
 	      if (u) for (l in u) t && u[l] == t[l] || z$2(n.style, l, u[l]);
 	    }
-	  } else if ("o" == l[0] && "n" == l[1]) r = l != (l = l.replace(a$1, "$1")), o = l.toLowerCase(), l = o in n || "onFocusOut" == l || "onFocusIn" == l ? o.slice(2) : l.slice(2), n.l || (n.l = {}), n.l[l + r] = u, u ? t ? u[s$1] = t[s$1] : (u[s$1] = h$1, n.addEventListener(l, r ? v$1 : p$1, r)) : n.removeEventListener(l, r ? v$1 : p$1, r);else {
+	  } else if ("o" == l[0] && "n" == l[1]) r = l != (l = l.replace(s$1, "$1")), o = l.toLowerCase(), l = o in n || "onFocusOut" == l || "onFocusIn" == l ? o.slice(2) : l.slice(2), n.l || (n.l = {}), n.l[l + r] = u, u ? t ? u[a$1] = t[a$1] : (u[a$1] = h$1, n.addEventListener(l, r ? v$1 : p$1, r)) : n.removeEventListener(l, r ? v$1 : p$1, r);else {
 	    if ("http://www.w3.org/2000/svg" == i) l = l.replace(/xlink(H|:h)/, "h").replace(/sName$/, "s");else if ("width" != l && "height" != l && "href" != l && "list" != l && "form" != l && "tabIndex" != l && "download" != l && "rowSpan" != l && "colSpan" != l && "role" != l && "popover" != l && l in n) try {
 	      n[l] = null == u ? "" : u;
 	      break n;
@@ -47880,13 +47880,13 @@ void main() {
 	  return function (u) {
 	    if (this.l) {
 	      var t = this.l[u.type + n];
-	      if (null == u[c$1]) u[c$1] = h$1++;else if (u[c$1] < t[s$1]) return;
+	      if (null == u[c$1]) u[c$1] = h$1++;else if (u[c$1] < t[a$1]) return;
 	      return t(l$1.event ? l$1.event(u) : u);
 	    }
 	  };
 	}
-	function q$2(n, u, t, i, r, o, e, f, c, s) {
-	  var a,
+	function q$2(n, u, t, i, r, o, e, f, c, a) {
+	  var s,
 	    h,
 	    p,
 	    v,
@@ -47903,9 +47903,9 @@ void main() {
 	    H,
 	    T = u.type;
 	  if (void 0 !== u.constructor) return null;
-	  128 & t.__u && (c = !!(32 & t.__u), o = [f = u.__e = t.__e]), (a = l$1.__b) && a(u);
+	  128 & t.__u && (c = !!(32 & t.__u), o = [f = u.__e = t.__e]), (s = l$1.__b) && s(u);
 	  n: if ("function" == typeof T) try {
-	    if (k = u.props, x = T.prototype && T.prototype.render, M = (a = T.contextType) && i[a.__c], $ = a ? M ? M.props.value : a.__ : i, t.__c ? _ = (h = u.__c = t.__c).__ = h.__E : (x ? u.__c = h = new T(k, $) : (u.__c = h = new C$2(k, $), h.constructor = T, h.render = Q$1), M && M.sub(h), h.state || (h.state = {}), h.__n = i, p = h.__d = !0, h.__h = [], h._sb = []), x && null == h.__s && (h.__s = h.state), x && null != T.getDerivedStateFromProps && (h.__s == h.state && (h.__s = m$1({}, h.__s)), m$1(h.__s, T.getDerivedStateFromProps(k, h.__s))), v = h.props, y = h.state, h.__v = u, p) x && null == T.getDerivedStateFromProps && null != h.componentWillMount && h.componentWillMount(), x && null != h.componentDidMount && h.__h.push(h.componentDidMount);else {
+	    if (k = u.props, x = T.prototype && T.prototype.render, M = (s = T.contextType) && i[s.__c], $ = s ? M ? M.props.value : s.__ : i, t.__c ? _ = (h = u.__c = t.__c).__ = h.__E : (x ? u.__c = h = new T(k, $) : (u.__c = h = new C$2(k, $), h.constructor = T, h.render = Q$1), M && M.sub(h), h.state || (h.state = {}), h.__n = i, p = h.__d = !0, h.__h = [], h._sb = []), x && null == h.__s && (h.__s = h.state), x && null != T.getDerivedStateFromProps && (h.__s == h.state && (h.__s = m$1({}, h.__s)), m$1(h.__s, T.getDerivedStateFromProps(k, h.__s))), v = h.props, y = h.state, h.__v = u, p) x && null == T.getDerivedStateFromProps && null != h.componentWillMount && h.componentWillMount(), x && null != h.componentDidMount && h.__h.push(h.componentDidMount);else {
 	      if (x && null == T.getDerivedStateFromProps && k !== v && null != h.componentWillReceiveProps && h.componentWillReceiveProps(k, $), u.__v == t.__v || !h.__e && null != h.shouldComponentUpdate && !1 === h.shouldComponentUpdate(k, h.__s, $)) {
 	        u.__v != t.__v && (h.props = k, h.state = h.__s, h.__d = !1), u.__e = t.__e, u.__k = t.__k, u.__k.some(function (n) {
 	          n && (n.__ = u);
@@ -47916,10 +47916,10 @@ void main() {
 	        h.componentDidUpdate(v, y, d);
 	      });
 	    }
-	    if (h.context = $, h.props = k, h.__P = n, h.__e = !1, I = l$1.__r, P = 0, x) h.state = h.__s, h.__d = !1, I && I(u), a = h.render(h.props, h.state, h.context), w$2.push.apply(h.__h, h._sb), h._sb = [];else do {
-	      h.__d = !1, I && I(u), a = h.render(h.props, h.state, h.context), h.state = h.__s;
+	    if (h.context = $, h.props = k, h.__P = n, h.__e = !1, I = l$1.__r, P = 0, x) h.state = h.__s, h.__d = !1, I && I(u), s = h.render(h.props, h.state, h.context), w$2.push.apply(h.__h, h._sb), h._sb = [];else do {
+	      h.__d = !1, I && I(u), s = h.render(h.props, h.state, h.context), h.state = h.__s;
 	    } while (h.__d && ++P < 25);
-	    h.state = h.__s, null != h.getChildContext && (i = m$1(m$1({}, i), h.getChildContext())), x && !p && null != h.getSnapshotBeforeUpdate && (d = h.getSnapshotBeforeUpdate(v, y)), A = null != a && a.type === S && null == a.key ? E$1(a.props.children) : a, f = L$1(n, g$2(A) ? A : [A], u, t, i, r, o, e, f, c, s), h.base = u.__e, u.__u &= -161, h.__h.length && e.push(h), _ && (h.__E = h.__ = null);
+	    h.state = h.__s, null != h.getChildContext && (i = m$1(m$1({}, i), h.getChildContext())), x && !p && null != h.getSnapshotBeforeUpdate && (d = h.getSnapshotBeforeUpdate(v, y)), A = null != s && s.type === S && null == s.key ? E$1(s.props.children) : s, f = L$1(n, g$2(A) ? A : [A], u, t, i, r, o, e, f, c, a), h.base = u.__e, u.__u &= -161, h.__h.length && e.push(h), _ && (h.__E = h.__ = null);
 	  } catch (n) {
 	    if (u.__v = null, c || null != o) {
 	      if (n.then) {
@@ -47931,8 +47931,8 @@ void main() {
 	      }
 	    } else u.__e = t.__e, u.__k = t.__k, n.then || B$2(u);
 	    l$1.__e(n, u, t);
-	  } else null == o && u.__v == t.__v ? (u.__k = t.__k, u.__e = t.__e) : f = u.__e = G$2(t.__e, u, t, i, r, o, e, c, s);
-	  return (a = l$1.diffed) && a(u), 128 & u.__u ? void 0 : f;
+	  } else null == o && u.__v == t.__v ? (u.__k = t.__k, u.__e = t.__e) : f = u.__e = G$2(t.__e, u, t, i, r, o, e, c, a);
+	  return (s = l$1.diffed) && s(u), 128 & u.__u ? void 0 : f;
 	}
 	function B$2(n) {
 	  n && (n.__c && (n.__c.__e = true), n.__k && n.__k.some(B$2));
@@ -47950,10 +47950,10 @@ void main() {
 	  });
 	}
 	function E$1(n) {
-	  return "object" != typeof n || null == n || n.__b > 0 ? n : g$2(n) ? n.map(E$1) : m$1({}, n);
+	  return "object" != typeof n || null == n || n.__b > 0 ? n : g$2(n) ? n.map(E$1) : void 0 !== n.constructor ? null : m$1({}, n);
 	}
-	function G$2(u, t, i, r, o, e, f, c, s) {
-	  var a,
+	function G$2(u, t, i, r, o, e, f, c, a) {
+	  var s,
 	    h,
 	    p,
 	    v,
@@ -47963,8 +47963,8 @@ void main() {
 	    m = i.props || d$1,
 	    k = t.props,
 	    x = t.type;
-	  if ("svg" == x ? o = "http://www.w3.org/2000/svg" : "math" == x ? o = "http://www.w3.org/1998/Math/MathML" : o || (o = "http://www.w3.org/1999/xhtml"), null != e) for (a = 0; a < e.length; a++) if ((y = e[a]) && "setAttribute" in y == !!x && (x ? y.localName == x : 3 == y.nodeType)) {
-	    u = y, e[a] = null;
+	  if ("svg" == x ? o = "http://www.w3.org/2000/svg" : "math" == x ? o = "http://www.w3.org/1998/Math/MathML" : o || (o = "http://www.w3.org/1999/xhtml"), null != e) for (s = 0; s < e.length; s++) if ((y = e[s]) && "setAttribute" in y == !!x && (x ? y.localName == x : 3 == y.nodeType)) {
+	    u = y, e[s] = null;
 	    break;
 	  }
 	  if (null == u) {
@@ -47972,11 +47972,11 @@ void main() {
 	    u = document.createElementNS(o, x, k.is && k), c && (l$1.__m && l$1.__m(t, e), c = false), e = null;
 	  }
 	  if (null == x) m === k || c && u.data == k || (u.data = k);else {
-	    if (e = e && n.call(u.childNodes), !c && null != e) for (m = {}, a = 0; a < u.attributes.length; a++) m[(y = u.attributes[a]).name] = y.value;
-	    for (a in m) y = m[a], "dangerouslySetInnerHTML" == a ? p = y : "children" == a || a in k || "value" == a && "defaultValue" in k || "checked" == a && "defaultChecked" in k || N$1(u, a, null, y, o);
-	    for (a in k) y = k[a], "children" == a ? v = y : "dangerouslySetInnerHTML" == a ? h = y : "value" == a ? w = y : "checked" == a ? _ = y : c && "function" != typeof y || m[a] === y || N$1(u, a, y, m[a], o);
-	    if (h) c || p && (h.__html == p.__html || h.__html == u.innerHTML) || (u.innerHTML = h.__html), t.__k = [];else if (p && (u.innerHTML = ""), L$1("template" == t.type ? u.content : u, g$2(v) ? v : [v], t, i, r, "foreignObject" == x ? "http://www.w3.org/1999/xhtml" : o, e, f, e ? e[0] : i.__k && $$1(i, 0), c, s), null != e) for (a = e.length; a--;) b(e[a]);
-	    c || (a = "value", "progress" == x && null == w ? u.removeAttribute("value") : null != w && (w !== u[a] || "progress" == x && !w || "option" == x && w != m[a]) && N$1(u, a, w, m[a], o), a = "checked", null != _ && _ != u[a] && N$1(u, a, _, m[a], o));
+	    if (e = "textarea" == x && null != k.defaultValue ? null : e && n.call(u.childNodes), !c && null != e) for (m = {}, s = 0; s < u.attributes.length; s++) m[(y = u.attributes[s]).name] = y.value;
+	    for (s in m) y = m[s], "dangerouslySetInnerHTML" == s ? p = y : "children" == s || s in k || "value" == s && "defaultValue" in k || "checked" == s && "defaultChecked" in k || N$1(u, s, null, y, o);
+	    for (s in k) y = k[s], "children" == s ? v = y : "dangerouslySetInnerHTML" == s ? h = y : "value" == s ? w = y : "checked" == s ? _ = y : c && "function" != typeof y || m[s] === y || N$1(u, s, y, m[s], o);
+	    if (h) c || p && (h.__html == p.__html || h.__html == u.innerHTML) || (u.innerHTML = h.__html), t.__k = [];else if (p && (u.innerHTML = ""), L$1("template" == t.type ? u.content : u, g$2(v) ? v : [v], t, i, r, "foreignObject" == x ? "http://www.w3.org/1999/xhtml" : o, e, f, e ? e[0] : i.__k && $$1(i, 0), c, a), null != e) for (s = e.length; s--;) b(e[s]);
+	    c && "textarea" != x || (s = "value", "progress" == x && null == w ? u.removeAttribute("value") : null != w && (w !== u[s] || "progress" == x && !w || "option" == x && w != m[s]) && N$1(u, s, w, m[s], o), s = "checked", null != _ && _ != u[s] && N$1(u, s, _, m[s], o));
 	  }
 	  return u;
 	}
@@ -48061,7 +48061,7 @@ void main() {
 	  this.__v && (this.__e = true, n && this.__h.push(n), A$2(this));
 	}, C$2.prototype.render = S, i$1 = [], o$1 = "function" == typeof Promise ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout, e$1 = function (n, l) {
 	  return n.__v.__b - l.__v.__b;
-	}, H$1.__r = 0, f$1 = Math.random().toString(8), c$1 = "__d" + f$1, s$1 = "__a" + f$1, a$1 = /(PointerCapture)$|Capture$/i, h$1 = 0, p$1 = V$1(false), v$1 = V$1(true), y$1 = 0;
+	}, H$1.__r = 0, f$1 = Math.random().toString(8), c$1 = "__d" + f$1, a$1 = "__a" + f$1, s$1 = /(PointerCapture)$|Capture$/i, h$1 = 0, p$1 = V$1(false), v$1 = V$1(true), y$1 = 0;
 
 	var t,
 	  r,
@@ -48882,9 +48882,9 @@ void main() {
 	 * also have a `name` and `type` attribute to specify filename and content type
 	 *
 	 * @see https://github.com/facebook/react-native/blob/26684cf3adf4094eb6c405d345a75bf8c7c0bf88/Libraries/Network/FormData.js#L68-L71
-	 * 
+	 *
 	 * @param {*} value The value to test
-	 * 
+	 *
 	 * @returns {boolean} True if value is a React Native Blob, otherwise false
 	 */
 	const isReactNativeBlob = value => {
@@ -48894,9 +48894,9 @@ void main() {
 	/**
 	 * Determine if environment is React Native
 	 * ReactNative `FormData` has a non-standard `getParts()` method
-	 * 
+	 *
 	 * @param {*} formData The formData to test
-	 * 
+	 *
 	 * @returns {boolean} True if environment is React Native, otherwise false
 	 */
 	const isReactNative = formData => formData && typeof formData.getParts !== 'undefined';
@@ -48915,7 +48915,7 @@ void main() {
 	 *
 	 * @param {*} val The value to test
 	 *
-	 * @returns {boolean} True if value is a File, otherwise false
+	 * @returns {boolean} True if value is a FileList, otherwise false
 	 */
 	const isFileList = kindOfTest('FileList');
 
@@ -48947,7 +48947,7 @@ void main() {
 	const isFormData = thing => {
 	  if (!thing) return false;
 	  if (FormDataCtor && thing instanceof FormDataCtor) return true;
-	  // Reject plain objects inheriting directly from Object.prototype so prototype-pollution gadgets can't spoof FormData (GHSA-6chq-wfr3-2hj9).
+	  // Reject plain objects inheriting directly from Object.prototype so prototype-pollution gadgets can't spoof FormData.
 	  const proto = getPrototypeOf(thing);
 	  if (!proto || proto === Object.prototype) return false;
 	  if (!isFunction$1(thing.append)) return false;
@@ -49079,8 +49079,7 @@ void main() {
 	 *
 	 * @returns {Object} Result of all merge properties
 	 */
-	function merge(/* obj1, obj2, obj3, ... */
-	) {
+	function merge(...objs) {
 	  const {
 	    caseless,
 	    skipUndefined
@@ -49092,8 +49091,12 @@ void main() {
 	      return;
 	    }
 	    const targetKey = caseless && findKey(result, key) || key;
-	    if (isPlainObject(result[targetKey]) && isPlainObject(val)) {
-	      result[targetKey] = merge(result[targetKey], val);
+	    // Read via own-prop only — a bare `result[targetKey]` walks the prototype
+	    // chain, so a polluted Object.prototype value could surface here and get
+	    // copied into the merged result.
+	    const existing = hasOwnProperty(result, targetKey) ? result[targetKey] : undefined;
+	    if (isPlainObject(existing) && isPlainObject(val)) {
+	      result[targetKey] = merge(existing, val);
 	    } else if (isPlainObject(val)) {
 	      result[targetKey] = merge({}, val);
 	    } else if (isArray(val)) {
@@ -49102,8 +49105,8 @@ void main() {
 	      result[targetKey] = val;
 	    }
 	  };
-	  for (let i = 0, l = arguments.length; i < l; i++) {
-	    arguments[i] && forEach(arguments[i], assignValue);
+	  for (let i = 0, l = objs.length; i < l; i++) {
+	    objs[i] && forEach(objs[i], assignValue);
 	  }
 	  return result;
 	}
@@ -49125,6 +49128,9 @@ void main() {
 	  forEach(b, (val, key) => {
 	    if (thisArg && isFunction$1(val)) {
 	      Object.defineProperty(a, key, {
+	        // Null-proto descriptor so a polluted Object.prototype.get cannot
+	        // hijack defineProperty's accessor-vs-data resolution.
+	        __proto__: null,
 	        value: bind(val, thisArg),
 	        writable: true,
 	        enumerable: true,
@@ -49132,6 +49138,7 @@ void main() {
 	      });
 	    } else {
 	      Object.defineProperty(a, key, {
+	        __proto__: null,
 	        value: val,
 	        writable: true,
 	        enumerable: true,
@@ -49170,12 +49177,14 @@ void main() {
 	const inherits = (constructor, superConstructor, props, descriptors) => {
 	  constructor.prototype = Object.create(superConstructor.prototype, descriptors);
 	  Object.defineProperty(constructor.prototype, 'constructor', {
+	    __proto__: null,
 	    value: constructor,
 	    writable: true,
 	    enumerable: false,
 	    configurable: true
 	  });
 	  Object.defineProperty(constructor, 'super', {
+	    __proto__: null,
 	    value: superConstructor.prototype
 	  });
 	  props && Object.assign(constructor.prototype, props);
@@ -49343,7 +49352,7 @@ void main() {
 	const freezeMethods = obj => {
 	  reduceDescriptors(obj, (descriptor, name) => {
 	    // skip restricted props in strict mode
-	    if (isFunction$1(obj) && ['arguments', 'caller', 'callee'].indexOf(name) !== -1) {
+	    if (isFunction$1(obj) && ['arguments', 'caller', 'callee'].includes(name)) {
 	      return false;
 	    }
 	    const value = obj[name];
@@ -49402,10 +49411,10 @@ void main() {
 	 * @returns {Object} The JSON-compatible object.
 	 */
 	const toJSONObject = obj => {
-	  const stack = new Array(10);
-	  const visit = (source, i) => {
+	  const visited = new WeakSet();
+	  const visit = source => {
 	    if (isObject(source)) {
-	      if (stack.indexOf(source) >= 0) {
+	      if (visited.has(source)) {
 	        return;
 	      }
 
@@ -49414,19 +49423,20 @@ void main() {
 	        return source;
 	      }
 	      if (!('toJSON' in source)) {
-	        stack[i] = source;
+	        // add-on descent / delete-on-ascent: preserves path semantics, so DAG nodes serialise at every occurrence (see #7230).
+	        visited.add(source);
 	        const target = isArray(source) ? [] : {};
 	        forEach(source, (value, key) => {
-	          const reducedValue = visit(value, i + 1);
+	          const reducedValue = visit(value);
 	          !isUndefined(reducedValue) && (target[key] = reducedValue);
 	        });
-	        stack[i] = undefined;
+	        visited.delete(source);
 	        return target;
 	      }
 	    }
 	    return source;
 	  };
-	  return visit(obj, 0);
+	  return visit(obj);
 	};
 
 	/**
@@ -49550,6 +49560,382 @@ void main() {
 	  isIterable
 	};
 
+	// RawAxiosHeaders whose duplicates are ignored by node
+	// c.f. https://nodejs.org/api/http.html#http_message_headers
+	const ignoreDuplicateOf = utils$1.toObjectSet(['age', 'authorization', 'content-length', 'content-type', 'etag', 'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since', 'last-modified', 'location', 'max-forwards', 'proxy-authorization', 'referer', 'retry-after', 'user-agent']);
+
+	/**
+	 * Parse headers into an object
+	 *
+	 * ```
+	 * Date: Wed, 27 Aug 2014 08:58:49 GMT
+	 * Content-Type: application/json
+	 * Connection: keep-alive
+	 * Transfer-Encoding: chunked
+	 * ```
+	 *
+	 * @param {String} rawHeaders Headers needing to be parsed
+	 *
+	 * @returns {Object} Headers parsed into an object
+	 */
+	var parseHeaders = rawHeaders => {
+	  const parsed = {};
+	  let key;
+	  let val;
+	  let i;
+	  rawHeaders && rawHeaders.split('\n').forEach(function parser(line) {
+	    i = line.indexOf(':');
+	    key = line.substring(0, i).trim().toLowerCase();
+	    val = line.substring(i + 1).trim();
+	    if (!key || parsed[key] && ignoreDuplicateOf[key]) {
+	      return;
+	    }
+	    if (key === 'set-cookie') {
+	      if (parsed[key]) {
+	        parsed[key].push(val);
+	      } else {
+	        parsed[key] = [val];
+	      }
+	    } else {
+	      parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+	    }
+	  });
+	  return parsed;
+	};
+
+	function trimSPorHTAB(str) {
+	  let start = 0;
+	  let end = str.length;
+	  while (start < end) {
+	    const code = str.charCodeAt(start);
+	    if (code !== 0x09 && code !== 0x20) {
+	      break;
+	    }
+	    start += 1;
+	  }
+	  while (end > start) {
+	    const code = str.charCodeAt(end - 1);
+	    if (code !== 0x09 && code !== 0x20) {
+	      break;
+	    }
+	    end -= 1;
+	  }
+	  return start === 0 && end === str.length ? str : str.slice(start, end);
+	}
+
+	// The control-code ranges are intentional: header sanitization strips C0/DEL bytes.
+	// eslint-disable-next-line no-control-regex
+	const INVALID_UNICODE_HEADER_VALUE_CHARS = new RegExp('[\\u0000-\\u0008\\u000a-\\u001f\\u007f]+', 'g');
+	// eslint-disable-next-line no-control-regex
+	const INVALID_BYTE_STRING_HEADER_VALUE_CHARS = new RegExp('[^\\u0009\\u0020-\\u007e\\u0080-\\u00ff]+', 'g');
+	function sanitizeValue(value, invalidChars) {
+	  if (utils$1.isArray(value)) {
+	    return value.map(item => sanitizeValue(item, invalidChars));
+	  }
+	  return trimSPorHTAB(String(value).replace(invalidChars, ''));
+	}
+	const sanitizeHeaderValue = value => sanitizeValue(value, INVALID_UNICODE_HEADER_VALUE_CHARS);
+	const sanitizeByteStringHeaderValue = value => sanitizeValue(value, INVALID_BYTE_STRING_HEADER_VALUE_CHARS);
+	function toByteStringHeaderObject(headers) {
+	  const byteStringHeaders = Object.create(null);
+	  utils$1.forEach(headers.toJSON(), (value, header) => {
+	    byteStringHeaders[header] = sanitizeByteStringHeaderValue(value);
+	  });
+	  return byteStringHeaders;
+	}
+
+	const $internals = Symbol('internals');
+	function normalizeHeader(header) {
+	  return header && String(header).trim().toLowerCase();
+	}
+	function normalizeValue(value) {
+	  if (value === false || value == null) {
+	    return value;
+	  }
+	  return utils$1.isArray(value) ? value.map(normalizeValue) : sanitizeHeaderValue(String(value));
+	}
+	function parseTokens(str) {
+	  const tokens = Object.create(null);
+	  const tokensRE = /([^\s,;=]+)\s*(?:=\s*([^,;]+))?/g;
+	  let match;
+	  while (match = tokensRE.exec(str)) {
+	    tokens[match[1]] = match[2];
+	  }
+	  return tokens;
+	}
+	const isValidHeaderName = str => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
+	function matchHeaderValue(context, value, header, filter, isHeaderNameFilter) {
+	  if (utils$1.isFunction(filter)) {
+	    return filter.call(this, value, header);
+	  }
+	  if (isHeaderNameFilter) {
+	    value = header;
+	  }
+	  if (!utils$1.isString(value)) return;
+	  if (utils$1.isString(filter)) {
+	    return value.indexOf(filter) !== -1;
+	  }
+	  if (utils$1.isRegExp(filter)) {
+	    return filter.test(value);
+	  }
+	}
+	function formatHeader(header) {
+	  return header.trim().toLowerCase().replace(/([a-z\d])(\w*)/g, (w, char, str) => {
+	    return char.toUpperCase() + str;
+	  });
+	}
+	function buildAccessors(obj, header) {
+	  const accessorName = utils$1.toCamelCase(' ' + header);
+	  ['get', 'set', 'has'].forEach(methodName => {
+	    Object.defineProperty(obj, methodName + accessorName, {
+	      // Null-proto descriptor so a polluted Object.prototype.get cannot turn
+	      // this data descriptor into an accessor descriptor on the way in.
+	      __proto__: null,
+	      value: function (arg1, arg2, arg3) {
+	        return this[methodName].call(this, header, arg1, arg2, arg3);
+	      },
+	      configurable: true
+	    });
+	  });
+	}
+	let AxiosHeaders$1 = class AxiosHeaders {
+	  constructor(headers) {
+	    headers && this.set(headers);
+	  }
+	  set(header, valueOrRewrite, rewrite) {
+	    const self = this;
+	    function setHeader(_value, _header, _rewrite) {
+	      const lHeader = normalizeHeader(_header);
+	      if (!lHeader) {
+	        throw new Error('header name must be a non-empty string');
+	      }
+	      const key = utils$1.findKey(self, lHeader);
+	      if (!key || self[key] === undefined || _rewrite === true || _rewrite === undefined && self[key] !== false) {
+	        self[key || _header] = normalizeValue(_value);
+	      }
+	    }
+	    const setHeaders = (headers, _rewrite) => utils$1.forEach(headers, (_value, _header) => setHeader(_value, _header, _rewrite));
+	    if (utils$1.isPlainObject(header) || header instanceof this.constructor) {
+	      setHeaders(header, valueOrRewrite);
+	    } else if (utils$1.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
+	      setHeaders(parseHeaders(header), valueOrRewrite);
+	    } else if (utils$1.isObject(header) && utils$1.isIterable(header)) {
+	      let obj = {},
+	        dest,
+	        key;
+	      for (const entry of header) {
+	        if (!utils$1.isArray(entry)) {
+	          throw TypeError('Object iterator must return a key-value pair');
+	        }
+	        obj[key = entry[0]] = (dest = obj[key]) ? utils$1.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
+	      }
+	      setHeaders(obj, valueOrRewrite);
+	    } else {
+	      header != null && setHeader(valueOrRewrite, header, rewrite);
+	    }
+	    return this;
+	  }
+	  get(header, parser) {
+	    header = normalizeHeader(header);
+	    if (header) {
+	      const key = utils$1.findKey(this, header);
+	      if (key) {
+	        const value = this[key];
+	        if (!parser) {
+	          return value;
+	        }
+	        if (parser === true) {
+	          return parseTokens(value);
+	        }
+	        if (utils$1.isFunction(parser)) {
+	          return parser.call(this, value, key);
+	        }
+	        if (utils$1.isRegExp(parser)) {
+	          return parser.exec(value);
+	        }
+	        throw new TypeError('parser must be boolean|regexp|function');
+	      }
+	    }
+	  }
+	  has(header, matcher) {
+	    header = normalizeHeader(header);
+	    if (header) {
+	      const key = utils$1.findKey(this, header);
+	      return !!(key && this[key] !== undefined && (!matcher || matchHeaderValue(this, this[key], key, matcher)));
+	    }
+	    return false;
+	  }
+	  delete(header, matcher) {
+	    const self = this;
+	    let deleted = false;
+	    function deleteHeader(_header) {
+	      _header = normalizeHeader(_header);
+	      if (_header) {
+	        const key = utils$1.findKey(self, _header);
+	        if (key && (!matcher || matchHeaderValue(self, self[key], key, matcher))) {
+	          delete self[key];
+	          deleted = true;
+	        }
+	      }
+	    }
+	    if (utils$1.isArray(header)) {
+	      header.forEach(deleteHeader);
+	    } else {
+	      deleteHeader(header);
+	    }
+	    return deleted;
+	  }
+	  clear(matcher) {
+	    const keys = Object.keys(this);
+	    let i = keys.length;
+	    let deleted = false;
+	    while (i--) {
+	      const key = keys[i];
+	      if (!matcher || matchHeaderValue(this, this[key], key, matcher, true)) {
+	        delete this[key];
+	        deleted = true;
+	      }
+	    }
+	    return deleted;
+	  }
+	  normalize(format) {
+	    const self = this;
+	    const headers = {};
+	    utils$1.forEach(this, (value, header) => {
+	      const key = utils$1.findKey(headers, header);
+	      if (key) {
+	        self[key] = normalizeValue(value);
+	        delete self[header];
+	        return;
+	      }
+	      const normalized = format ? formatHeader(header) : String(header).trim();
+	      if (normalized !== header) {
+	        delete self[header];
+	      }
+	      self[normalized] = normalizeValue(value);
+	      headers[normalized] = true;
+	    });
+	    return this;
+	  }
+	  concat(...targets) {
+	    return this.constructor.concat(this, ...targets);
+	  }
+	  toJSON(asStrings) {
+	    const obj = Object.create(null);
+	    utils$1.forEach(this, (value, header) => {
+	      value != null && value !== false && (obj[header] = asStrings && utils$1.isArray(value) ? value.join(', ') : value);
+	    });
+	    return obj;
+	  }
+	  [Symbol.iterator]() {
+	    return Object.entries(this.toJSON())[Symbol.iterator]();
+	  }
+	  toString() {
+	    return Object.entries(this.toJSON()).map(([header, value]) => header + ': ' + value).join('\n');
+	  }
+	  getSetCookie() {
+	    return this.get('set-cookie') || [];
+	  }
+	  get [Symbol.toStringTag]() {
+	    return 'AxiosHeaders';
+	  }
+	  static from(thing) {
+	    return thing instanceof this ? thing : new this(thing);
+	  }
+	  static concat(first, ...targets) {
+	    const computed = new this(first);
+	    targets.forEach(target => computed.set(target));
+	    return computed;
+	  }
+	  static accessor(header) {
+	    const internals = this[$internals] = this[$internals] = {
+	      accessors: {}
+	    };
+	    const accessors = internals.accessors;
+	    const prototype = this.prototype;
+	    function defineAccessor(_header) {
+	      const lHeader = normalizeHeader(_header);
+	      if (!accessors[lHeader]) {
+	        buildAccessors(prototype, _header);
+	        accessors[lHeader] = true;
+	      }
+	    }
+	    utils$1.isArray(header) ? header.forEach(defineAccessor) : defineAccessor(header);
+	    return this;
+	  }
+	};
+	AxiosHeaders$1.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
+
+	// reserved names hotfix
+	utils$1.reduceDescriptors(AxiosHeaders$1.prototype, ({
+	  value
+	}, key) => {
+	  let mapped = key[0].toUpperCase() + key.slice(1); // map `set` => `Set`
+	  return {
+	    get: () => value,
+	    set(headerValue) {
+	      this[mapped] = headerValue;
+	    }
+	  };
+	});
+	utils$1.freezeMethods(AxiosHeaders$1);
+
+	const REDACTED = '[REDACTED ****]';
+	function hasOwnOrPrototypeToJSON(source) {
+	  if (utils$1.hasOwnProp(source, 'toJSON')) {
+	    return true;
+	  }
+	  let prototype = Object.getPrototypeOf(source);
+	  while (prototype && prototype !== Object.prototype) {
+	    if (utils$1.hasOwnProp(prototype, 'toJSON')) {
+	      return true;
+	    }
+	    prototype = Object.getPrototypeOf(prototype);
+	  }
+	  return false;
+	}
+
+	// Build a plain-object snapshot of `config` and replace the value of any key
+	// (case-insensitive) listed in `redactKeys` with REDACTED. Walks through arrays
+	// and AxiosHeaders, and short-circuits on circular references.
+	function redactConfig(config, redactKeys) {
+	  const lowerKeys = new Set(redactKeys.map(k => String(k).toLowerCase()));
+	  const seen = [];
+	  const visit = source => {
+	    if (source === null || typeof source !== 'object') return source;
+	    if (utils$1.isBuffer(source)) return source;
+	    if (seen.indexOf(source) !== -1) return undefined;
+	    if (source instanceof AxiosHeaders$1) {
+	      source = source.toJSON();
+	    }
+	    seen.push(source);
+	    let result;
+	    if (utils$1.isArray(source)) {
+	      result = [];
+	      source.forEach((v, i) => {
+	        const reducedValue = visit(v);
+	        if (!utils$1.isUndefined(reducedValue)) {
+	          result[i] = reducedValue;
+	        }
+	      });
+	    } else {
+	      if (!utils$1.isPlainObject(source) && hasOwnOrPrototypeToJSON(source)) {
+	        seen.pop();
+	        return source;
+	      }
+	      result = Object.create(null);
+	      for (const [key, value] of Object.entries(source)) {
+	        const reducedValue = lowerKeys.has(key.toLowerCase()) ? REDACTED : visit(value);
+	        if (!utils$1.isUndefined(reducedValue)) {
+	          result[key] = reducedValue;
+	        }
+	      }
+	    }
+	    seen.pop();
+	    return result;
+	  };
+	  return visit(config);
+	}
 	let AxiosError$1 = class AxiosError extends Error {
 	  static from(error, code, config, request, response, customProps) {
 	    const axiosError = new AxiosError(error.message, code || error.code, config, request, response);
@@ -49582,6 +49968,9 @@ void main() {
 	    // The native Error constructor sets message as non-enumerable,
 	    // but axios < v1.13.3 had it as enumerable
 	    Object.defineProperty(this, 'message', {
+	      // Null-proto descriptor so a polluted Object.prototype.get cannot turn
+	      // this data descriptor into an accessor descriptor on the way in.
+	      __proto__: null,
 	      value: message,
 	      enumerable: true,
 	      writable: true,
@@ -49598,6 +49987,13 @@ void main() {
 	    }
 	  }
 	  toJSON() {
+	    // Opt-in redaction: when the request config carries a `redact` array, the
+	    // value of any matching key (case-insensitive, at any depth) is replaced
+	    // with REDACTED in the serialized snapshot. Undefined or empty leaves the
+	    // existing serialization behavior unchanged.
+	    const config = this.config;
+	    const redactKeys = config && utils$1.hasOwnProp(config, 'redact') ? config.redact : undefined;
+	    const serializedConfig = utils$1.isArray(redactKeys) && redactKeys.length > 0 ? redactConfig(config, redactKeys) : utils$1.toJSONObject(config);
 	    return {
 	      // Standard
 	      message: this.message,
@@ -49611,7 +50007,7 @@ void main() {
 	      columnNumber: this.columnNumber,
 	      stack: this.stack,
 	      // Axios
-	      config: utils$1.toJSONObject(this.config),
+	      config: serializedConfig,
 	      code: this.code,
 	      status: this.status
 	    };
@@ -49623,6 +50019,7 @@ void main() {
 	AxiosError$1.ERR_BAD_OPTION = 'ERR_BAD_OPTION';
 	AxiosError$1.ECONNABORTED = 'ECONNABORTED';
 	AxiosError$1.ETIMEDOUT = 'ETIMEDOUT';
+	AxiosError$1.ECONNREFUSED = 'ECONNREFUSED';
 	AxiosError$1.ERR_NETWORK = 'ERR_NETWORK';
 	AxiosError$1.ERR_FR_TOO_MANY_REDIRECTS = 'ERR_FR_TOO_MANY_REDIRECTS';
 	AxiosError$1.ERR_DEPRECATED = 'ERR_DEPRECATED';
@@ -50134,7 +50531,7 @@ void main() {
 	      }
 	      return !isNumericKey;
 	    }
-	    if (!target[name] || !utils$1.isObject(target[name])) {
+	    if (!utils$1.hasOwnProp(target, name) || !utils$1.isObject(target[name])) {
 	      target[name] = [];
 	    }
 	    const result = buildPath(path, value, target[name], index);
@@ -50269,308 +50666,9 @@ void main() {
 	    }
 	  }
 	};
-	utils$1.forEach(['delete', 'get', 'head', 'post', 'put', 'patch'], method => {
+	utils$1.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'query'], method => {
 	  defaults.headers[method] = {};
 	});
-
-	// RawAxiosHeaders whose duplicates are ignored by node
-	// c.f. https://nodejs.org/api/http.html#http_message_headers
-	const ignoreDuplicateOf = utils$1.toObjectSet(['age', 'authorization', 'content-length', 'content-type', 'etag', 'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since', 'last-modified', 'location', 'max-forwards', 'proxy-authorization', 'referer', 'retry-after', 'user-agent']);
-
-	/**
-	 * Parse headers into an object
-	 *
-	 * ```
-	 * Date: Wed, 27 Aug 2014 08:58:49 GMT
-	 * Content-Type: application/json
-	 * Connection: keep-alive
-	 * Transfer-Encoding: chunked
-	 * ```
-	 *
-	 * @param {String} rawHeaders Headers needing to be parsed
-	 *
-	 * @returns {Object} Headers parsed into an object
-	 */
-	var parseHeaders = rawHeaders => {
-	  const parsed = {};
-	  let key;
-	  let val;
-	  let i;
-	  rawHeaders && rawHeaders.split('\n').forEach(function parser(line) {
-	    i = line.indexOf(':');
-	    key = line.substring(0, i).trim().toLowerCase();
-	    val = line.substring(i + 1).trim();
-	    if (!key || parsed[key] && ignoreDuplicateOf[key]) {
-	      return;
-	    }
-	    if (key === 'set-cookie') {
-	      if (parsed[key]) {
-	        parsed[key].push(val);
-	      } else {
-	        parsed[key] = [val];
-	      }
-	    } else {
-	      parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
-	    }
-	  });
-	  return parsed;
-	};
-
-	const $internals = Symbol('internals');
-	const INVALID_HEADER_VALUE_CHARS_RE = /[^\x09\x20-\x7E\x80-\xFF]/g;
-	function trimSPorHTAB(str) {
-	  let start = 0;
-	  let end = str.length;
-	  while (start < end) {
-	    const code = str.charCodeAt(start);
-	    if (code !== 0x09 && code !== 0x20) {
-	      break;
-	    }
-	    start += 1;
-	  }
-	  while (end > start) {
-	    const code = str.charCodeAt(end - 1);
-	    if (code !== 0x09 && code !== 0x20) {
-	      break;
-	    }
-	    end -= 1;
-	  }
-	  return start === 0 && end === str.length ? str : str.slice(start, end);
-	}
-	function normalizeHeader(header) {
-	  return header && String(header).trim().toLowerCase();
-	}
-	function sanitizeHeaderValue(str) {
-	  return trimSPorHTAB(str.replace(INVALID_HEADER_VALUE_CHARS_RE, ''));
-	}
-	function normalizeValue(value) {
-	  if (value === false || value == null) {
-	    return value;
-	  }
-	  return utils$1.isArray(value) ? value.map(normalizeValue) : sanitizeHeaderValue(String(value));
-	}
-	function parseTokens(str) {
-	  const tokens = Object.create(null);
-	  const tokensRE = /([^\s,;=]+)\s*(?:=\s*([^,;]+))?/g;
-	  let match;
-	  while (match = tokensRE.exec(str)) {
-	    tokens[match[1]] = match[2];
-	  }
-	  return tokens;
-	}
-	const isValidHeaderName = str => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
-	function matchHeaderValue(context, value, header, filter, isHeaderNameFilter) {
-	  if (utils$1.isFunction(filter)) {
-	    return filter.call(this, value, header);
-	  }
-	  if (isHeaderNameFilter) {
-	    value = header;
-	  }
-	  if (!utils$1.isString(value)) return;
-	  if (utils$1.isString(filter)) {
-	    return value.indexOf(filter) !== -1;
-	  }
-	  if (utils$1.isRegExp(filter)) {
-	    return filter.test(value);
-	  }
-	}
-	function formatHeader(header) {
-	  return header.trim().toLowerCase().replace(/([a-z\d])(\w*)/g, (w, char, str) => {
-	    return char.toUpperCase() + str;
-	  });
-	}
-	function buildAccessors(obj, header) {
-	  const accessorName = utils$1.toCamelCase(' ' + header);
-	  ['get', 'set', 'has'].forEach(methodName => {
-	    Object.defineProperty(obj, methodName + accessorName, {
-	      value: function (arg1, arg2, arg3) {
-	        return this[methodName].call(this, header, arg1, arg2, arg3);
-	      },
-	      configurable: true
-	    });
-	  });
-	}
-	let AxiosHeaders$1 = class AxiosHeaders {
-	  constructor(headers) {
-	    headers && this.set(headers);
-	  }
-	  set(header, valueOrRewrite, rewrite) {
-	    const self = this;
-	    function setHeader(_value, _header, _rewrite) {
-	      const lHeader = normalizeHeader(_header);
-	      if (!lHeader) {
-	        throw new Error('header name must be a non-empty string');
-	      }
-	      const key = utils$1.findKey(self, lHeader);
-	      if (!key || self[key] === undefined || _rewrite === true || _rewrite === undefined && self[key] !== false) {
-	        self[key || _header] = normalizeValue(_value);
-	      }
-	    }
-	    const setHeaders = (headers, _rewrite) => utils$1.forEach(headers, (_value, _header) => setHeader(_value, _header, _rewrite));
-	    if (utils$1.isPlainObject(header) || header instanceof this.constructor) {
-	      setHeaders(header, valueOrRewrite);
-	    } else if (utils$1.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
-	      setHeaders(parseHeaders(header), valueOrRewrite);
-	    } else if (utils$1.isObject(header) && utils$1.isIterable(header)) {
-	      let obj = {},
-	        dest,
-	        key;
-	      for (const entry of header) {
-	        if (!utils$1.isArray(entry)) {
-	          throw TypeError('Object iterator must return a key-value pair');
-	        }
-	        obj[key = entry[0]] = (dest = obj[key]) ? utils$1.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
-	      }
-	      setHeaders(obj, valueOrRewrite);
-	    } else {
-	      header != null && setHeader(valueOrRewrite, header, rewrite);
-	    }
-	    return this;
-	  }
-	  get(header, parser) {
-	    header = normalizeHeader(header);
-	    if (header) {
-	      const key = utils$1.findKey(this, header);
-	      if (key) {
-	        const value = this[key];
-	        if (!parser) {
-	          return value;
-	        }
-	        if (parser === true) {
-	          return parseTokens(value);
-	        }
-	        if (utils$1.isFunction(parser)) {
-	          return parser.call(this, value, key);
-	        }
-	        if (utils$1.isRegExp(parser)) {
-	          return parser.exec(value);
-	        }
-	        throw new TypeError('parser must be boolean|regexp|function');
-	      }
-	    }
-	  }
-	  has(header, matcher) {
-	    header = normalizeHeader(header);
-	    if (header) {
-	      const key = utils$1.findKey(this, header);
-	      return !!(key && this[key] !== undefined && (!matcher || matchHeaderValue(this, this[key], key, matcher)));
-	    }
-	    return false;
-	  }
-	  delete(header, matcher) {
-	    const self = this;
-	    let deleted = false;
-	    function deleteHeader(_header) {
-	      _header = normalizeHeader(_header);
-	      if (_header) {
-	        const key = utils$1.findKey(self, _header);
-	        if (key && (!matcher || matchHeaderValue(self, self[key], key, matcher))) {
-	          delete self[key];
-	          deleted = true;
-	        }
-	      }
-	    }
-	    if (utils$1.isArray(header)) {
-	      header.forEach(deleteHeader);
-	    } else {
-	      deleteHeader(header);
-	    }
-	    return deleted;
-	  }
-	  clear(matcher) {
-	    const keys = Object.keys(this);
-	    let i = keys.length;
-	    let deleted = false;
-	    while (i--) {
-	      const key = keys[i];
-	      if (!matcher || matchHeaderValue(this, this[key], key, matcher, true)) {
-	        delete this[key];
-	        deleted = true;
-	      }
-	    }
-	    return deleted;
-	  }
-	  normalize(format) {
-	    const self = this;
-	    const headers = {};
-	    utils$1.forEach(this, (value, header) => {
-	      const key = utils$1.findKey(headers, header);
-	      if (key) {
-	        self[key] = normalizeValue(value);
-	        delete self[header];
-	        return;
-	      }
-	      const normalized = format ? formatHeader(header) : String(header).trim();
-	      if (normalized !== header) {
-	        delete self[header];
-	      }
-	      self[normalized] = normalizeValue(value);
-	      headers[normalized] = true;
-	    });
-	    return this;
-	  }
-	  concat(...targets) {
-	    return this.constructor.concat(this, ...targets);
-	  }
-	  toJSON(asStrings) {
-	    const obj = Object.create(null);
-	    utils$1.forEach(this, (value, header) => {
-	      value != null && value !== false && (obj[header] = asStrings && utils$1.isArray(value) ? value.join(', ') : value);
-	    });
-	    return obj;
-	  }
-	  [Symbol.iterator]() {
-	    return Object.entries(this.toJSON())[Symbol.iterator]();
-	  }
-	  toString() {
-	    return Object.entries(this.toJSON()).map(([header, value]) => header + ': ' + value).join('\n');
-	  }
-	  getSetCookie() {
-	    return this.get('set-cookie') || [];
-	  }
-	  get [Symbol.toStringTag]() {
-	    return 'AxiosHeaders';
-	  }
-	  static from(thing) {
-	    return thing instanceof this ? thing : new this(thing);
-	  }
-	  static concat(first, ...targets) {
-	    const computed = new this(first);
-	    targets.forEach(target => computed.set(target));
-	    return computed;
-	  }
-	  static accessor(header) {
-	    const internals = this[$internals] = this[$internals] = {
-	      accessors: {}
-	    };
-	    const accessors = internals.accessors;
-	    const prototype = this.prototype;
-	    function defineAccessor(_header) {
-	      const lHeader = normalizeHeader(_header);
-	      if (!accessors[lHeader]) {
-	        buildAccessors(prototype, _header);
-	        accessors[lHeader] = true;
-	      }
-	    }
-	    utils$1.isArray(header) ? header.forEach(defineAccessor) : defineAccessor(header);
-	    return this;
-	  }
-	};
-	AxiosHeaders$1.accessor(['Content-Type', 'Content-Length', 'Accept', 'Accept-Encoding', 'User-Agent', 'Authorization']);
-
-	// reserved names hotfix
-	utils$1.reduceDescriptors(AxiosHeaders$1.prototype, ({
-	  value
-	}, key) => {
-	  let mapped = key[0].toUpperCase() + key.slice(1); // map `set` => `Set`
-	  return {
-	    get: () => value,
-	    set(headerValue) {
-	      this[mapped] = headerValue;
-	    }
-	  };
-	});
-	utils$1.freezeMethods(AxiosHeaders$1);
 
 	/**
 	 * Transform the data for a request or a response
@@ -50627,12 +50725,12 @@ void main() {
 	  if (!response.status || !validateStatus || validateStatus(response.status)) {
 	    resolve(response);
 	  } else {
-	    reject(new AxiosError$1('Request failed with status code ' + response.status, [AxiosError$1.ERR_BAD_REQUEST, AxiosError$1.ERR_BAD_RESPONSE][Math.floor(response.status / 100) - 4], response.config, response.request, response));
+	    reject(new AxiosError$1('Request failed with status code ' + response.status, response.status >= 400 && response.status < 500 ? AxiosError$1.ERR_BAD_REQUEST : AxiosError$1.ERR_BAD_RESPONSE, response.config, response.request, response));
 	  }
 	}
 
 	function parseProtocol(url) {
-	  const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url);
+	  const match = /^([-+\w]{1,25}):(?:\/\/)?/.exec(url);
 	  return match && match[1] || '';
 	}
 
@@ -50719,6 +50817,9 @@ void main() {
 	  let bytesNotified = 0;
 	  const _speedometer = speedometer(50, 250);
 	  return throttle(e => {
+	    if (!e || typeof e.loaded !== 'number') {
+	      return;
+	    }
 	    const rawLoaded = e.loaded;
 	    const total = e.lengthComputable ? e.total : undefined;
 	    const loaded = total != null ? Math.min(rawLoaded, total) : rawLoaded;
@@ -50779,8 +50880,20 @@ void main() {
 	  },
 	  read(name) {
 	    if (typeof document === 'undefined') return null;
-	    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-	    return match ? decodeURIComponent(match[1]) : null;
+	    // Match name=value by splitting on the semicolon separator instead of building a
+	    // RegExp from `name` — interpolating an unescaped string into a RegExp would let
+	    // metacharacters (e.g. `.+?` in an attacker-influenced cookie name) cause ReDoS or
+	    // match the wrong cookie. Browsers may serialize cookie pairs as either ";" or
+	    // "; ", so ignore optional whitespace before each cookie name.
+	    const cookies = document.cookie.split(';');
+	    for (let i = 0; i < cookies.length; i++) {
+	      const cookie = cookies[i].replace(/^\s+/, '');
+	      const eq = cookie.indexOf('=');
+	      if (eq !== -1 && cookie.slice(0, eq) === name) {
+	        return decodeURIComponent(cookie.slice(eq + 1));
+	      }
+	    }
+	    return null;
 	  },
 	  remove(name) {
 	    this.write(name, '', Date.now() - 86400000, '/');
@@ -50860,11 +50973,14 @@ void main() {
 	  config2 = config2 || {};
 
 	  // Use a null-prototype object so that downstream reads such as `config.auth`
-	  // or `config.baseURL` cannot inherit polluted values from Object.prototype
-	  // (see GHSA-q8qp-cvcw-x6jj). `hasOwnProperty` is restored as a non-enumerable
-	  // own slot to preserve ergonomics for user code that relies on it.
+	  // or `config.baseURL` cannot inherit polluted values from Object.prototype.
+	  // `hasOwnProperty` is restored as a non-enumerable own slot to preserve
+	  // ergonomics for user code that relies on it.
 	  const config = Object.create(null);
 	  Object.defineProperty(config, 'hasOwnProperty', {
+	    // Null-proto descriptor so a polluted Object.prototype.get cannot turn
+	    // this data descriptor into an accessor descriptor on the way in.
+	    __proto__: null,
 	    value: Object.prototype.hasOwnProperty,
 	    enumerable: false,
 	    writable: true,
@@ -50960,11 +51076,33 @@ void main() {
 	  return config;
 	}
 
+	const FORM_DATA_CONTENT_HEADERS = ['content-type', 'content-length'];
+	function setFormDataHeaders(headers, formHeaders, policy) {
+	  if (policy !== 'content-only') {
+	    headers.set(formHeaders);
+	    return;
+	  }
+	  Object.entries(formHeaders).forEach(([key, val]) => {
+	    if (FORM_DATA_CONTENT_HEADERS.includes(key.toLowerCase())) {
+	      headers.set(key, val);
+	    }
+	  });
+	}
+
+	/**
+	 * Encode a UTF-8 string to a Latin-1 byte string for use with btoa().
+	 * This is a modern replacement for the deprecated unescape(encodeURIComponent(str)) pattern.
+	 *
+	 * @param {string} str The string to encode
+	 *
+	 * @returns {string} UTF-8 bytes as a Latin-1 string
+	 */
+	const encodeUTF8 = str => encodeURIComponent(str).replace(/%([0-9A-F]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
 	var resolveConfig = config => {
 	  const newConfig = mergeConfig$1({}, config);
 
 	  // Read only own properties to prevent prototype pollution gadgets
-	  // (e.g. Object.prototype.baseURL = 'https://evil.com'). See GHSA-q8qp-cvcw-x6jj.
+	  // (e.g. Object.prototype.baseURL = 'https://evil.com').
 	  const own = key => utils$1.hasOwnProp(newConfig, key) ? newConfig[key] : undefined;
 	  const data = own('data');
 	  let withXSRFToken = own('withXSRFToken');
@@ -50980,21 +51118,14 @@ void main() {
 
 	  // HTTP basic authentication
 	  if (auth) {
-	    headers.set('Authorization', 'Basic ' + btoa((auth.username || '') + ':' + (auth.password ? unescape(encodeURIComponent(auth.password)) : '')));
+	    headers.set('Authorization', 'Basic ' + btoa((auth.username || '') + ':' + (auth.password ? encodeUTF8(auth.password) : '')));
 	  }
 	  if (utils$1.isFormData(data)) {
 	    if (platform.hasStandardBrowserEnv || platform.hasStandardBrowserWebWorkerEnv) {
 	      headers.setContentType(undefined); // browser handles it
 	    } else if (utils$1.isFunction(data.getHeaders)) {
 	      // Node.js FormData (like form-data package)
-	      const formHeaders = data.getHeaders();
-	      // Only set safe headers to avoid overwriting security headers
-	      const allowedHeaders = ['content-type', 'content-length'];
-	      Object.entries(formHeaders).forEach(([key, val]) => {
-	        if (allowedHeaders.includes(key.toLowerCase())) {
-	          headers.set(key, val);
-	        }
-	      });
+	      setFormDataHeaders(headers, data.getHeaders(), own('formDataHeaderPolicy'));
 	    }
 	  }
 
@@ -51009,7 +51140,7 @@ void main() {
 
 	    // Strict boolean check — prevents proto-pollution gadgets (e.g. Object.prototype.withXSRFToken = 1)
 	    // and misconfigurations (e.g. "false") from short-circuiting the same-origin check and leaking
-	    // the XSRF token cross-origin. See GHSA-xx6v-rp6x-q39c.
+	    // the XSRF token cross-origin.
 	    const shouldSendXSRF = withXSRFToken === true || withXSRFToken == null && isURLSameOrigin(newConfig.url);
 	    if (shouldSendXSRF) {
 	      const xsrfValue = xsrfHeaderName && xsrfCookieName && cookies.read(xsrfCookieName);
@@ -51087,7 +51218,7 @@ void main() {
 	        // handled by onerror instead
 	        // With one exception: request that using file: protocol, most browsers
 	        // will return status as 0 even though it's a successful request
-	        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+	        if (request.status === 0 && !(request.responseURL && request.responseURL.startsWith('file:'))) {
 	          return;
 	        }
 	        // readystate handler is calling before onerror or ontimeout handlers,
@@ -51102,6 +51233,7 @@ void main() {
 	        return;
 	      }
 	      reject(new AxiosError$1('Request aborted', AxiosError$1.ECONNABORTED, config, request));
+	      done();
 
 	      // Clean up request
 	      request = null;
@@ -51117,6 +51249,7 @@ void main() {
 	      // attach the underlying event for consumers who want details
 	      err.event = event || null;
 	      reject(err);
+	      done();
 	      request = null;
 	    };
 
@@ -51128,6 +51261,7 @@ void main() {
 	        timeoutErrorMessage = _config.timeoutErrorMessage;
 	      }
 	      reject(new AxiosError$1(timeoutErrorMessage, transitional.clarifyTimeoutError ? AxiosError$1.ETIMEDOUT : AxiosError$1.ECONNABORTED, config, request));
+	      done();
 
 	      // Clean up request
 	      request = null;
@@ -51138,7 +51272,7 @@ void main() {
 
 	    // Add headers to the request
 	    if ('setRequestHeader' in request) {
-	      utils$1.forEach(requestHeaders.toJSON(), function setRequestHeader(val, key) {
+	      utils$1.forEach(toByteStringHeaderObject(requestHeaders), function setRequestHeader(val, key) {
 	        request.setRequestHeader(key, val);
 	      });
 	    }
@@ -51174,6 +51308,7 @@ void main() {
 	        }
 	        reject(!cancel || cancel.type ? new CanceledError$1(null, config, request) : cancel);
 	        request.abort();
+	        done();
 	        request = null;
 	      };
 	      _config.cancelToken && _config.cancelToken.subscribe(onCanceled);
@@ -51182,7 +51317,7 @@ void main() {
 	      }
 	    }
 	    const protocol = parseProtocol(_config.url);
-	    if (protocol && platform.protocols.indexOf(protocol) === -1) {
+	    if (protocol && !platform.protocols.includes(protocol)) {
 	      reject(new AxiosError$1('Unsupported protocol ' + protocol + ':', AxiosError$1.ERR_BAD_REQUEST, config));
 	      return;
 	    }
@@ -51193,41 +51328,41 @@ void main() {
 	};
 
 	const composeSignals = (signals, timeout) => {
-	  const {
-	    length
-	  } = signals = signals ? signals.filter(Boolean) : [];
-	  if (timeout || length) {
-	    let controller = new AbortController();
-	    let aborted;
-	    const onabort = function (reason) {
-	      if (!aborted) {
-	        aborted = true;
-	        unsubscribe();
-	        const err = reason instanceof Error ? reason : this.reason;
-	        controller.abort(err instanceof AxiosError$1 ? err : new CanceledError$1(err instanceof Error ? err.message : err));
-	      }
-	    };
-	    let timer = timeout && setTimeout(() => {
-	      timer = null;
-	      onabort(new AxiosError$1(`timeout of ${timeout}ms exceeded`, AxiosError$1.ETIMEDOUT));
-	    }, timeout);
-	    const unsubscribe = () => {
-	      if (signals) {
-	        timer && clearTimeout(timer);
-	        timer = null;
-	        signals.forEach(signal => {
-	          signal.unsubscribe ? signal.unsubscribe(onabort) : signal.removeEventListener('abort', onabort);
-	        });
-	        signals = null;
-	      }
-	    };
-	    signals.forEach(signal => signal.addEventListener('abort', onabort));
-	    const {
-	      signal
-	    } = controller;
-	    signal.unsubscribe = () => utils$1.asap(unsubscribe);
-	    return signal;
+	  signals = signals ? signals.filter(Boolean) : [];
+	  if (!timeout && !signals.length) {
+	    return;
 	  }
+	  const controller = new AbortController();
+	  let aborted = false;
+	  const onabort = function (reason) {
+	    if (!aborted) {
+	      aborted = true;
+	      unsubscribe();
+	      const err = reason instanceof Error ? reason : this.reason;
+	      controller.abort(err instanceof AxiosError$1 ? err : new CanceledError$1(err instanceof Error ? err.message : err));
+	    }
+	  };
+	  let timer = timeout && setTimeout(() => {
+	    timer = null;
+	    onabort(new AxiosError$1(`timeout of ${timeout}ms exceeded`, AxiosError$1.ETIMEDOUT));
+	  }, timeout);
+	  const unsubscribe = () => {
+	    if (!signals) {
+	      return;
+	    }
+	    timer && clearTimeout(timer);
+	    timer = null;
+	    signals.forEach(signal => {
+	      signal.unsubscribe ? signal.unsubscribe(onabort) : signal.removeEventListener('abort', onabort);
+	    });
+	    signals = null;
+	  };
+	  signals.forEach(signal => signal.addEventListener('abort', onabort));
+	  const {
+	    signal
+	  } = controller;
+	  signal.unsubscribe = () => utils$1.asap(unsubscribe);
+	  return signal;
 	};
 
 	const streamChunk = function* (chunk, chunkSize) {
@@ -51312,21 +51447,102 @@ void main() {
 	  });
 	};
 
+	/**
+	 * Estimate decoded byte length of a data:// URL *without* allocating large buffers.
+	 * - For base64: compute exact decoded size using length and padding;
+	 *               handle %XX at the character-count level (no string allocation).
+	 * - For non-base64: use UTF-8 byteLength of the encoded body as a safe upper bound.
+	 *
+	 * @param {string} url
+	 * @returns {number}
+	 */
+	function estimateDataURLDecodedBytes(url) {
+	  if (!url || typeof url !== 'string') return 0;
+	  if (!url.startsWith('data:')) return 0;
+	  const comma = url.indexOf(',');
+	  if (comma < 0) return 0;
+	  const meta = url.slice(5, comma);
+	  const body = url.slice(comma + 1);
+	  const isBase64 = /;base64/i.test(meta);
+	  if (isBase64) {
+	    let effectiveLen = body.length;
+	    const len = body.length; // cache length
+
+	    for (let i = 0; i < len; i++) {
+	      if (body.charCodeAt(i) === 37 /* '%' */ && i + 2 < len) {
+	        const a = body.charCodeAt(i + 1);
+	        const b = body.charCodeAt(i + 2);
+	        const isHex = (a >= 48 && a <= 57 || a >= 65 && a <= 70 || a >= 97 && a <= 102) && (b >= 48 && b <= 57 || b >= 65 && b <= 70 || b >= 97 && b <= 102);
+	        if (isHex) {
+	          effectiveLen -= 2;
+	          i += 2;
+	        }
+	      }
+	    }
+	    let pad = 0;
+	    let idx = len - 1;
+	    const tailIsPct3D = j => j >= 2 && body.charCodeAt(j - 2) === 37 &&
+	    // '%'
+	    body.charCodeAt(j - 1) === 51 && (
+	    // '3'
+	    body.charCodeAt(j) === 68 || body.charCodeAt(j) === 100); // 'D' or 'd'
+
+	    if (idx >= 0) {
+	      if (body.charCodeAt(idx) === 61 /* '=' */) {
+	        pad++;
+	        idx--;
+	      } else if (tailIsPct3D(idx)) {
+	        pad++;
+	        idx -= 3;
+	      }
+	    }
+	    if (pad === 1 && idx >= 0) {
+	      if (body.charCodeAt(idx) === 61 /* '=' */) {
+	        pad++;
+	      } else if (tailIsPct3D(idx)) {
+	        pad++;
+	      }
+	    }
+	    const groups = Math.floor(effectiveLen / 4);
+	    const bytes = groups * 3 - (pad || 0);
+	    return bytes > 0 ? bytes : 0;
+	  }
+	  if (typeof Buffer !== 'undefined' && typeof Buffer.byteLength === 'function') {
+	    return Buffer.byteLength(body, 'utf8');
+	  }
+
+	  // Compute UTF-8 byte length directly from UTF-16 code units without allocating
+	  // a byte buffer (TextEncoder.encode would defeat the DoS guard on large bodies).
+	  // Using body.length here would undercount non-ASCII (e.g. '€' is 1 code unit
+	  // but 3 UTF-8 bytes).
+	  let bytes = 0;
+	  for (let i = 0, len = body.length; i < len; i++) {
+	    const c = body.charCodeAt(i);
+	    if (c < 0x80) {
+	      bytes += 1;
+	    } else if (c < 0x800) {
+	      bytes += 2;
+	    } else if (c >= 0xd800 && c <= 0xdbff && i + 1 < len) {
+	      const next = body.charCodeAt(i + 1);
+	      if (next >= 0xdc00 && next <= 0xdfff) {
+	        bytes += 4;
+	        i++;
+	      } else {
+	        bytes += 3;
+	      }
+	    } else {
+	      bytes += 3;
+	    }
+	  }
+	  return bytes;
+	}
+
+	const VERSION$1 = "1.16.1";
+
 	const DEFAULT_CHUNK_SIZE = 64 * 1024;
 	const {
 	  isFunction
 	} = utils$1;
-	const globalFetchAPI = (({
-	  Request,
-	  Response
-	}) => ({
-	  Request,
-	  Response
-	}))(utils$1.global);
-	const {
-	  ReadableStream: ReadableStream$1,
-	  TextEncoder
-	} = utils$1.global;
 	const test = (fn, ...args) => {
 	  try {
 	    return !!fn(...args);
@@ -51335,9 +51551,17 @@ void main() {
 	  }
 	};
 	const factory = env => {
+	  const globalObject = utils$1.global !== undefined && utils$1.global !== null ? utils$1.global : globalThis;
+	  const {
+	    ReadableStream,
+	    TextEncoder
+	  } = globalObject;
 	  env = utils$1.merge.call({
 	    skipUndefined: true
-	  }, globalFetchAPI, env);
+	  }, {
+	    Request: globalObject.Request,
+	    Response: globalObject.Response
+	  }, env);
 	  const {
 	    fetch: envFetch,
 	    Request,
@@ -51349,12 +51573,12 @@ void main() {
 	  if (!isFetchSupported) {
 	    return false;
 	  }
-	  const isReadableStreamSupported = isFetchSupported && isFunction(ReadableStream$1);
+	  const isReadableStreamSupported = isFetchSupported && isFunction(ReadableStream);
 	  const encodeText = isFetchSupported && (typeof TextEncoder === 'function' ? (encoder => str => encoder.encode(str))(new TextEncoder()) : async str => new Uint8Array(await new Request(str).arrayBuffer()));
 	  const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
 	    let duplexAccessed = false;
 	    const request = new Request(platform.origin, {
-	      body: new ReadableStream$1(),
+	      body: new ReadableStream(),
 	      method: 'POST',
 	      get duplex() {
 	        duplexAccessed = true;
@@ -51423,8 +51647,12 @@ void main() {
 	      responseType,
 	      headers,
 	      withCredentials = 'same-origin',
-	      fetchOptions
+	      fetchOptions,
+	      maxContentLength,
+	      maxBodyLength
 	    } = resolveConfig(config);
+	    const hasMaxContentLength = utils$1.isNumber(maxContentLength) && maxContentLength > -1;
+	    const hasMaxBodyLength = utils$1.isNumber(maxBodyLength) && maxBodyLength > -1;
 	    let _fetch = envFetch || fetch;
 	    responseType = responseType ? (responseType + '').toLowerCase() : 'text';
 	    let composedSignal = composeSignals([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
@@ -51434,6 +51662,26 @@ void main() {
 	    });
 	    let requestContentLength;
 	    try {
+	      // Enforce maxContentLength for data: URLs up-front so we never materialize
+	      // an oversized payload. The HTTP adapter applies the same check (see http.js
+	      // "if (protocol === 'data:')" branch).
+	      if (hasMaxContentLength && typeof url === 'string' && url.startsWith('data:')) {
+	        const estimated = estimateDataURLDecodedBytes(url);
+	        if (estimated > maxContentLength) {
+	          throw new AxiosError$1('maxContentLength size of ' + maxContentLength + ' exceeded', AxiosError$1.ERR_BAD_RESPONSE, config, request);
+	        }
+	      }
+
+	      // Enforce maxBodyLength against the outbound request body before dispatch.
+	      // Mirrors http.js behavior (ERR_BAD_REQUEST / 'Request body larger than
+	      // maxBodyLength limit'). Skip when the body length cannot be determined
+	      // (e.g. a live ReadableStream supplied by the caller).
+	      if (hasMaxBodyLength && method !== 'get' && method !== 'head') {
+	        const outboundLength = await resolveBodyLength(headers, data);
+	        if (typeof outboundLength === 'number' && isFinite(outboundLength) && outboundLength > maxBodyLength) {
+	          throw new AxiosError$1('Request body larger than maxBodyLength limit', AxiosError$1.ERR_BAD_REQUEST, config, request);
+	        }
+	      }
 	      if (onUploadProgress && supportsRequestStream && method !== 'get' && method !== 'head' && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
 	        let _request = new Request(url, {
 	          method: 'POST',
@@ -51465,32 +51713,73 @@ void main() {
 	          headers.delete('content-type');
 	        }
 	      }
+
+	      // Set User-Agent header if not already set (fetch defaults to 'node' in Node.js)
+	      headers.set('User-Agent', 'axios/' + VERSION$1, false);
 	      const resolvedOptions = {
 	        ...fetchOptions,
 	        signal: composedSignal,
 	        method: method.toUpperCase(),
-	        headers: headers.normalize().toJSON(),
+	        headers: toByteStringHeaderObject(headers.normalize()),
 	        body: data,
 	        duplex: 'half',
 	        credentials: isCredentialsSupported ? withCredentials : undefined
 	      };
 	      request = isRequestSupported && new Request(url, resolvedOptions);
 	      let response = await (isRequestSupported ? _fetch(request, fetchOptions) : _fetch(url, resolvedOptions));
+
+	      // Cheap pre-check: if the server honestly declares a content-length that
+	      // already exceeds the cap, reject before we start streaming.
+	      if (hasMaxContentLength) {
+	        const declaredLength = utils$1.toFiniteNumber(response.headers.get('content-length'));
+	        if (declaredLength != null && declaredLength > maxContentLength) {
+	          throw new AxiosError$1('maxContentLength size of ' + maxContentLength + ' exceeded', AxiosError$1.ERR_BAD_RESPONSE, config, request);
+	        }
+	      }
 	      const isStreamResponse = supportsResponseStream && (responseType === 'stream' || responseType === 'response');
-	      if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
+	      if (supportsResponseStream && response.body && (onDownloadProgress || hasMaxContentLength || isStreamResponse && unsubscribe)) {
 	        const options = {};
 	        ['status', 'statusText', 'headers'].forEach(prop => {
 	          options[prop] = response[prop];
 	        });
 	        const responseContentLength = utils$1.toFiniteNumber(response.headers.get('content-length'));
 	        const [onProgress, flush] = onDownloadProgress && progressEventDecorator(responseContentLength, progressEventReducer(asyncDecorator(onDownloadProgress), true)) || [];
-	        response = new Response(trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
+	        let bytesRead = 0;
+	        const onChunkProgress = loadedBytes => {
+	          if (hasMaxContentLength) {
+	            bytesRead = loadedBytes;
+	            if (bytesRead > maxContentLength) {
+	              throw new AxiosError$1('maxContentLength size of ' + maxContentLength + ' exceeded', AxiosError$1.ERR_BAD_RESPONSE, config, request);
+	            }
+	          }
+	          onProgress && onProgress(loadedBytes);
+	        };
+	        response = new Response(trackStream(response.body, DEFAULT_CHUNK_SIZE, onChunkProgress, () => {
 	          flush && flush();
 	          unsubscribe && unsubscribe();
 	        }), options);
 	      }
 	      responseType = responseType || 'text';
 	      let responseData = await resolvers[utils$1.findKey(resolvers, responseType) || 'text'](response, config);
+
+	      // Fallback enforcement for environments without ReadableStream support
+	      // (legacy runtimes). Detect materialized size from typed output; skip
+	      // streams/Response passthrough since the user will read those themselves.
+	      if (hasMaxContentLength && !supportsResponseStream && !isStreamResponse) {
+	        let materializedSize;
+	        if (responseData != null) {
+	          if (typeof responseData.byteLength === 'number') {
+	            materializedSize = responseData.byteLength;
+	          } else if (typeof responseData.size === 'number') {
+	            materializedSize = responseData.size;
+	          } else if (typeof responseData === 'string') {
+	            materializedSize = typeof TextEncoder === 'function' ? new TextEncoder().encode(responseData).byteLength : responseData.length;
+	          }
+	        }
+	        if (typeof materializedSize === 'number' && materializedSize > maxContentLength) {
+	          throw new AxiosError$1('maxContentLength size of ' + maxContentLength + ' exceeded', AxiosError$1.ERR_BAD_RESPONSE, config, request);
+	        }
+	      }
 	      !isStreamResponse && unsubscribe && unsubscribe();
 	      return await new Promise((resolve, reject) => {
 	        settle(resolve, reject, {
@@ -51504,6 +51793,17 @@ void main() {
 	      });
 	    } catch (err) {
 	      unsubscribe && unsubscribe();
+
+	      // Safari can surface fetch aborts as a DOMException-like object whose
+	      // branded getters throw. Prefer our composed signal reason before reading
+	      // the caught error, preserving timeout vs cancellation semantics.
+	      if (composedSignal && composedSignal.aborted && composedSignal.reason instanceof AxiosError$1) {
+	        const canceledError = composedSignal.reason;
+	        canceledError.config = config;
+	        request && (canceledError.request = request);
+	        err !== canceledError && (canceledError.cause = err);
+	        throw canceledError;
+	      }
 	      if (err && err.name === 'TypeError' && /Load failed|fetch/i.test(err.message)) {
 	        throw Object.assign(new AxiosError$1('Network Error', AxiosError$1.ERR_NETWORK, config, request, err && err.response), {
 	          cause: err.cause || err
@@ -51558,13 +51858,17 @@ void main() {
 	utils$1.forEach(knownAdapters, (fn, value) => {
 	  if (fn) {
 	    try {
+	      // Null-proto descriptors so a polluted Object.prototype.get cannot turn
+	      // these data descriptors into accessor descriptors on the way in.
 	      Object.defineProperty(fn, 'name', {
+	        __proto__: null,
 	        value
 	      });
 	    } catch (e) {
 	      // eslint-disable-next-line no-empty
 	    }
 	    Object.defineProperty(fn, 'adapterName', {
+	      __proto__: null,
 	      value
 	    });
 	  }
@@ -51679,8 +51983,15 @@ void main() {
 	  return adapter(config).then(function onAdapterResolution(response) {
 	    throwIfCancellationRequested(config);
 
-	    // Transform response data
-	    response.data = transformData.call(config, config.transformResponse, response);
+	    // Expose the current response on config so that transformResponse can
+	    // attach it to any AxiosError it throws (e.g. on JSON parse failure).
+	    // We clean it up afterwards to avoid polluting the config object.
+	    config.response = response;
+	    try {
+	      response.data = transformData.call(config, config.transformResponse, response);
+	    } finally {
+	      delete config.response;
+	    }
 	    response.headers = AxiosHeaders$1.from(response.headers);
 	    return response;
 	  }, function onAdapterRejection(reason) {
@@ -51689,15 +52000,18 @@ void main() {
 
 	      // Transform response data
 	      if (reason && reason.response) {
-	        reason.response.data = transformData.call(config, config.transformResponse, reason.response);
+	        config.response = reason.response;
+	        try {
+	          reason.response.data = transformData.call(config, config.transformResponse, reason.response);
+	        } finally {
+	          delete config.response;
+	        }
 	        reason.response.headers = AxiosHeaders$1.from(reason.response.headers);
 	      }
 	    }
 	    return Promise.reject(reason);
 	  });
 	}
-
-	const VERSION$1 = "1.15.2";
 
 	const validators$1 = {};
 
@@ -51763,7 +52077,7 @@ void main() {
 	  while (i-- > 0) {
 	    const opt = keys[i];
 	    // Use hasOwnProperty so a polluted Object.prototype.<opt> cannot supply
-	    // a non-function validator and cause a TypeError. See GHSA-q8qp-cvcw-x6jj.
+	    // a non-function validator and cause a TypeError.
 	    const validator = Object.prototype.hasOwnProperty.call(schema, opt) ? schema[opt] : undefined;
 	    if (validator) {
 	      const value = options[opt];
@@ -51896,7 +52210,7 @@ void main() {
 
 	    // Flatten headers
 	    let contextHeaders = headers && utils$1.merge(headers.common, headers[config.method]);
-	    headers && utils$1.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'common'], method => {
+	    headers && utils$1.forEach(['delete', 'get', 'head', 'post', 'put', 'patch', 'query', 'common'], method => {
 	      delete headers[method];
 	    });
 	    config.headers = AxiosHeaders$1.concat(contextHeaders, headers);
@@ -51977,7 +52291,7 @@ void main() {
 	    }));
 	  };
 	});
-	utils$1.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+	utils$1.forEach(['post', 'put', 'patch', 'query'], function forEachMethodWithData(method) {
 	  function generateHTTPMethod(isForm) {
 	    return function httpMethod(url, data, config) {
 	      return this.request(mergeConfig$1(config || {}, {
@@ -51991,7 +52305,12 @@ void main() {
 	    };
 	  }
 	  Axios$1.prototype[method] = generateHTTPMethod();
-	  Axios$1.prototype[method + 'Form'] = generateHTTPMethod(true);
+
+	  // QUERY is a safe/idempotent read method; multipart form bodies don't fit
+	  // its semantics, so no queryForm shorthand is generated.
+	  if (method !== 'query') {
+	    Axios$1.prototype[method + 'Form'] = generateHTTPMethod(true);
+	  }
 	});
 
 	/**
@@ -52305,7 +52624,8 @@ void main() {
 	  HttpStatusCode,
 	  formToJSON,
 	  getAdapter,
-	  mergeConfig
+	  mergeConfig,
+	  create
 	} = axios;
 
 	async function api (url, data) {
