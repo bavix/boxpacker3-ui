@@ -1,0 +1,20 @@
+# Packrift ecommerce cartonization fixture
+# Source: https://packrift.github.io/packaging-optimization-benchmark-corpus/cartonization-solver-fixtures.html
+# Dimensions converted from inches to millimeters for BoxPacker3 UI.
+# Format: width;height;depth;weight;type
+
+# Boxes
+254;152;152;20000;0
+508;356;152;20000;0
+610;254;203;20000;0
+1016;508;508;30000;0
+
+# Items
+191;114;89;454;1
+381;178;64;680;1
+381;178;64;680;1
+533;216;127;1361;1
+457;305;140;1814;1
+457;305;140;1814;1
+457;305;140;1814;1
+457;305;140;1814;1
