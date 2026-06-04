@@ -49090,7 +49090,10 @@ void main() {
 	    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
 	      return;
 	    }
-	    const targetKey = caseless && findKey(result, key) || key;
+
+	    // findKey lowercases the key, so caseless lookup only applies to strings —
+	    // symbol keys are identity-matched.
+	    const targetKey = caseless && typeof key === 'string' && findKey(result, key) || key;
 	    // Read via own-prop only — a bare `result[targetKey]` walks the prototype
 	    // chain, so a polluted Object.prototype value could surface here and get
 	    // copied into the merged result.
@@ -49106,7 +49109,21 @@ void main() {
 	    }
 	  };
 	  for (let i = 0, l = objs.length; i < l; i++) {
-	    objs[i] && forEach(objs[i], assignValue);
+	    const source = objs[i];
+	    if (!source || isBuffer(source)) {
+	      continue;
+	    }
+	    forEach(source, assignValue);
+	    if (typeof source !== 'object' || isArray(source)) {
+	      continue;
+	    }
+	    const symbols = Object.getOwnPropertySymbols(source);
+	    for (let j = 0; j < symbols.length; j++) {
+	      const symbol = symbols[j];
+	      if (propertyIsEnumerable.call(source, symbol)) {
+	        assignValue(source[symbol], symbol);
+	      }
+	    }
 	  }
 	  return result;
 	}
@@ -49323,6 +49340,9 @@ void main() {
 	const hasOwnProperty = (({
 	  hasOwnProperty
 	}) => (obj, prop) => hasOwnProperty.call(obj, prop))(Object.prototype);
+	const {
+	  propertyIsEnumerable
+	} = Object.prototype;
 
 	/**
 	 * Determine if a value is a RegExp object
@@ -49707,7 +49727,7 @@ void main() {
 	    function setHeader(_value, _header, _rewrite) {
 	      const lHeader = normalizeHeader(_header);
 	      if (!lHeader) {
-	        throw new Error('header name must be a non-empty string');
+	        return;
 	      }
 	      const key = utils$1.findKey(self, lHeader);
 	      if (!key || self[key] === undefined || _rewrite === true || _rewrite === undefined && self[key] !== false) {
@@ -49725,7 +49745,7 @@ void main() {
 	        key;
 	      for (const entry of header) {
 	        if (!utils$1.isArray(entry)) {
-	          throw TypeError('Object iterator must return a key-value pair');
+	          throw new TypeError('Object iterator must return a key-value pair');
 	        }
 	        obj[key = entry[0]] = (dest = obj[key]) ? utils$1.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
 	      }
@@ -50206,7 +50226,7 @@ void main() {
 	      throw new AxiosError$1('Object is too deeply nested (' + depth + ' levels). Max depth: ' + maxDepth, AxiosError$1.ERR_FORM_DATA_DEPTH_EXCEEDED);
 	    }
 	    if (stack.indexOf(value) !== -1) {
-	      throw Error('Circular reference detected in ' + path.join('.'));
+	      throw new Error('Circular reference detected in ' + path.join('.'));
 	    }
 	    stack.push(value);
 	    utils$1.forEach(value, function each(el, key) {
@@ -50388,7 +50408,8 @@ void main() {
 	  silentJSONParsing: true,
 	  forcedJSONParsing: true,
 	  clarifyTimeoutError: false,
-	  legacyInterceptorReqResOrdering: true
+	  legacyInterceptorReqResOrdering: true,
+	  advertiseZstdAcceptEncoding: false
 	};
 
 	var URLSearchParams$1 = typeof URLSearchParams !== 'undefined' ? URLSearchParams : AxiosURLSearchParams;
@@ -51097,8 +51118,8 @@ void main() {
 	 *
 	 * @returns {string} UTF-8 bytes as a Latin-1 string
 	 */
-	const encodeUTF8 = str => encodeURIComponent(str).replace(/%([0-9A-F]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-	var resolveConfig = config => {
+	const encodeUTF8$1 = str => encodeURIComponent(str).replace(/%([0-9A-F]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+	function resolveConfig(config) {
 	  const newConfig = mergeConfig$1({}, config);
 
 	  // Read only own properties to prevent prototype pollution gadgets
@@ -51114,15 +51135,15 @@ void main() {
 	  const allowAbsoluteUrls = own('allowAbsoluteUrls');
 	  const url = own('url');
 	  newConfig.headers = headers = AxiosHeaders$1.from(headers);
-	  newConfig.url = buildURL(buildFullPath(baseURL, url, allowAbsoluteUrls), config.params, config.paramsSerializer);
+	  newConfig.url = buildURL(buildFullPath(baseURL, url, allowAbsoluteUrls), own('params'), own('paramsSerializer'));
 
 	  // HTTP basic authentication
 	  if (auth) {
-	    headers.set('Authorization', 'Basic ' + btoa((auth.username || '') + ':' + (auth.password ? encodeUTF8(auth.password) : '')));
+	    headers.set('Authorization', 'Basic ' + btoa((auth.username || '') + ':' + (auth.password ? encodeUTF8$1(auth.password) : '')));
 	  }
 	  if (utils$1.isFormData(data)) {
-	    if (platform.hasStandardBrowserEnv || platform.hasStandardBrowserWebWorkerEnv) {
-	      headers.setContentType(undefined); // browser handles it
+	    if (platform.hasStandardBrowserEnv || platform.hasStandardBrowserWebWorkerEnv || utils$1.isReactNative(data)) {
+	      headers.setContentType(undefined); // browser/web worker/RN handles it
 	    } else if (utils$1.isFunction(data.getHeaders)) {
 	      // Node.js FormData (like form-data package)
 	      setFormDataHeaders(headers, data.getHeaders(), own('formDataHeaderPolicy'));
@@ -51150,7 +51171,7 @@ void main() {
 	    }
 	  }
 	  return newConfig;
-	};
+	}
 
 	const isXHRAdapterSupported = typeof XMLHttpRequest !== 'undefined';
 	var xhrAdapter = isXHRAdapterSupported && function (config) {
@@ -51537,18 +51558,51 @@ void main() {
 	  return bytes;
 	}
 
-	const VERSION$1 = "1.16.1";
+	const VERSION$1 = "1.17.0";
 
 	const DEFAULT_CHUNK_SIZE = 64 * 1024;
 	const {
 	  isFunction
 	} = utils$1;
+
+	/**
+	 * Encode a UTF-8 string to a Latin-1 byte string for use with btoa().
+	 * This is a modern replacement for the deprecated unescape(encodeURIComponent(str)) pattern.
+	 *
+	 * @param {string} str The string to encode
+	 *
+	 * @returns {string} UTF-8 bytes as a Latin-1 string
+	 */
+	const encodeUTF8 = str => encodeURIComponent(str).replace(/%([0-9A-F]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+
+	// Node's WHATWG URL parser returns `username` and `password` percent-encoded.
+	// Decode before composing the `auth` option so credentials such as
+	// `my%40email.com:pass` are sent as `my@email.com:pass`. Falls back to the
+	// original value for malformed input so a bad encoding never throws.
+	const decodeURIComponentSafe = value => {
+	  if (!utils$1.isString(value)) {
+	    return value;
+	  }
+	  try {
+	    return decodeURIComponent(value);
+	  } catch (error) {
+	    return value;
+	  }
+	};
 	const test = (fn, ...args) => {
 	  try {
 	    return !!fn(...args);
 	  } catch (e) {
 	    return false;
 	  }
+	};
+	const maybeWithAuthCredentials = url => {
+	  const protocolIndex = url.indexOf('://');
+	  let urlToCheck = url;
+	  if (protocolIndex !== -1) {
+	    urlToCheck = urlToCheck.slice(protocolIndex + 3);
+	  }
+	  return urlToCheck.includes('@') || urlToCheck.includes(':');
 	};
 	const factory = env => {
 	  const globalObject = utils$1.global !== undefined && utils$1.global !== null ? utils$1.global : globalThis;
@@ -51653,6 +51707,7 @@ void main() {
 	    } = resolveConfig(config);
 	    const hasMaxContentLength = utils$1.isNumber(maxContentLength) && maxContentLength > -1;
 	    const hasMaxBodyLength = utils$1.isNumber(maxBodyLength) && maxBodyLength > -1;
+	    const own = key => utils$1.hasOwnProp(config, key) ? config[key] : undefined;
 	    let _fetch = envFetch || fetch;
 	    responseType = responseType ? (responseType + '').toLowerCase() : 'text';
 	    let composedSignal = composeSignals([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
@@ -51662,6 +51717,38 @@ void main() {
 	    });
 	    let requestContentLength;
 	    try {
+	      // HTTP basic authentication
+	      let auth = undefined;
+	      const configAuth = own('auth');
+	      if (configAuth) {
+	        const username = configAuth.username || '';
+	        const password = configAuth.password || '';
+	        auth = {
+	          username,
+	          password
+	        };
+	      }
+	      if (maybeWithAuthCredentials(url)) {
+	        const parsedURL = new URL(url, platform.origin);
+	        if (!auth && (parsedURL.username || parsedURL.password)) {
+	          const urlUsername = decodeURIComponentSafe(parsedURL.username);
+	          const urlPassword = decodeURIComponentSafe(parsedURL.password);
+	          auth = {
+	            username: urlUsername,
+	            password: urlPassword
+	          };
+	        }
+	        if (parsedURL.username || parsedURL.password) {
+	          parsedURL.username = '';
+	          parsedURL.password = '';
+	          url = parsedURL.href;
+	        }
+	      }
+	      if (auth) {
+	        headers.delete('authorization');
+	        headers.set('Authorization', 'Basic ' + btoa(encodeUTF8((auth.username || '') + ':' + (auth.password || ''))));
+	      }
+
 	      // Enforce maxContentLength for data: URLs up-front so we never materialize
 	      // an oversized payload. The HTTP adapter applies the same check (see http.js
 	      // "if (protocol === 'data:')" branch).
@@ -52178,7 +52265,8 @@ void main() {
 	        silentJSONParsing: validators.transitional(validators.boolean),
 	        forcedJSONParsing: validators.transitional(validators.boolean),
 	        clarifyTimeoutError: validators.transitional(validators.boolean),
-	        legacyInterceptorReqResOrdering: validators.transitional(validators.boolean)
+	        legacyInterceptorReqResOrdering: validators.transitional(validators.boolean),
+	        advertiseZstdAcceptEncoding: validators.transitional(validators.boolean)
 	      }, false);
 	    }
 	    if (paramsSerializer != null) {
