@@ -130,3 +130,7 @@ dist
 .pnp.*
 
 .idea/
+
+# Go workspace: local development against a checked-out boxpacker3
+go.work
+go.work.sum

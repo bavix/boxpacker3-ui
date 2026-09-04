@@ -25,6 +25,8 @@ func main() {
 
 	http.HandleFunc("/bp3", app.Bp3Handle)
 	http.HandleFunc("/bp3boxes", app.Bp3DefaultBoxesHandle)
+	http.HandleFunc("/bp3meta", app.Bp3MetaHandle)
+	http.HandleFunc("/bp3compare", app.Bp3CompareHandle)
 
 	host, _ := os.LookupEnv("HOST")
 	port, ok := os.LookupEnv("PORT")

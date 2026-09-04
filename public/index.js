@@ -17089,6 +17089,389 @@
 	}
 
 	/**
+	 * A material for rendering line primitives.
+	 *
+	 * Materials define the appearance of renderable 3D objects.
+	 *
+	 * ```js
+	 * const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+	 * ```
+	 *
+	 * @augments Material
+	 */
+	class LineBasicMaterial extends Material {
+	  /**
+	   * Constructs a new line basic material.
+	   *
+	   * @param {Object} [parameters] - An object with one or more properties
+	   * defining the material's appearance. Any property of the material
+	   * (including any property from inherited materials) can be passed
+	   * in here. Color values can be passed any type of value accepted
+	   * by {@link Color#set}.
+	   */
+	  constructor(parameters) {
+	    super();
+
+	    /**
+	     * This flag can be used for type testing.
+	     *
+	     * @type {boolean}
+	     * @readonly
+	     * @default true
+	     */
+	    this.isLineBasicMaterial = true;
+	    this.type = 'LineBasicMaterial';
+
+	    /**
+	     * Color of the material.
+	     *
+	     * @type {Color}
+	     * @default (1,1,1)
+	     */
+	    this.color = new Color(0xffffff);
+
+	    /**
+	     * Sets the color of the lines using data from a texture. The texture map
+	     * color is modulated by the diffuse `color`.
+	     *
+	     * @type {?Texture}
+	     * @default null
+	     */
+	    this.map = null;
+
+	    /**
+	     * Controls line thickness or lines.
+	     *
+	     * Can only be used with {@link SVGRenderer}. WebGL and WebGPU
+	     * ignore this setting and always render line primitives with a
+	     * width of one pixel.
+	     *
+	     * @type {number}
+	     * @default 1
+	     */
+	    this.linewidth = 1;
+
+	    /**
+	     * Defines appearance of line ends.
+	     *
+	     * Can only be used with {@link SVGRenderer}.
+	     *
+	     * @type {('butt'|'round'|'square')}
+	     * @default 'round'
+	     */
+	    this.linecap = 'round';
+
+	    /**
+	     * Defines appearance of line joints.
+	     *
+	     * Can only be used with {@link SVGRenderer}.
+	     *
+	     * @type {('round'|'bevel'|'miter')}
+	     * @default 'round'
+	     */
+	    this.linejoin = 'round';
+
+	    /**
+	     * Whether the material is affected by fog or not.
+	     *
+	     * @type {boolean}
+	     * @default true
+	     */
+	    this.fog = true;
+	    this.setValues(parameters);
+	  }
+	  copy(source) {
+	    super.copy(source);
+	    this.color.copy(source.color);
+	    this.map = source.map;
+	    this.linewidth = source.linewidth;
+	    this.linecap = source.linecap;
+	    this.linejoin = source.linejoin;
+	    this.fog = source.fog;
+	    return this;
+	  }
+	}
+	const _vStart = /*@__PURE__*/new Vector3$1();
+	const _vEnd = /*@__PURE__*/new Vector3$1();
+	const _inverseMatrix$1 = /*@__PURE__*/new Matrix4$1();
+	const _ray$1 = /*@__PURE__*/new Ray();
+	const _sphere$1 = /*@__PURE__*/new Sphere$1();
+	const _intersectPointOnRay = /*@__PURE__*/new Vector3$1();
+	const _intersectPointOnSegment = /*@__PURE__*/new Vector3$1();
+
+	/**
+	 * A continuous line. The line are rendered by connecting consecutive
+	 * vertices with straight lines.
+	 *
+	 * ```js
+	 * const material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+	 *
+	 * const points = [];
+	 * points.push( new THREE.Vector3( - 10, 0, 0 ) );
+	 * points.push( new THREE.Vector3( 0, 10, 0 ) );
+	 * points.push( new THREE.Vector3( 10, 0, 0 ) );
+	 *
+	 * const geometry = new THREE.BufferGeometry().setFromPoints( points );
+	 *
+	 * const line = new THREE.Line( geometry, material );
+	 * scene.add( line );
+	 * ```
+	 *
+	 * @augments Object3D
+	 */
+	class Line extends Object3D$1 {
+	  /**
+	   * Constructs a new line.
+	   *
+	   * @param {BufferGeometry} [geometry] - The line geometry.
+	   * @param {Material|Array<Material>} [material] - The line material.
+	   */
+	  constructor(geometry = new BufferGeometry$1(), material = new LineBasicMaterial()) {
+	    super();
+
+	    /**
+	     * This flag can be used for type testing.
+	     *
+	     * @type {boolean}
+	     * @readonly
+	     * @default true
+	     */
+	    this.isLine = true;
+	    this.type = 'Line';
+
+	    /**
+	     * The line geometry.
+	     *
+	     * @type {BufferGeometry}
+	     */
+	    this.geometry = geometry;
+
+	    /**
+	     * The line material.
+	     *
+	     * @type {Material|Array<Material>}
+	     * @default LineBasicMaterial
+	     */
+	    this.material = material;
+
+	    /**
+	     * A dictionary representing the morph targets in the geometry. The key is the
+	     * morph targets name, the value its attribute index. This member is `undefined`
+	     * by default and only set when morph targets are detected in the geometry.
+	     *
+	     * @type {Object<string,number>|undefined}
+	     * @default undefined
+	     */
+	    this.morphTargetDictionary = undefined;
+
+	    /**
+	     * An array of weights typically in the range `[0,1]` that specify how much of the morph
+	     * is applied. This member is `undefined` by default and only set when morph targets are
+	     * detected in the geometry.
+	     *
+	     * @type {Array<number>|undefined}
+	     * @default undefined
+	     */
+	    this.morphTargetInfluences = undefined;
+	    this.updateMorphTargets();
+	  }
+	  copy(source, recursive) {
+	    super.copy(source, recursive);
+	    this.material = Array.isArray(source.material) ? source.material.slice() : source.material;
+	    this.geometry = source.geometry;
+	    return this;
+	  }
+
+	  /**
+	   * Computes an array of distance values which are necessary for rendering dashed lines.
+	   * For each vertex in the geometry, the method calculates the cumulative length from the
+	   * current point to the very beginning of the line.
+	   *
+	   * @return {Line} A reference to this line.
+	   */
+	  computeLineDistances() {
+	    const geometry = this.geometry;
+
+	    // we assume non-indexed geometry
+
+	    if (geometry.index === null) {
+	      const positionAttribute = geometry.attributes.position;
+	      const lineDistances = [0];
+	      for (let i = 1, l = positionAttribute.count; i < l; i++) {
+	        _vStart.fromBufferAttribute(positionAttribute, i - 1);
+	        _vEnd.fromBufferAttribute(positionAttribute, i);
+	        lineDistances[i] = lineDistances[i - 1];
+	        lineDistances[i] += _vStart.distanceTo(_vEnd);
+	      }
+	      geometry.setAttribute('lineDistance', new Float32BufferAttribute$1(lineDistances, 1));
+	    } else {
+	      warn$1('Line.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.');
+	    }
+	    return this;
+	  }
+
+	  /**
+	   * Computes intersection points between a casted ray and this line.
+	   *
+	   * @param {Raycaster} raycaster - The raycaster.
+	   * @param {Array<Object>} intersects - The target array that holds the intersection points.
+	   */
+	  raycast(raycaster, intersects) {
+	    const geometry = this.geometry;
+	    const matrixWorld = this.matrixWorld;
+	    const threshold = raycaster.params.Line.threshold;
+	    const drawRange = geometry.drawRange;
+
+	    // Checking boundingSphere distance to ray
+
+	    if (geometry.boundingSphere === null) geometry.computeBoundingSphere();
+	    _sphere$1.copy(geometry.boundingSphere);
+	    _sphere$1.applyMatrix4(matrixWorld);
+	    _sphere$1.radius += threshold;
+	    if (raycaster.ray.intersectsSphere(_sphere$1) === false) return;
+
+	    //
+
+	    _inverseMatrix$1.copy(matrixWorld).invert();
+	    _ray$1.copy(raycaster.ray).applyMatrix4(_inverseMatrix$1);
+	    const localThreshold = threshold / ((this.scale.x + this.scale.y + this.scale.z) / 3);
+	    const localThresholdSq = localThreshold * localThreshold;
+	    const step = this.isLineSegments ? 2 : 1;
+	    const index = geometry.index;
+	    const attributes = geometry.attributes;
+	    const positionAttribute = attributes.position;
+	    if (index !== null) {
+	      const start = Math.max(0, drawRange.start);
+	      const end = Math.min(index.count, drawRange.start + drawRange.count);
+	      for (let i = start, l = end - 1; i < l; i += step) {
+	        const a = index.getX(i);
+	        const b = index.getX(i + 1);
+	        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, a, b, i);
+	        if (intersect) {
+	          intersects.push(intersect);
+	        }
+	      }
+	      if (this.isLineLoop) {
+	        const a = index.getX(end - 1);
+	        const b = index.getX(start);
+	        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, a, b, end - 1);
+	        if (intersect) {
+	          intersects.push(intersect);
+	        }
+	      }
+	    } else {
+	      const start = Math.max(0, drawRange.start);
+	      const end = Math.min(positionAttribute.count, drawRange.start + drawRange.count);
+	      for (let i = start, l = end - 1; i < l; i += step) {
+	        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, i, i + 1, i);
+	        if (intersect) {
+	          intersects.push(intersect);
+	        }
+	      }
+	      if (this.isLineLoop) {
+	        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, end - 1, start, end - 1);
+	        if (intersect) {
+	          intersects.push(intersect);
+	        }
+	      }
+	    }
+	  }
+
+	  /**
+	   * Sets the values of {@link Line#morphTargetDictionary} and {@link Line#morphTargetInfluences}
+	   * to make sure existing morph targets can influence this 3D object.
+	   */
+	  updateMorphTargets() {
+	    const geometry = this.geometry;
+	    const morphAttributes = geometry.morphAttributes;
+	    const keys = Object.keys(morphAttributes);
+	    if (keys.length > 0) {
+	      const morphAttribute = morphAttributes[keys[0]];
+	      if (morphAttribute !== undefined) {
+	        this.morphTargetInfluences = [];
+	        this.morphTargetDictionary = {};
+	        for (let m = 0, ml = morphAttribute.length; m < ml; m++) {
+	          const name = morphAttribute[m].name || String(m);
+	          this.morphTargetInfluences.push(0);
+	          this.morphTargetDictionary[name] = m;
+	        }
+	      }
+	    }
+	  }
+	}
+	function checkIntersection(object, raycaster, ray, thresholdSq, a, b, i) {
+	  const positionAttribute = object.geometry.attributes.position;
+	  _vStart.fromBufferAttribute(positionAttribute, a);
+	  _vEnd.fromBufferAttribute(positionAttribute, b);
+	  const distSq = ray.distanceSqToSegment(_vStart, _vEnd, _intersectPointOnRay, _intersectPointOnSegment);
+	  if (distSq > thresholdSq) return;
+	  _intersectPointOnRay.applyMatrix4(object.matrixWorld); // Move back to world space for distance calculation
+
+	  const distance = raycaster.ray.origin.distanceTo(_intersectPointOnRay);
+	  if (distance < raycaster.near || distance > raycaster.far) return;
+	  return {
+	    distance: distance,
+	    // What do we want? intersection point on the ray or on the segment??
+	    // point: raycaster.ray.at( distance ),
+	    point: _intersectPointOnSegment.clone().applyMatrix4(object.matrixWorld),
+	    index: i,
+	    face: null,
+	    faceIndex: null,
+	    barycoord: null,
+	    object: object
+	  };
+	}
+	const _start = /*@__PURE__*/new Vector3$1();
+	const _end = /*@__PURE__*/new Vector3$1();
+
+	/**
+	 * A series of lines drawn between pairs of vertices.
+	 *
+	 * @augments Line
+	 */
+	class LineSegments extends Line {
+	  /**
+	   * Constructs a new line segments.
+	   *
+	   * @param {BufferGeometry} [geometry] - The line geometry.
+	   * @param {Material|Array<Material>} [material] - The line material.
+	   */
+	  constructor(geometry, material) {
+	    super(geometry, material);
+
+	    /**
+	     * This flag can be used for type testing.
+	     *
+	     * @type {boolean}
+	     * @readonly
+	     * @default true
+	     */
+	    this.isLineSegments = true;
+	    this.type = 'LineSegments';
+	  }
+	  computeLineDistances() {
+	    const geometry = this.geometry;
+
+	    // we assume non-indexed geometry
+
+	    if (geometry.index === null) {
+	      const positionAttribute = geometry.attributes.position;
+	      const lineDistances = [];
+	      for (let i = 0, l = positionAttribute.count; i < l; i += 2) {
+	        _start.fromBufferAttribute(positionAttribute, i);
+	        _end.fromBufferAttribute(positionAttribute, i + 1);
+	        lineDistances[i] = i === 0 ? 0 : lineDistances[i - 1];
+	        lineDistances[i + 1] = lineDistances[i] + _start.distanceTo(_end);
+	      }
+	      geometry.setAttribute('lineDistance', new Float32BufferAttribute$1(lineDistances, 1));
+	    } else {
+	      warn$1('LineSegments.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.');
+	    }
+	    return this;
+	  }
+	}
+
+	/**
 	 * Creates a cube texture made up of six images.
 	 *
 	 * ```js
@@ -17535,6 +17918,141 @@
 	    return new BoxGeometry(data.width, data.height, data.depth, data.widthSegments, data.heightSegments, data.depthSegments);
 	  }
 	};
+	const _v0$3 = /*@__PURE__*/new Vector3$1();
+	const _v1$1$1 = /*@__PURE__*/new Vector3$1();
+	const _normal = /*@__PURE__*/new Vector3$1();
+	const _triangle = /*@__PURE__*/new Triangle();
+
+	/**
+	 * Can be used as a helper object to view the edges of a geometry.
+	 *
+	 * ```js
+	 * const geometry = new THREE.BoxGeometry();
+	 * const edges = new THREE.EdgesGeometry( geometry );
+	 * const line = new THREE.LineSegments( edges );
+	 * scene.add( line );
+	 * ```
+	 *
+	 * Note: It is not yet possible to serialize/deserialize instances of this class.
+	 *
+	 * @augments BufferGeometry
+	 */
+	class EdgesGeometry extends BufferGeometry$1 {
+	  /**
+	   * Constructs a new edges geometry.
+	   *
+	   * @param {?BufferGeometry} [geometry=null] - The geometry.
+	   * @param {number} [thresholdAngle=1] - An edge is only rendered if the angle (in degrees)
+	   * between the face normals of the adjoining faces exceeds this value.
+	   */
+	  constructor(geometry = null, thresholdAngle = 1) {
+	    super();
+	    this.type = 'EdgesGeometry';
+
+	    /**
+	     * Holds the constructor parameters that have been
+	     * used to generate the geometry. Any modification
+	     * after instantiation does not change the geometry.
+	     *
+	     * @type {Object}
+	     */
+	    this.parameters = {
+	      geometry: geometry,
+	      thresholdAngle: thresholdAngle
+	    };
+	    if (geometry !== null) {
+	      const precisionPoints = 4;
+	      const precision = Math.pow(10, precisionPoints);
+	      const thresholdDot = Math.cos(DEG2RAD * thresholdAngle);
+	      const indexAttr = geometry.getIndex();
+	      const positionAttr = geometry.getAttribute('position');
+	      const indexCount = indexAttr ? indexAttr.count : positionAttr.count;
+	      const indexArr = [0, 0, 0];
+	      const vertKeys = ['a', 'b', 'c'];
+	      const hashes = new Array(3);
+	      const edgeData = {};
+	      const vertices = [];
+	      for (let i = 0; i < indexCount; i += 3) {
+	        if (indexAttr) {
+	          indexArr[0] = indexAttr.getX(i);
+	          indexArr[1] = indexAttr.getX(i + 1);
+	          indexArr[2] = indexAttr.getX(i + 2);
+	        } else {
+	          indexArr[0] = i;
+	          indexArr[1] = i + 1;
+	          indexArr[2] = i + 2;
+	        }
+	        const {
+	          a,
+	          b,
+	          c
+	        } = _triangle;
+	        a.fromBufferAttribute(positionAttr, indexArr[0]);
+	        b.fromBufferAttribute(positionAttr, indexArr[1]);
+	        c.fromBufferAttribute(positionAttr, indexArr[2]);
+	        _triangle.getNormal(_normal);
+
+	        // create hashes for the edge from the vertices
+	        hashes[0] = `${Math.round(a.x * precision)},${Math.round(a.y * precision)},${Math.round(a.z * precision)}`;
+	        hashes[1] = `${Math.round(b.x * precision)},${Math.round(b.y * precision)},${Math.round(b.z * precision)}`;
+	        hashes[2] = `${Math.round(c.x * precision)},${Math.round(c.y * precision)},${Math.round(c.z * precision)}`;
+
+	        // skip degenerate triangles
+	        if (hashes[0] === hashes[1] || hashes[1] === hashes[2] || hashes[2] === hashes[0]) {
+	          continue;
+	        }
+
+	        // iterate over every edge
+	        for (let j = 0; j < 3; j++) {
+	          // get the first and next vertex making up the edge
+	          const jNext = (j + 1) % 3;
+	          const vecHash0 = hashes[j];
+	          const vecHash1 = hashes[jNext];
+	          const v0 = _triangle[vertKeys[j]];
+	          const v1 = _triangle[vertKeys[jNext]];
+	          const hash = `${vecHash0}_${vecHash1}`;
+	          const reverseHash = `${vecHash1}_${vecHash0}`;
+	          if (reverseHash in edgeData && edgeData[reverseHash]) {
+	            // if we found a sibling edge add it into the vertex array if
+	            // it meets the angle threshold and delete the edge from the map.
+	            if (_normal.dot(edgeData[reverseHash].normal) <= thresholdDot) {
+	              vertices.push(v0.x, v0.y, v0.z);
+	              vertices.push(v1.x, v1.y, v1.z);
+	            }
+	            edgeData[reverseHash] = null;
+	          } else if (!(hash in edgeData)) {
+	            // if we've already got an edge here then skip adding a new one
+	            edgeData[hash] = {
+	              index0: indexArr[j],
+	              index1: indexArr[jNext],
+	              normal: _normal.clone()
+	            };
+	          }
+	        }
+	      }
+
+	      // iterate over all remaining, unmatched edges and add them to the vertex array
+	      for (const key in edgeData) {
+	        if (edgeData[key]) {
+	          const {
+	            index0,
+	            index1
+	          } = edgeData[key];
+	          _v0$3.fromBufferAttribute(positionAttr, index0);
+	          _v1$1$1.fromBufferAttribute(positionAttr, index1);
+	          vertices.push(_v0$3.x, _v0$3.y, _v0$3.z);
+	          vertices.push(_v1$1$1.x, _v1$1$1.y, _v1$1$1.z);
+	        }
+	      }
+	      this.setAttribute('position', new Float32BufferAttribute$1(vertices, 3));
+	    }
+	  }
+	  copy(source) {
+	    super.copy(source);
+	    this.parameters = Object.assign({}, source.parameters);
+	    return this;
+	  }
+	}
 
 	/**
 	 * A geometry class for representing a plane.
@@ -18105,415 +18623,42 @@
 	}
 
 	/**
-	 * A material for shiny surfaces with specular highlights.
+	 * A standard physically based material, using Metallic-Roughness workflow.
 	 *
-	 * The material uses a non-physically based [Blinn-Phong](https://en.wikipedia.org/wiki/Blinn-Phong_shading_model)
-	 * model for calculating reflectance. Unlike the Lambertian model used in the
-	 * {@link MeshLambertMaterial} this can simulate shiny surfaces with specular
-	 * highlights (such as varnished wood). `MeshPhongMaterial` uses per-fragment shading.
+	 * Physically based rendering (PBR) has recently become the standard in many
+	 * 3D applications, such as [Unity](https://blogs.unity3d.com/2014/10/29/physically-based-shading-in-unity-5-a-primer/),
+	 * [Unreal](https://docs.unrealengine.com/latest/INT/Engine/Rendering/Materials/PhysicallyBased/) and
+	 * [3D Studio Max](http://area.autodesk.com/blogs/the-3ds-max-blog/what039s-new-for-rendering-in-3ds-max-2017).
 	 *
-	 * Performance will generally be greater when using this material over the
-	 * {@link MeshStandardMaterial} or {@link MeshPhysicalMaterial}, at the cost of
-	 * some graphical accuracy.
+	 * This approach differs from older approaches in that instead of using
+	 * approximations for the way in which light interacts with a surface, a
+	 * physically correct model is used. The idea is that, instead of tweaking
+	 * materials to look good under specific lighting, a material can be created
+	 * that will react 'correctly' under all lighting scenarios.
 	 *
-	 * @augments Material
-	 * @demo scenes/material-browser.html#MeshPhongMaterial
-	 */
-	class MeshPhongMaterial extends Material {
-	  /**
-	   * Constructs a new mesh phong material.
-	   *
-	   * @param {Object} [parameters] - An object with one or more properties
-	   * defining the material's appearance. Any property of the material
-	   * (including any property from inherited materials) can be passed
-	   * in here. Color values can be passed any type of value accepted
-	   * by {@link Color#set}.
-	   */
-	  constructor(parameters) {
-	    super();
-
-	    /**
-	     * This flag can be used for type testing.
-	     *
-	     * @type {boolean}
-	     * @readonly
-	     * @default true
-	     */
-	    this.isMeshPhongMaterial = true;
-	    this.type = 'MeshPhongMaterial';
-
-	    /**
-	     * Color of the material.
-	     *
-	     * @type {Color}
-	     * @default (1,1,1)
-	     */
-	    this.color = new Color(0xffffff); // diffuse
-
-	    /**
-	     * Specular color of the material. The default color is set to `0x111111` (very dark grey)
-	     *
-	     * This defines how shiny the material is and the color of its shine.
-	     *
-	     * @type {Color}
-	     */
-	    this.specular = new Color(0x111111);
-
-	    /**
-	     * How shiny the specular highlight is; a higher value gives a sharper highlight.
-	     *
-	     * @type {number}
-	     * @default 30
-	     */
-	    this.shininess = 30;
-
-	    /**
-	     * The color map. May optionally include an alpha channel, typically combined
-	     * with {@link Material#transparent} or {@link Material#alphaTest}. The texture map
-	     * color is modulated by the diffuse `color`.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.map = null;
-
-	    /**
-	     * The light map. Requires a second set of UVs.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.lightMap = null;
-
-	    /**
-	     * Intensity of the baked light.
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.lightMapIntensity = 1.0;
-
-	    /**
-	     * The red channel of this texture is used as the ambient occlusion map.
-	     * Requires a second set of UVs.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.aoMap = null;
-
-	    /**
-	     * Intensity of the ambient occlusion effect. Range is `[0,1]`, where `0`
-	     * disables ambient occlusion. Where intensity is `1` and the AO map's
-	     * red channel is also `1`, ambient light is fully occluded on a surface.
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.aoMapIntensity = 1.0;
-
-	    /**
-	     * Emissive (light) color of the material, essentially a solid color
-	     * unaffected by other lighting.
-	     *
-	     * @type {Color}
-	     * @default (0,0,0)
-	     */
-	    this.emissive = new Color(0x000000);
-
-	    /**
-	     * Intensity of the emissive light. Modulates the emissive color.
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.emissiveIntensity = 1.0;
-
-	    /**
-	     * Set emissive (glow) map. The emissive map color is modulated by the
-	     * emissive color and the emissive intensity. If you have an emissive map,
-	     * be sure to set the emissive color to something other than black.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.emissiveMap = null;
-
-	    /**
-	     * The texture to create a bump map. The black and white values map to the
-	     * perceived depth in relation to the lights. Bump doesn't actually affect
-	     * the geometry of the object, only the lighting. If a normal map is defined
-	     * this will be ignored.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.bumpMap = null;
-
-	    /**
-	     * How much the bump map affects the material. Typical range is `[0,1]`.
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.bumpScale = 1;
-
-	    /**
-	     * The texture to create a normal map. The RGB values affect the surface
-	     * normal for each pixel fragment and change the way the color is lit. Normal
-	     * maps do not change the actual shape of the surface, only the lighting. In
-	     * case the material has a normal map authored using the left handed
-	     * convention, the `y` component of `normalScale` should be negated to compensate
-	     * for the different handedness.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.normalMap = null;
-
-	    /**
-	     * The type of normal map.
-	     *
-	     * @type {(TangentSpaceNormalMap|ObjectSpaceNormalMap)}
-	     * @default TangentSpaceNormalMap
-	     */
-	    this.normalMapType = TangentSpaceNormalMap;
-
-	    /**
-	     * How much the normal map affects the material. Typical value range is `[0,1]`.
-	     *
-	     * @type {Vector2}
-	     * @default (1,1)
-	     */
-	    this.normalScale = new Vector2$1(1, 1);
-
-	    /**
-	     * The displacement map affects the position of the mesh's vertices. Unlike
-	     * other maps which only affect the light and shade of the material the
-	     * displaced vertices can cast shadows, block other objects, and otherwise
-	     * act as real geometry. The displacement texture is an image where the value
-	     * of each pixel (white being the highest) is mapped against, and
-	     * repositions, the vertices of the mesh.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.displacementMap = null;
-
-	    /**
-	     * How much the displacement map affects the mesh (where black is no
-	     * displacement, and white is maximum displacement). Without a displacement
-	     * map set, this value is not applied.
-	     *
-	     * @type {number}
-	     * @default 0
-	     */
-	    this.displacementScale = 1;
-
-	    /**
-	     * The offset of the displacement map's values on the mesh's vertices.
-	     * The bias is added to the scaled sample of the displacement map.
-	     * Without a displacement map set, this value is not applied.
-	     *
-	     * @type {number}
-	     * @default 0
-	     */
-	    this.displacementBias = 0;
-
-	    /**
-	     * The specular map value affects both how much the specular surface
-	     * highlight contributes and how much of the environment map affects the
-	     * surface.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.specularMap = null;
-
-	    /**
-	     * The alpha map is a grayscale texture that controls the opacity across the
-	     * surface (black: fully transparent; white: fully opaque).
-	     *
-	     * Only the color of the texture is used, ignoring the alpha channel if one
-	     * exists. For RGB and RGBA textures, the renderer will use the green channel
-	     * when sampling this texture due to the extra bit of precision provided for
-	     * green in DXT-compressed and uncompressed RGB 565 formats. Luminance-only and
-	     * luminance/alpha textures will also still work as expected.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.alphaMap = null;
-
-	    /**
-	     * The environment map.
-	     *
-	     * @type {?Texture}
-	     * @default null
-	     */
-	    this.envMap = null;
-
-	    /**
-	     * The rotation of the environment map in radians.
-	     *
-	     * @type {Euler}
-	     * @default (0,0,0)
-	     */
-	    this.envMapRotation = new Euler$1();
-
-	    /**
-	     * How to combine the result of the surface's color with the environment map, if any.
-	     *
-	     * When set to `MixOperation`, the {@link MeshBasicMaterial#reflectivity} is used to
-	     * blend between the two colors.
-	     *
-	     * @type {(MultiplyOperation|MixOperation|AddOperation)}
-	     * @default MultiplyOperation
-	     */
-	    this.combine = MultiplyOperation;
-
-	    /**
-	     * How much the environment map affects the surface.
-	     * The valid range is between `0` (no reflections) and `1` (full reflections).
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.reflectivity = 1;
-
-	    /**
-	     * Scales the effect of the environment map by multiplying its color.
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.envMapIntensity = 1.0;
-
-	    /**
-	     * The index of refraction (IOR) of air (approximately 1) divided by the
-	     * index of refraction of the material. It is used with environment mapping
-	     * modes {@link CubeRefractionMapping} and {@link EquirectangularRefractionMapping}.
-	     * The refraction ratio should not exceed `1`.
-	     *
-	     * @type {number}
-	     * @default 0.98
-	     */
-	    this.refractionRatio = 0.98;
-
-	    /**
-	     * Renders the geometry as a wireframe.
-	     *
-	     * @type {boolean}
-	     * @default false
-	     */
-	    this.wireframe = false;
-
-	    /**
-	     * Controls the thickness of the wireframe.
-	     *
-	     * Can only be used with {@link SVGRenderer}.
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.wireframeLinewidth = 1;
-
-	    /**
-	     * Defines appearance of wireframe ends.
-	     *
-	     * Can only be used with {@link SVGRenderer}.
-	     *
-	     * @type {('round'|'bevel'|'miter')}
-	     * @default 'round'
-	     */
-	    this.wireframeLinecap = 'round';
-
-	    /**
-	     * Defines appearance of wireframe joints.
-	     *
-	     * Can only be used with {@link SVGRenderer}.
-	     *
-	     * @type {('round'|'bevel'|'miter')}
-	     * @default 'round'
-	     */
-	    this.wireframeLinejoin = 'round';
-
-	    /**
-	     * Whether the material is rendered with flat shading or not.
-	     *
-	     * @type {boolean}
-	     * @default false
-	     */
-	    this.flatShading = false;
-
-	    /**
-	     * Whether the material is affected by fog or not.
-	     *
-	     * @type {boolean}
-	     * @default true
-	     */
-	    this.fog = true;
-	    this.setValues(parameters);
-	  }
-	  copy(source) {
-	    super.copy(source);
-	    this.color.copy(source.color);
-	    this.specular.copy(source.specular);
-	    this.shininess = source.shininess;
-	    this.map = source.map;
-	    this.lightMap = source.lightMap;
-	    this.lightMapIntensity = source.lightMapIntensity;
-	    this.aoMap = source.aoMap;
-	    this.aoMapIntensity = source.aoMapIntensity;
-	    this.emissive.copy(source.emissive);
-	    this.emissiveMap = source.emissiveMap;
-	    this.emissiveIntensity = source.emissiveIntensity;
-	    this.bumpMap = source.bumpMap;
-	    this.bumpScale = source.bumpScale;
-	    this.normalMap = source.normalMap;
-	    this.normalMapType = source.normalMapType;
-	    this.normalScale.copy(source.normalScale);
-	    this.displacementMap = source.displacementMap;
-	    this.displacementScale = source.displacementScale;
-	    this.displacementBias = source.displacementBias;
-	    this.specularMap = source.specularMap;
-	    this.alphaMap = source.alphaMap;
-	    this.envMap = source.envMap;
-	    this.envMapRotation.copy(source.envMapRotation);
-	    this.combine = source.combine;
-	    this.reflectivity = source.reflectivity;
-	    this.envMapIntensity = source.envMapIntensity;
-	    this.refractionRatio = source.refractionRatio;
-	    this.wireframe = source.wireframe;
-	    this.wireframeLinewidth = source.wireframeLinewidth;
-	    this.wireframeLinecap = source.wireframeLinecap;
-	    this.wireframeLinejoin = source.wireframeLinejoin;
-	    this.flatShading = source.flatShading;
-	    this.fog = source.fog;
-	    return this;
-	  }
-	}
-
-	/**
-	 * A material for non-shiny surfaces, without specular highlights.
-	 *
-	 * The material uses a non-physically based [Lambertian](https://en.wikipedia.org/wiki/Lambertian_reflectance)
-	 * model for calculating reflectance. This can simulate some surfaces (such
-	 * as untreated wood or stone) well, but cannot simulate shiny surfaces with
-	 * specular highlights (such as varnished wood). `MeshLambertMaterial` uses per-fragment
+	 * In practice this gives a more accurate and realistic looking result than
+	 * the {@link MeshLambertMaterial} or {@link MeshPhongMaterial}, at the cost of
+	 * being somewhat more computationally expensive. `MeshStandardMaterial` uses per-fragment
 	 * shading.
 	 *
-	 * Due to the simplicity of the reflectance and illumination models,
-	 * performance will be greater when using this material over the
-	 * {@link MeshPhongMaterial}, {@link MeshStandardMaterial} or
-	 * {@link MeshPhysicalMaterial}, at the cost of some graphical accuracy.
+	 * Note that for best results you should always specify an environment map when using this material.
+	 *
+	 * For a non-technical introduction to the concept of PBR and how to set up a
+	 * PBR material, check out these articles by the people at [marmoset](https://www.marmoset.co):
+	 *
+	 * - [Basic Theory of Physically Based Rendering](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
+	 * - [Physically Based Rendering and You Can Too](https://www.marmoset.co/posts/physically-based-rendering-and-you-can-too/)
+	 *
+	 * Technical details of the approach used in three.js (and most other PBR systems) can be found is this
+	 * [paper from Disney](https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf)
+	 * (pdf), by Brent Burley.
 	 *
 	 * @augments Material
-	 * @demo scenes/material-browser.html#MeshLambertMaterial
+	 * @demo scenes/material-browser.html#MeshStandardMaterial
 	 */
-	class MeshLambertMaterial extends Material {
+	class MeshStandardMaterial extends Material {
 	  /**
-	   * Constructs a new mesh lambert material.
+	   * Constructs a new mesh standard material.
 	   *
 	   * @param {Object} [parameters] - An object with one or more properties
 	   * defining the material's appearance. Any property of the material
@@ -18531,8 +18676,11 @@
 	     * @readonly
 	     * @default true
 	     */
-	    this.isMeshLambertMaterial = true;
-	    this.type = 'MeshLambertMaterial';
+	    this.isMeshStandardMaterial = true;
+	    this.type = 'MeshStandardMaterial';
+	    this.defines = {
+	      'STANDARD': ''
+	    };
 
 	    /**
 	     * Color of the material.
@@ -18541,6 +18689,27 @@
 	     * @default (1,1,1)
 	     */
 	    this.color = new Color(0xffffff); // diffuse
+
+	    /**
+	     * How rough the material appears. `0.0` means a smooth mirror reflection, `1.0`
+	     * means fully diffuse. If `roughnessMap` is also provided,
+	     * both values are multiplied.
+	     *
+	     * @type {number}
+	     * @default 1
+	     */
+	    this.roughness = 1.0;
+
+	    /**
+	     * How much the material is like a metal. Non-metallic materials such as wood
+	     * or stone use `0.0`, metallic use `1.0`, with nothing (usually) in between.
+	     * A value between `0.0` and `1.0` could be used for a rusty metal look.
+	     * If `metalnessMap` is also provided, both values are multiplied.
+	     *
+	     * @type {number}
+	     * @default 0
+	     */
+	    this.metalness = 0.0;
 
 	    /**
 	     * The color map. May optionally include an alpha channel, typically combined
@@ -18696,12 +18865,22 @@
 	    this.displacementBias = 0;
 
 	    /**
-	     * Specular map used by the material.
+	     * The green channel of this texture is used to alter the roughness of the
+	     * material.
 	     *
 	     * @type {?Texture}
 	     * @default null
 	     */
-	    this.specularMap = null;
+	    this.roughnessMap = null;
+
+	    /**
+	     * The blue channel of this texture is used to alter the metalness of the
+	     * material.
+	     *
+	     * @type {?Texture}
+	     * @default null
+	     */
+	    this.metalnessMap = null;
 
 	    /**
 	     * The alpha map is a grayscale texture that controls the opacity across the
@@ -18719,7 +18898,8 @@
 	    this.alphaMap = null;
 
 	    /**
-	     * The environment map.
+	     * The environment map. To ensure a physically correct rendering, environment maps
+	     * are internally pre-processed with {@link PMREMGenerator}.
 	     *
 	     * @type {?Texture}
 	     * @default null
@@ -18735,43 +18915,12 @@
 	    this.envMapRotation = new Euler$1();
 
 	    /**
-	     * How to combine the result of the surface's color with the environment map, if any.
-	     *
-	     * When set to `MixOperation`, the {@link MeshBasicMaterial#reflectivity} is used to
-	     * blend between the two colors.
-	     *
-	     * @type {(MultiplyOperation|MixOperation|AddOperation)}
-	     * @default MultiplyOperation
-	     */
-	    this.combine = MultiplyOperation;
-
-	    /**
-	     * How much the environment map affects the surface.
-	     * The valid range is between `0` (no reflections) and `1` (full reflections).
-	     *
-	     * @type {number}
-	     * @default 1
-	     */
-	    this.reflectivity = 1;
-
-	    /**
 	     * Scales the effect of the environment map by multiplying its color.
 	     *
 	     * @type {number}
 	     * @default 1
 	     */
 	    this.envMapIntensity = 1.0;
-
-	    /**
-	     * The index of refraction (IOR) of air (approximately 1) divided by the
-	     * index of refraction of the material. It is used with environment mapping
-	     * modes {@link CubeRefractionMapping} and {@link EquirectangularRefractionMapping}.
-	     * The refraction ratio should not exceed `1`.
-	     *
-	     * @type {number}
-	     * @default 0.98
-	     */
-	    this.refractionRatio = 0.98;
 
 	    /**
 	     * Renders the geometry as a wireframe.
@@ -18830,7 +18979,12 @@
 	  }
 	  copy(source) {
 	    super.copy(source);
+	    this.defines = {
+	      'STANDARD': ''
+	    };
 	    this.color.copy(source.color);
+	    this.roughness = source.roughness;
+	    this.metalness = source.metalness;
 	    this.map = source.map;
 	    this.lightMap = source.lightMap;
 	    this.lightMapIntensity = source.lightMapIntensity;
@@ -18847,14 +19001,12 @@
 	    this.displacementMap = source.displacementMap;
 	    this.displacementScale = source.displacementScale;
 	    this.displacementBias = source.displacementBias;
-	    this.specularMap = source.specularMap;
+	    this.roughnessMap = source.roughnessMap;
+	    this.metalnessMap = source.metalnessMap;
 	    this.alphaMap = source.alphaMap;
 	    this.envMap = source.envMap;
 	    this.envMapRotation.copy(source.envMapRotation);
-	    this.combine = source.combine;
-	    this.reflectivity = source.reflectivity;
 	    this.envMapIntensity = source.envMapIntensity;
-	    this.refractionRatio = source.refractionRatio;
 	    this.wireframe = source.wireframe;
 	    this.wireframeLinewidth = source.wireframeLinewidth;
 	    this.wireframeLinecap = source.wireframeLinecap;
@@ -19159,6 +19311,61 @@
 	    const data = super.toJSON(meta);
 	    data.object.color = this.color.getHex();
 	    data.object.intensity = this.intensity;
+	    return data;
+	  }
+	}
+
+	/**
+	 * A light source positioned directly above the scene, with color fading from
+	 * the sky color to the ground color.
+	 *
+	 * This light cannot be used to cast shadows.
+	 *
+	 * ```js
+	 * const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+	 * scene.add( light );
+	 * ```
+	 *
+	 * @augments Light
+	 */
+	class HemisphereLight extends Light {
+	  /**
+	   * Constructs a new hemisphere light.
+	   *
+	   * @param {(number|Color|string)} [skyColor=0xffffff] - The light's sky color.
+	   * @param {(number|Color|string)} [groundColor=0xffffff] - The light's ground color.
+	   * @param {number} [intensity=1] - The light's strength/intensity.
+	   */
+	  constructor(skyColor, groundColor, intensity) {
+	    super(skyColor, intensity);
+
+	    /**
+	     * This flag can be used for type testing.
+	     *
+	     * @type {boolean}
+	     * @readonly
+	     * @default true
+	     */
+	    this.isHemisphereLight = true;
+	    this.type = 'HemisphereLight';
+	    this.position.copy(Object3D$1.DEFAULT_UP);
+	    this.updateMatrix();
+
+	    /**
+	     * The light's ground color.
+	     *
+	     * @type {Color}
+	     */
+	    this.groundColor = new Color(groundColor);
+	  }
+	  copy(source, recursive) {
+	    super.copy(source, recursive);
+	    this.groundColor.copy(source.groundColor);
+	    return this;
+	  }
+	  toJSON(meta) {
+	    const data = super.toJSON(meta);
+	    data.object.groundColor = this.groundColor.getHex();
 	    return data;
 	  }
 	}
@@ -20206,40 +20413,6 @@
 	    return data;
 	  }
 	}
-
-	/**
-	 * This light globally illuminates all objects in the scene equally.
-	 *
-	 * It cannot be used to cast shadows as it does not have a direction.
-	 *
-	 * ```js
-	 * const light = new THREE.AmbientLight( 0x404040 ); // soft white light
-	 * scene.add( light );
-	 * ```
-	 *
-	 * @augments Light
-	 */
-	class AmbientLight extends Light {
-	  /**
-	   * Constructs a new ambient light.
-	   *
-	   * @param {(number|Color|string)} [color=0xffffff] - The light's color.
-	   * @param {number} [intensity=1] - The light's strength/intensity.
-	   */
-	  constructor(color, intensity) {
-	    super(color, intensity);
-
-	    /**
-	     * This flag can be used for type testing.
-	     *
-	     * @type {boolean}
-	     * @readonly
-	     * @default true
-	     */
-	    this.isAmbientLight = true;
-	    this.type = 'AmbientLight';
-	  }
-	}
 	const fov = -90; // negative fov is not an error
 	const aspect = 1;
 
@@ -20914,6 +21087,71 @@
 	    te[1] = n21;
 	    te[3] = n22;
 	    return this;
+	  }
+	}
+
+	/**
+	 * The helper is an object to define grids. Grids are two-dimensional
+	 * arrays of lines.
+	 *
+	 * ```js
+	 * const size = 10;
+	 * const divisions = 10;
+	 *
+	 * const gridHelper = new THREE.GridHelper( size, divisions );
+	 * scene.add( gridHelper );
+	 * ```
+	 *
+	 * @augments LineSegments
+	 */
+	class GridHelper extends LineSegments {
+	  /**
+	   * Constructs a new grid helper.
+	   *
+	   * @param {number} [size=10] - The size of the grid.
+	   * @param {number} [divisions=10] - The number of divisions across the grid.
+	   * @param {number|Color|string} [color1=0x444444] - The color of the center line.
+	   * @param {number|Color|string} [color2=0x888888] - The color of the lines of the grid.
+	   */
+	  constructor(size = 10, divisions = 10, color1 = 0x444444, color2 = 0x888888) {
+	    color1 = new Color(color1);
+	    color2 = new Color(color2);
+	    const center = divisions / 2;
+	    const step = size / divisions;
+	    const halfSize = size / 2;
+	    const vertices = [],
+	      colors = [];
+	    for (let i = 0, j = 0, k = -halfSize; i <= divisions; i++, k += step) {
+	      vertices.push(-halfSize, 0, k, halfSize, 0, k);
+	      vertices.push(k, 0, -halfSize, k, 0, halfSize);
+	      const color = i === center ? color1 : color2;
+	      color.toArray(colors, j);
+	      j += 3;
+	      color.toArray(colors, j);
+	      j += 3;
+	      color.toArray(colors, j);
+	      j += 3;
+	      color.toArray(colors, j);
+	      j += 3;
+	    }
+	    const geometry = new BufferGeometry$1();
+	    geometry.setAttribute('position', new Float32BufferAttribute$1(vertices, 3));
+	    geometry.setAttribute('color', new Float32BufferAttribute$1(colors, 3));
+	    const material = new LineBasicMaterial({
+	      vertexColors: true,
+	      toneMapped: false
+	    });
+	    super(geometry, material);
+	    this.type = 'GridHelper';
+	  }
+
+	  /**
+	   * Frees the GPU-related resources allocated by this instance. Call this
+	   * method whenever this instance is no longer used in your app.
+	   */
+	  dispose() {
+	    this.geometry.dispose();
+	    this.material.dispose();
 	  }
 	}
 
@@ -44361,2767 +44599,63 @@ void main() {
 	  }
 	}
 
-	var lib$1 = {};
-
-	var REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
-
-	function validate(uuid) {
-	  return typeof uuid === 'string' && REGEX.test(uuid);
+	const ITEM_PALETTE = [0x5dffae, 0x58b7ff, 0xc291ff, 0xff6b6b, 0xd6ea64, 0xff9946, 0x4de1c1, 0xf178b6, 0x8f9dff];
+	function hashOf(text) {
+	  let hash = 0;
+	  for (let i = 0; i < text.length; i++) {
+	    hash = hash * 31 + text.charCodeAt(i) & 0xffffffff;
+	  }
+	  return Math.abs(hash);
 	}
-
-	var esmBrowser = /*#__PURE__*/Object.freeze({
-		__proto__: null,
-		validate: validate
-	});
-
-	var BigInteger = {exports: {}};
-
-	var hasRequiredBigInteger;
-	function requireBigInteger() {
-	  if (hasRequiredBigInteger) return BigInteger.exports;
-	  hasRequiredBigInteger = 1;
-	  (function (module) {
-	    var bigInt = function (undefined$1) {
-
-	      var BASE = 1e7,
-	        LOG_BASE = 7,
-	        MAX_INT = 9007199254740992,
-	        MAX_INT_ARR = smallToArray(MAX_INT),
-	        DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
-	      var supportsNativeBigInt = typeof BigInt === "function";
-	      function Integer(v, radix, alphabet, caseSensitive) {
-	        if (typeof v === "undefined") return Integer[0];
-	        if (typeof radix !== "undefined") return +radix === 10 && !alphabet ? parseValue(v) : parseBase(v, radix, alphabet, caseSensitive);
-	        return parseValue(v);
-	      }
-	      function BigInteger(value, sign) {
-	        this.value = value;
-	        this.sign = sign;
-	        this.isSmall = false;
-	      }
-	      BigInteger.prototype = Object.create(Integer.prototype);
-	      function SmallInteger(value) {
-	        this.value = value;
-	        this.sign = value < 0;
-	        this.isSmall = true;
-	      }
-	      SmallInteger.prototype = Object.create(Integer.prototype);
-	      function NativeBigInt(value) {
-	        this.value = value;
-	      }
-	      NativeBigInt.prototype = Object.create(Integer.prototype);
-	      function isPrecise(n) {
-	        return -MAX_INT < n && n < MAX_INT;
-	      }
-	      function smallToArray(n) {
-	        // For performance reasons doesn't reference BASE, need to change this function if BASE changes
-	        if (n < 1e7) return [n];
-	        if (n < 1e14) return [n % 1e7, Math.floor(n / 1e7)];
-	        return [n % 1e7, Math.floor(n / 1e7) % 1e7, Math.floor(n / 1e14)];
-	      }
-	      function arrayToSmall(arr) {
-	        // If BASE changes this function may need to change
-	        trim(arr);
-	        var length = arr.length;
-	        if (length < 4 && compareAbs(arr, MAX_INT_ARR) < 0) {
-	          switch (length) {
-	            case 0:
-	              return 0;
-	            case 1:
-	              return arr[0];
-	            case 2:
-	              return arr[0] + arr[1] * BASE;
-	            default:
-	              return arr[0] + (arr[1] + arr[2] * BASE) * BASE;
-	          }
-	        }
-	        return arr;
-	      }
-	      function trim(v) {
-	        var i = v.length;
-	        while (v[--i] === 0);
-	        v.length = i + 1;
-	      }
-	      function createArray(length) {
-	        // function shamelessly stolen from Yaffle's library https://github.com/Yaffle/BigInteger
-	        var x = new Array(length);
-	        var i = -1;
-	        while (++i < length) {
-	          x[i] = 0;
-	        }
-	        return x;
-	      }
-	      function truncate(n) {
-	        if (n > 0) return Math.floor(n);
-	        return Math.ceil(n);
-	      }
-	      function add(a, b) {
-	        // assumes a and b are arrays with a.length >= b.length
-	        var l_a = a.length,
-	          l_b = b.length,
-	          r = new Array(l_a),
-	          carry = 0,
-	          base = BASE,
-	          sum,
-	          i;
-	        for (i = 0; i < l_b; i++) {
-	          sum = a[i] + b[i] + carry;
-	          carry = sum >= base ? 1 : 0;
-	          r[i] = sum - carry * base;
-	        }
-	        while (i < l_a) {
-	          sum = a[i] + carry;
-	          carry = sum === base ? 1 : 0;
-	          r[i++] = sum - carry * base;
-	        }
-	        if (carry > 0) r.push(carry);
-	        return r;
-	      }
-	      function addAny(a, b) {
-	        if (a.length >= b.length) return add(a, b);
-	        return add(b, a);
-	      }
-	      function addSmall(a, carry) {
-	        // assumes a is array, carry is number with 0 <= carry < MAX_INT
-	        var l = a.length,
-	          r = new Array(l),
-	          base = BASE,
-	          sum,
-	          i;
-	        for (i = 0; i < l; i++) {
-	          sum = a[i] - base + carry;
-	          carry = Math.floor(sum / base);
-	          r[i] = sum - carry * base;
-	          carry += 1;
-	        }
-	        while (carry > 0) {
-	          r[i++] = carry % base;
-	          carry = Math.floor(carry / base);
-	        }
-	        return r;
-	      }
-	      BigInteger.prototype.add = function (v) {
-	        var n = parseValue(v);
-	        if (this.sign !== n.sign) {
-	          return this.subtract(n.negate());
-	        }
-	        var a = this.value,
-	          b = n.value;
-	        if (n.isSmall) {
-	          return new BigInteger(addSmall(a, Math.abs(b)), this.sign);
-	        }
-	        return new BigInteger(addAny(a, b), this.sign);
-	      };
-	      BigInteger.prototype.plus = BigInteger.prototype.add;
-	      SmallInteger.prototype.add = function (v) {
-	        var n = parseValue(v);
-	        var a = this.value;
-	        if (a < 0 !== n.sign) {
-	          return this.subtract(n.negate());
-	        }
-	        var b = n.value;
-	        if (n.isSmall) {
-	          if (isPrecise(a + b)) return new SmallInteger(a + b);
-	          b = smallToArray(Math.abs(b));
-	        }
-	        return new BigInteger(addSmall(b, Math.abs(a)), a < 0);
-	      };
-	      SmallInteger.prototype.plus = SmallInteger.prototype.add;
-	      NativeBigInt.prototype.add = function (v) {
-	        return new NativeBigInt(this.value + parseValue(v).value);
-	      };
-	      NativeBigInt.prototype.plus = NativeBigInt.prototype.add;
-	      function subtract(a, b) {
-	        // assumes a and b are arrays with a >= b
-	        var a_l = a.length,
-	          b_l = b.length,
-	          r = new Array(a_l),
-	          borrow = 0,
-	          base = BASE,
-	          i,
-	          difference;
-	        for (i = 0; i < b_l; i++) {
-	          difference = a[i] - borrow - b[i];
-	          if (difference < 0) {
-	            difference += base;
-	            borrow = 1;
-	          } else borrow = 0;
-	          r[i] = difference;
-	        }
-	        for (i = b_l; i < a_l; i++) {
-	          difference = a[i] - borrow;
-	          if (difference < 0) difference += base;else {
-	            r[i++] = difference;
-	            break;
-	          }
-	          r[i] = difference;
-	        }
-	        for (; i < a_l; i++) {
-	          r[i] = a[i];
-	        }
-	        trim(r);
-	        return r;
-	      }
-	      function subtractAny(a, b, sign) {
-	        var value;
-	        if (compareAbs(a, b) >= 0) {
-	          value = subtract(a, b);
-	        } else {
-	          value = subtract(b, a);
-	          sign = !sign;
-	        }
-	        value = arrayToSmall(value);
-	        if (typeof value === "number") {
-	          if (sign) value = -value;
-	          return new SmallInteger(value);
-	        }
-	        return new BigInteger(value, sign);
-	      }
-	      function subtractSmall(a, b, sign) {
-	        // assumes a is array, b is number with 0 <= b < MAX_INT
-	        var l = a.length,
-	          r = new Array(l),
-	          carry = -b,
-	          base = BASE,
-	          i,
-	          difference;
-	        for (i = 0; i < l; i++) {
-	          difference = a[i] + carry;
-	          carry = Math.floor(difference / base);
-	          difference %= base;
-	          r[i] = difference < 0 ? difference + base : difference;
-	        }
-	        r = arrayToSmall(r);
-	        if (typeof r === "number") {
-	          if (sign) r = -r;
-	          return new SmallInteger(r);
-	        }
-	        return new BigInteger(r, sign);
-	      }
-	      BigInteger.prototype.subtract = function (v) {
-	        var n = parseValue(v);
-	        if (this.sign !== n.sign) {
-	          return this.add(n.negate());
-	        }
-	        var a = this.value,
-	          b = n.value;
-	        if (n.isSmall) return subtractSmall(a, Math.abs(b), this.sign);
-	        return subtractAny(a, b, this.sign);
-	      };
-	      BigInteger.prototype.minus = BigInteger.prototype.subtract;
-	      SmallInteger.prototype.subtract = function (v) {
-	        var n = parseValue(v);
-	        var a = this.value;
-	        if (a < 0 !== n.sign) {
-	          return this.add(n.negate());
-	        }
-	        var b = n.value;
-	        if (n.isSmall) {
-	          return new SmallInteger(a - b);
-	        }
-	        return subtractSmall(b, Math.abs(a), a >= 0);
-	      };
-	      SmallInteger.prototype.minus = SmallInteger.prototype.subtract;
-	      NativeBigInt.prototype.subtract = function (v) {
-	        return new NativeBigInt(this.value - parseValue(v).value);
-	      };
-	      NativeBigInt.prototype.minus = NativeBigInt.prototype.subtract;
-	      BigInteger.prototype.negate = function () {
-	        return new BigInteger(this.value, !this.sign);
-	      };
-	      SmallInteger.prototype.negate = function () {
-	        var sign = this.sign;
-	        var small = new SmallInteger(-this.value);
-	        small.sign = !sign;
-	        return small;
-	      };
-	      NativeBigInt.prototype.negate = function () {
-	        return new NativeBigInt(-this.value);
-	      };
-	      BigInteger.prototype.abs = function () {
-	        return new BigInteger(this.value, false);
-	      };
-	      SmallInteger.prototype.abs = function () {
-	        return new SmallInteger(Math.abs(this.value));
-	      };
-	      NativeBigInt.prototype.abs = function () {
-	        return new NativeBigInt(this.value >= 0 ? this.value : -this.value);
-	      };
-	      function multiplyLong(a, b) {
-	        var a_l = a.length,
-	          b_l = b.length,
-	          l = a_l + b_l,
-	          r = createArray(l),
-	          base = BASE,
-	          product,
-	          carry,
-	          i,
-	          a_i,
-	          b_j;
-	        for (i = 0; i < a_l; ++i) {
-	          a_i = a[i];
-	          for (var j = 0; j < b_l; ++j) {
-	            b_j = b[j];
-	            product = a_i * b_j + r[i + j];
-	            carry = Math.floor(product / base);
-	            r[i + j] = product - carry * base;
-	            r[i + j + 1] += carry;
-	          }
-	        }
-	        trim(r);
-	        return r;
-	      }
-	      function multiplySmall(a, b) {
-	        // assumes a is array, b is number with |b| < BASE
-	        var l = a.length,
-	          r = new Array(l),
-	          base = BASE,
-	          carry = 0,
-	          product,
-	          i;
-	        for (i = 0; i < l; i++) {
-	          product = a[i] * b + carry;
-	          carry = Math.floor(product / base);
-	          r[i] = product - carry * base;
-	        }
-	        while (carry > 0) {
-	          r[i++] = carry % base;
-	          carry = Math.floor(carry / base);
-	        }
-	        return r;
-	      }
-	      function shiftLeft(x, n) {
-	        var r = [];
-	        while (n-- > 0) r.push(0);
-	        return r.concat(x);
-	      }
-	      function multiplyKaratsuba(x, y) {
-	        var n = Math.max(x.length, y.length);
-	        if (n <= 30) return multiplyLong(x, y);
-	        n = Math.ceil(n / 2);
-	        var b = x.slice(n),
-	          a = x.slice(0, n),
-	          d = y.slice(n),
-	          c = y.slice(0, n);
-	        var ac = multiplyKaratsuba(a, c),
-	          bd = multiplyKaratsuba(b, d),
-	          abcd = multiplyKaratsuba(addAny(a, b), addAny(c, d));
-	        var product = addAny(addAny(ac, shiftLeft(subtract(subtract(abcd, ac), bd), n)), shiftLeft(bd, 2 * n));
-	        trim(product);
-	        return product;
-	      }
-
-	      // The following function is derived from a surface fit of a graph plotting the performance difference
-	      // between long multiplication and karatsuba multiplication versus the lengths of the two arrays.
-	      function useKaratsuba(l1, l2) {
-	        return -0.012 * l1 - 0.012 * l2 + 0.000015 * l1 * l2 > 0;
-	      }
-	      BigInteger.prototype.multiply = function (v) {
-	        var n = parseValue(v),
-	          a = this.value,
-	          b = n.value,
-	          sign = this.sign !== n.sign,
-	          abs;
-	        if (n.isSmall) {
-	          if (b === 0) return Integer[0];
-	          if (b === 1) return this;
-	          if (b === -1) return this.negate();
-	          abs = Math.abs(b);
-	          if (abs < BASE) {
-	            return new BigInteger(multiplySmall(a, abs), sign);
-	          }
-	          b = smallToArray(abs);
-	        }
-	        if (useKaratsuba(a.length, b.length))
-	          // Karatsuba is only faster for certain array sizes
-	          return new BigInteger(multiplyKaratsuba(a, b), sign);
-	        return new BigInteger(multiplyLong(a, b), sign);
-	      };
-	      BigInteger.prototype.times = BigInteger.prototype.multiply;
-	      function multiplySmallAndArray(a, b, sign) {
-	        // a >= 0
-	        if (a < BASE) {
-	          return new BigInteger(multiplySmall(b, a), sign);
-	        }
-	        return new BigInteger(multiplyLong(b, smallToArray(a)), sign);
-	      }
-	      SmallInteger.prototype._multiplyBySmall = function (a) {
-	        if (isPrecise(a.value * this.value)) {
-	          return new SmallInteger(a.value * this.value);
-	        }
-	        return multiplySmallAndArray(Math.abs(a.value), smallToArray(Math.abs(this.value)), this.sign !== a.sign);
-	      };
-	      BigInteger.prototype._multiplyBySmall = function (a) {
-	        if (a.value === 0) return Integer[0];
-	        if (a.value === 1) return this;
-	        if (a.value === -1) return this.negate();
-	        return multiplySmallAndArray(Math.abs(a.value), this.value, this.sign !== a.sign);
-	      };
-	      SmallInteger.prototype.multiply = function (v) {
-	        return parseValue(v)._multiplyBySmall(this);
-	      };
-	      SmallInteger.prototype.times = SmallInteger.prototype.multiply;
-	      NativeBigInt.prototype.multiply = function (v) {
-	        return new NativeBigInt(this.value * parseValue(v).value);
-	      };
-	      NativeBigInt.prototype.times = NativeBigInt.prototype.multiply;
-	      function square(a) {
-	        //console.assert(2 * BASE * BASE < MAX_INT);
-	        var l = a.length,
-	          r = createArray(l + l),
-	          base = BASE,
-	          product,
-	          carry,
-	          i,
-	          a_i,
-	          a_j;
-	        for (i = 0; i < l; i++) {
-	          a_i = a[i];
-	          carry = 0 - a_i * a_i;
-	          for (var j = i; j < l; j++) {
-	            a_j = a[j];
-	            product = 2 * (a_i * a_j) + r[i + j] + carry;
-	            carry = Math.floor(product / base);
-	            r[i + j] = product - carry * base;
-	          }
-	          r[i + l] = carry;
-	        }
-	        trim(r);
-	        return r;
-	      }
-	      BigInteger.prototype.square = function () {
-	        return new BigInteger(square(this.value), false);
-	      };
-	      SmallInteger.prototype.square = function () {
-	        var value = this.value * this.value;
-	        if (isPrecise(value)) return new SmallInteger(value);
-	        return new BigInteger(square(smallToArray(Math.abs(this.value))), false);
-	      };
-	      NativeBigInt.prototype.square = function (v) {
-	        return new NativeBigInt(this.value * this.value);
-	      };
-	      function divMod1(a, b) {
-	        // Left over from previous version. Performs faster than divMod2 on smaller input sizes.
-	        var a_l = a.length,
-	          b_l = b.length,
-	          base = BASE,
-	          result = createArray(b.length),
-	          divisorMostSignificantDigit = b[b_l - 1],
-	          // normalization
-	          lambda = Math.ceil(base / (2 * divisorMostSignificantDigit)),
-	          remainder = multiplySmall(a, lambda),
-	          divisor = multiplySmall(b, lambda),
-	          quotientDigit,
-	          shift,
-	          carry,
-	          borrow,
-	          i,
-	          l,
-	          q;
-	        if (remainder.length <= a_l) remainder.push(0);
-	        divisor.push(0);
-	        divisorMostSignificantDigit = divisor[b_l - 1];
-	        for (shift = a_l - b_l; shift >= 0; shift--) {
-	          quotientDigit = base - 1;
-	          if (remainder[shift + b_l] !== divisorMostSignificantDigit) {
-	            quotientDigit = Math.floor((remainder[shift + b_l] * base + remainder[shift + b_l - 1]) / divisorMostSignificantDigit);
-	          }
-	          // quotientDigit <= base - 1
-	          carry = 0;
-	          borrow = 0;
-	          l = divisor.length;
-	          for (i = 0; i < l; i++) {
-	            carry += quotientDigit * divisor[i];
-	            q = Math.floor(carry / base);
-	            borrow += remainder[shift + i] - (carry - q * base);
-	            carry = q;
-	            if (borrow < 0) {
-	              remainder[shift + i] = borrow + base;
-	              borrow = -1;
-	            } else {
-	              remainder[shift + i] = borrow;
-	              borrow = 0;
-	            }
-	          }
-	          while (borrow !== 0) {
-	            quotientDigit -= 1;
-	            carry = 0;
-	            for (i = 0; i < l; i++) {
-	              carry += remainder[shift + i] - base + divisor[i];
-	              if (carry < 0) {
-	                remainder[shift + i] = carry + base;
-	                carry = 0;
-	              } else {
-	                remainder[shift + i] = carry;
-	                carry = 1;
-	              }
-	            }
-	            borrow += carry;
-	          }
-	          result[shift] = quotientDigit;
-	        }
-	        // denormalization
-	        remainder = divModSmall(remainder, lambda)[0];
-	        return [arrayToSmall(result), arrayToSmall(remainder)];
-	      }
-	      function divMod2(a, b) {
-	        // Implementation idea shamelessly stolen from Silent Matt's library http://silentmatt.com/biginteger/
-	        // Performs faster than divMod1 on larger input sizes.
-	        var a_l = a.length,
-	          b_l = b.length,
-	          result = [],
-	          part = [],
-	          base = BASE,
-	          guess,
-	          xlen,
-	          highx,
-	          highy,
-	          check;
-	        while (a_l) {
-	          part.unshift(a[--a_l]);
-	          trim(part);
-	          if (compareAbs(part, b) < 0) {
-	            result.push(0);
-	            continue;
-	          }
-	          xlen = part.length;
-	          highx = part[xlen - 1] * base + part[xlen - 2];
-	          highy = b[b_l - 1] * base + b[b_l - 2];
-	          if (xlen > b_l) {
-	            highx = (highx + 1) * base;
-	          }
-	          guess = Math.ceil(highx / highy);
-	          do {
-	            check = multiplySmall(b, guess);
-	            if (compareAbs(check, part) <= 0) break;
-	            guess--;
-	          } while (guess);
-	          result.push(guess);
-	          part = subtract(part, check);
-	        }
-	        result.reverse();
-	        return [arrayToSmall(result), arrayToSmall(part)];
-	      }
-	      function divModSmall(value, lambda) {
-	        var length = value.length,
-	          quotient = createArray(length),
-	          base = BASE,
-	          i,
-	          q,
-	          remainder,
-	          divisor;
-	        remainder = 0;
-	        for (i = length - 1; i >= 0; --i) {
-	          divisor = remainder * base + value[i];
-	          q = truncate(divisor / lambda);
-	          remainder = divisor - q * lambda;
-	          quotient[i] = q | 0;
-	        }
-	        return [quotient, remainder | 0];
-	      }
-	      function divModAny(self, v) {
-	        var value,
-	          n = parseValue(v);
-	        if (supportsNativeBigInt) {
-	          return [new NativeBigInt(self.value / n.value), new NativeBigInt(self.value % n.value)];
-	        }
-	        var a = self.value,
-	          b = n.value;
-	        var quotient;
-	        if (b === 0) throw new Error("Cannot divide by zero");
-	        if (self.isSmall) {
-	          if (n.isSmall) {
-	            return [new SmallInteger(truncate(a / b)), new SmallInteger(a % b)];
-	          }
-	          return [Integer[0], self];
-	        }
-	        if (n.isSmall) {
-	          if (b === 1) return [self, Integer[0]];
-	          if (b == -1) return [self.negate(), Integer[0]];
-	          var abs = Math.abs(b);
-	          if (abs < BASE) {
-	            value = divModSmall(a, abs);
-	            quotient = arrayToSmall(value[0]);
-	            var remainder = value[1];
-	            if (self.sign) remainder = -remainder;
-	            if (typeof quotient === "number") {
-	              if (self.sign !== n.sign) quotient = -quotient;
-	              return [new SmallInteger(quotient), new SmallInteger(remainder)];
-	            }
-	            return [new BigInteger(quotient, self.sign !== n.sign), new SmallInteger(remainder)];
-	          }
-	          b = smallToArray(abs);
-	        }
-	        var comparison = compareAbs(a, b);
-	        if (comparison === -1) return [Integer[0], self];
-	        if (comparison === 0) return [Integer[self.sign === n.sign ? 1 : -1], Integer[0]];
-
-	        // divMod1 is faster on smaller input sizes
-	        if (a.length + b.length <= 200) value = divMod1(a, b);else value = divMod2(a, b);
-	        quotient = value[0];
-	        var qSign = self.sign !== n.sign,
-	          mod = value[1],
-	          mSign = self.sign;
-	        if (typeof quotient === "number") {
-	          if (qSign) quotient = -quotient;
-	          quotient = new SmallInteger(quotient);
-	        } else quotient = new BigInteger(quotient, qSign);
-	        if (typeof mod === "number") {
-	          if (mSign) mod = -mod;
-	          mod = new SmallInteger(mod);
-	        } else mod = new BigInteger(mod, mSign);
-	        return [quotient, mod];
-	      }
-	      BigInteger.prototype.divmod = function (v) {
-	        var result = divModAny(this, v);
-	        return {
-	          quotient: result[0],
-	          remainder: result[1]
-	        };
-	      };
-	      NativeBigInt.prototype.divmod = SmallInteger.prototype.divmod = BigInteger.prototype.divmod;
-	      BigInteger.prototype.divide = function (v) {
-	        return divModAny(this, v)[0];
-	      };
-	      NativeBigInt.prototype.over = NativeBigInt.prototype.divide = function (v) {
-	        return new NativeBigInt(this.value / parseValue(v).value);
-	      };
-	      SmallInteger.prototype.over = SmallInteger.prototype.divide = BigInteger.prototype.over = BigInteger.prototype.divide;
-	      BigInteger.prototype.mod = function (v) {
-	        return divModAny(this, v)[1];
-	      };
-	      NativeBigInt.prototype.mod = NativeBigInt.prototype.remainder = function (v) {
-	        return new NativeBigInt(this.value % parseValue(v).value);
-	      };
-	      SmallInteger.prototype.remainder = SmallInteger.prototype.mod = BigInteger.prototype.remainder = BigInteger.prototype.mod;
-	      BigInteger.prototype.pow = function (v) {
-	        var n = parseValue(v),
-	          a = this.value,
-	          b = n.value,
-	          value,
-	          x,
-	          y;
-	        if (b === 0) return Integer[1];
-	        if (a === 0) return Integer[0];
-	        if (a === 1) return Integer[1];
-	        if (a === -1) return n.isEven() ? Integer[1] : Integer[-1];
-	        if (n.sign) {
-	          return Integer[0];
-	        }
-	        if (!n.isSmall) throw new Error("The exponent " + n.toString() + " is too large.");
-	        if (this.isSmall) {
-	          if (isPrecise(value = Math.pow(a, b))) return new SmallInteger(truncate(value));
-	        }
-	        x = this;
-	        y = Integer[1];
-	        while (true) {
-	          if (b & 1 === 1) {
-	            y = y.times(x);
-	            --b;
-	          }
-	          if (b === 0) break;
-	          b /= 2;
-	          x = x.square();
-	        }
-	        return y;
-	      };
-	      SmallInteger.prototype.pow = BigInteger.prototype.pow;
-	      NativeBigInt.prototype.pow = function (v) {
-	        var n = parseValue(v);
-	        var a = this.value,
-	          b = n.value;
-	        var _0 = BigInt(0),
-	          _1 = BigInt(1),
-	          _2 = BigInt(2);
-	        if (b === _0) return Integer[1];
-	        if (a === _0) return Integer[0];
-	        if (a === _1) return Integer[1];
-	        if (a === BigInt(-1)) return n.isEven() ? Integer[1] : Integer[-1];
-	        if (n.isNegative()) return new NativeBigInt(_0);
-	        var x = this;
-	        var y = Integer[1];
-	        while (true) {
-	          if ((b & _1) === _1) {
-	            y = y.times(x);
-	            --b;
-	          }
-	          if (b === _0) break;
-	          b /= _2;
-	          x = x.square();
-	        }
-	        return y;
-	      };
-	      BigInteger.prototype.modPow = function (exp, mod) {
-	        exp = parseValue(exp);
-	        mod = parseValue(mod);
-	        if (mod.isZero()) throw new Error("Cannot take modPow with modulus 0");
-	        var r = Integer[1],
-	          base = this.mod(mod);
-	        if (exp.isNegative()) {
-	          exp = exp.multiply(Integer[-1]);
-	          base = base.modInv(mod);
-	        }
-	        while (exp.isPositive()) {
-	          if (base.isZero()) return Integer[0];
-	          if (exp.isOdd()) r = r.multiply(base).mod(mod);
-	          exp = exp.divide(2);
-	          base = base.square().mod(mod);
-	        }
-	        return r;
-	      };
-	      NativeBigInt.prototype.modPow = SmallInteger.prototype.modPow = BigInteger.prototype.modPow;
-	      function compareAbs(a, b) {
-	        if (a.length !== b.length) {
-	          return a.length > b.length ? 1 : -1;
-	        }
-	        for (var i = a.length - 1; i >= 0; i--) {
-	          if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1;
-	        }
-	        return 0;
-	      }
-	      BigInteger.prototype.compareAbs = function (v) {
-	        var n = parseValue(v),
-	          a = this.value,
-	          b = n.value;
-	        if (n.isSmall) return 1;
-	        return compareAbs(a, b);
-	      };
-	      SmallInteger.prototype.compareAbs = function (v) {
-	        var n = parseValue(v),
-	          a = Math.abs(this.value),
-	          b = n.value;
-	        if (n.isSmall) {
-	          b = Math.abs(b);
-	          return a === b ? 0 : a > b ? 1 : -1;
-	        }
-	        return -1;
-	      };
-	      NativeBigInt.prototype.compareAbs = function (v) {
-	        var a = this.value;
-	        var b = parseValue(v).value;
-	        a = a >= 0 ? a : -a;
-	        b = b >= 0 ? b : -b;
-	        return a === b ? 0 : a > b ? 1 : -1;
-	      };
-	      BigInteger.prototype.compare = function (v) {
-	        // See discussion about comparison with Infinity:
-	        // https://github.com/peterolson/BigInteger.js/issues/61
-	        if (v === Infinity) {
-	          return -1;
-	        }
-	        if (v === -Infinity) {
-	          return 1;
-	        }
-	        var n = parseValue(v),
-	          a = this.value,
-	          b = n.value;
-	        if (this.sign !== n.sign) {
-	          return n.sign ? 1 : -1;
-	        }
-	        if (n.isSmall) {
-	          return this.sign ? -1 : 1;
-	        }
-	        return compareAbs(a, b) * (this.sign ? -1 : 1);
-	      };
-	      BigInteger.prototype.compareTo = BigInteger.prototype.compare;
-	      SmallInteger.prototype.compare = function (v) {
-	        if (v === Infinity) {
-	          return -1;
-	        }
-	        if (v === -Infinity) {
-	          return 1;
-	        }
-	        var n = parseValue(v),
-	          a = this.value,
-	          b = n.value;
-	        if (n.isSmall) {
-	          return a == b ? 0 : a > b ? 1 : -1;
-	        }
-	        if (a < 0 !== n.sign) {
-	          return a < 0 ? -1 : 1;
-	        }
-	        return a < 0 ? 1 : -1;
-	      };
-	      SmallInteger.prototype.compareTo = SmallInteger.prototype.compare;
-	      NativeBigInt.prototype.compare = function (v) {
-	        if (v === Infinity) {
-	          return -1;
-	        }
-	        if (v === -Infinity) {
-	          return 1;
-	        }
-	        var a = this.value;
-	        var b = parseValue(v).value;
-	        return a === b ? 0 : a > b ? 1 : -1;
-	      };
-	      NativeBigInt.prototype.compareTo = NativeBigInt.prototype.compare;
-	      BigInteger.prototype.equals = function (v) {
-	        return this.compare(v) === 0;
-	      };
-	      NativeBigInt.prototype.eq = NativeBigInt.prototype.equals = SmallInteger.prototype.eq = SmallInteger.prototype.equals = BigInteger.prototype.eq = BigInteger.prototype.equals;
-	      BigInteger.prototype.notEquals = function (v) {
-	        return this.compare(v) !== 0;
-	      };
-	      NativeBigInt.prototype.neq = NativeBigInt.prototype.notEquals = SmallInteger.prototype.neq = SmallInteger.prototype.notEquals = BigInteger.prototype.neq = BigInteger.prototype.notEquals;
-	      BigInteger.prototype.greater = function (v) {
-	        return this.compare(v) > 0;
-	      };
-	      NativeBigInt.prototype.gt = NativeBigInt.prototype.greater = SmallInteger.prototype.gt = SmallInteger.prototype.greater = BigInteger.prototype.gt = BigInteger.prototype.greater;
-	      BigInteger.prototype.lesser = function (v) {
-	        return this.compare(v) < 0;
-	      };
-	      NativeBigInt.prototype.lt = NativeBigInt.prototype.lesser = SmallInteger.prototype.lt = SmallInteger.prototype.lesser = BigInteger.prototype.lt = BigInteger.prototype.lesser;
-	      BigInteger.prototype.greaterOrEquals = function (v) {
-	        return this.compare(v) >= 0;
-	      };
-	      NativeBigInt.prototype.geq = NativeBigInt.prototype.greaterOrEquals = SmallInteger.prototype.geq = SmallInteger.prototype.greaterOrEquals = BigInteger.prototype.geq = BigInteger.prototype.greaterOrEquals;
-	      BigInteger.prototype.lesserOrEquals = function (v) {
-	        return this.compare(v) <= 0;
-	      };
-	      NativeBigInt.prototype.leq = NativeBigInt.prototype.lesserOrEquals = SmallInteger.prototype.leq = SmallInteger.prototype.lesserOrEquals = BigInteger.prototype.leq = BigInteger.prototype.lesserOrEquals;
-	      BigInteger.prototype.isEven = function () {
-	        return (this.value[0] & 1) === 0;
-	      };
-	      SmallInteger.prototype.isEven = function () {
-	        return (this.value & 1) === 0;
-	      };
-	      NativeBigInt.prototype.isEven = function () {
-	        return (this.value & BigInt(1)) === BigInt(0);
-	      };
-	      BigInteger.prototype.isOdd = function () {
-	        return (this.value[0] & 1) === 1;
-	      };
-	      SmallInteger.prototype.isOdd = function () {
-	        return (this.value & 1) === 1;
-	      };
-	      NativeBigInt.prototype.isOdd = function () {
-	        return (this.value & BigInt(1)) === BigInt(1);
-	      };
-	      BigInteger.prototype.isPositive = function () {
-	        return !this.sign;
-	      };
-	      SmallInteger.prototype.isPositive = function () {
-	        return this.value > 0;
-	      };
-	      NativeBigInt.prototype.isPositive = SmallInteger.prototype.isPositive;
-	      BigInteger.prototype.isNegative = function () {
-	        return this.sign;
-	      };
-	      SmallInteger.prototype.isNegative = function () {
-	        return this.value < 0;
-	      };
-	      NativeBigInt.prototype.isNegative = SmallInteger.prototype.isNegative;
-	      BigInteger.prototype.isUnit = function () {
-	        return false;
-	      };
-	      SmallInteger.prototype.isUnit = function () {
-	        return Math.abs(this.value) === 1;
-	      };
-	      NativeBigInt.prototype.isUnit = function () {
-	        return this.abs().value === BigInt(1);
-	      };
-	      BigInteger.prototype.isZero = function () {
-	        return false;
-	      };
-	      SmallInteger.prototype.isZero = function () {
-	        return this.value === 0;
-	      };
-	      NativeBigInt.prototype.isZero = function () {
-	        return this.value === BigInt(0);
-	      };
-	      BigInteger.prototype.isDivisibleBy = function (v) {
-	        var n = parseValue(v);
-	        if (n.isZero()) return false;
-	        if (n.isUnit()) return true;
-	        if (n.compareAbs(2) === 0) return this.isEven();
-	        return this.mod(n).isZero();
-	      };
-	      NativeBigInt.prototype.isDivisibleBy = SmallInteger.prototype.isDivisibleBy = BigInteger.prototype.isDivisibleBy;
-	      function isBasicPrime(v) {
-	        var n = v.abs();
-	        if (n.isUnit()) return false;
-	        if (n.equals(2) || n.equals(3) || n.equals(5)) return true;
-	        if (n.isEven() || n.isDivisibleBy(3) || n.isDivisibleBy(5)) return false;
-	        if (n.lesser(49)) return true;
-	        // we don't know if it's prime: let the other functions figure it out
-	      }
-	      function millerRabinTest(n, a) {
-	        var nPrev = n.prev(),
-	          b = nPrev,
-	          r = 0,
-	          d,
-	          i,
-	          x;
-	        while (b.isEven()) b = b.divide(2), r++;
-	        next: for (i = 0; i < a.length; i++) {
-	          if (n.lesser(a[i])) continue;
-	          x = bigInt(a[i]).modPow(b, n);
-	          if (x.isUnit() || x.equals(nPrev)) continue;
-	          for (d = r - 1; d != 0; d--) {
-	            x = x.square().mod(n);
-	            if (x.isUnit()) return false;
-	            if (x.equals(nPrev)) continue next;
-	          }
-	          return false;
-	        }
-	        return true;
-	      }
-
-	      // Set "strict" to true to force GRH-supported lower bound of 2*log(N)^2
-	      BigInteger.prototype.isPrime = function (strict) {
-	        var isPrime = isBasicPrime(this);
-	        if (isPrime !== undefined$1) return isPrime;
-	        var n = this.abs();
-	        var bits = n.bitLength();
-	        if (bits <= 64) return millerRabinTest(n, [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]);
-	        var logN = Math.log(2) * bits.toJSNumber();
-	        var t = Math.ceil(strict === true ? 2 * Math.pow(logN, 2) : logN);
-	        for (var a = [], i = 0; i < t; i++) {
-	          a.push(bigInt(i + 2));
-	        }
-	        return millerRabinTest(n, a);
-	      };
-	      NativeBigInt.prototype.isPrime = SmallInteger.prototype.isPrime = BigInteger.prototype.isPrime;
-	      BigInteger.prototype.isProbablePrime = function (iterations, rng) {
-	        var isPrime = isBasicPrime(this);
-	        if (isPrime !== undefined$1) return isPrime;
-	        var n = this.abs();
-	        var t = iterations === undefined$1 ? 5 : iterations;
-	        for (var a = [], i = 0; i < t; i++) {
-	          a.push(bigInt.randBetween(2, n.minus(2), rng));
-	        }
-	        return millerRabinTest(n, a);
-	      };
-	      NativeBigInt.prototype.isProbablePrime = SmallInteger.prototype.isProbablePrime = BigInteger.prototype.isProbablePrime;
-	      BigInteger.prototype.modInv = function (n) {
-	        var t = bigInt.zero,
-	          newT = bigInt.one,
-	          r = parseValue(n),
-	          newR = this.abs(),
-	          q,
-	          lastT,
-	          lastR;
-	        while (!newR.isZero()) {
-	          q = r.divide(newR);
-	          lastT = t;
-	          lastR = r;
-	          t = newT;
-	          r = newR;
-	          newT = lastT.subtract(q.multiply(newT));
-	          newR = lastR.subtract(q.multiply(newR));
-	        }
-	        if (!r.isUnit()) throw new Error(this.toString() + " and " + n.toString() + " are not co-prime");
-	        if (t.compare(0) === -1) {
-	          t = t.add(n);
-	        }
-	        if (this.isNegative()) {
-	          return t.negate();
-	        }
-	        return t;
-	      };
-	      NativeBigInt.prototype.modInv = SmallInteger.prototype.modInv = BigInteger.prototype.modInv;
-	      BigInteger.prototype.next = function () {
-	        var value = this.value;
-	        if (this.sign) {
-	          return subtractSmall(value, 1, this.sign);
-	        }
-	        return new BigInteger(addSmall(value, 1), this.sign);
-	      };
-	      SmallInteger.prototype.next = function () {
-	        var value = this.value;
-	        if (value + 1 < MAX_INT) return new SmallInteger(value + 1);
-	        return new BigInteger(MAX_INT_ARR, false);
-	      };
-	      NativeBigInt.prototype.next = function () {
-	        return new NativeBigInt(this.value + BigInt(1));
-	      };
-	      BigInteger.prototype.prev = function () {
-	        var value = this.value;
-	        if (this.sign) {
-	          return new BigInteger(addSmall(value, 1), true);
-	        }
-	        return subtractSmall(value, 1, this.sign);
-	      };
-	      SmallInteger.prototype.prev = function () {
-	        var value = this.value;
-	        if (value - 1 > -MAX_INT) return new SmallInteger(value - 1);
-	        return new BigInteger(MAX_INT_ARR, true);
-	      };
-	      NativeBigInt.prototype.prev = function () {
-	        return new NativeBigInt(this.value - BigInt(1));
-	      };
-	      var powersOfTwo = [1];
-	      while (2 * powersOfTwo[powersOfTwo.length - 1] <= BASE) powersOfTwo.push(2 * powersOfTwo[powersOfTwo.length - 1]);
-	      var powers2Length = powersOfTwo.length,
-	        highestPower2 = powersOfTwo[powers2Length - 1];
-	      function shift_isSmall(n) {
-	        return Math.abs(n) <= BASE;
-	      }
-	      BigInteger.prototype.shiftLeft = function (v) {
-	        var n = parseValue(v).toJSNumber();
-	        if (!shift_isSmall(n)) {
-	          throw new Error(String(n) + " is too large for shifting.");
-	        }
-	        if (n < 0) return this.shiftRight(-n);
-	        var result = this;
-	        if (result.isZero()) return result;
-	        while (n >= powers2Length) {
-	          result = result.multiply(highestPower2);
-	          n -= powers2Length - 1;
-	        }
-	        return result.multiply(powersOfTwo[n]);
-	      };
-	      NativeBigInt.prototype.shiftLeft = SmallInteger.prototype.shiftLeft = BigInteger.prototype.shiftLeft;
-	      BigInteger.prototype.shiftRight = function (v) {
-	        var remQuo;
-	        var n = parseValue(v).toJSNumber();
-	        if (!shift_isSmall(n)) {
-	          throw new Error(String(n) + " is too large for shifting.");
-	        }
-	        if (n < 0) return this.shiftLeft(-n);
-	        var result = this;
-	        while (n >= powers2Length) {
-	          if (result.isZero() || result.isNegative() && result.isUnit()) return result;
-	          remQuo = divModAny(result, highestPower2);
-	          result = remQuo[1].isNegative() ? remQuo[0].prev() : remQuo[0];
-	          n -= powers2Length - 1;
-	        }
-	        remQuo = divModAny(result, powersOfTwo[n]);
-	        return remQuo[1].isNegative() ? remQuo[0].prev() : remQuo[0];
-	      };
-	      NativeBigInt.prototype.shiftRight = SmallInteger.prototype.shiftRight = BigInteger.prototype.shiftRight;
-	      function bitwise(x, y, fn) {
-	        y = parseValue(y);
-	        var xSign = x.isNegative(),
-	          ySign = y.isNegative();
-	        var xRem = xSign ? x.not() : x,
-	          yRem = ySign ? y.not() : y;
-	        var xDigit = 0,
-	          yDigit = 0;
-	        var xDivMod = null,
-	          yDivMod = null;
-	        var result = [];
-	        while (!xRem.isZero() || !yRem.isZero()) {
-	          xDivMod = divModAny(xRem, highestPower2);
-	          xDigit = xDivMod[1].toJSNumber();
-	          if (xSign) {
-	            xDigit = highestPower2 - 1 - xDigit; // two's complement for negative numbers
-	          }
-	          yDivMod = divModAny(yRem, highestPower2);
-	          yDigit = yDivMod[1].toJSNumber();
-	          if (ySign) {
-	            yDigit = highestPower2 - 1 - yDigit; // two's complement for negative numbers
-	          }
-	          xRem = xDivMod[0];
-	          yRem = yDivMod[0];
-	          result.push(fn(xDigit, yDigit));
-	        }
-	        var sum = fn(xSign ? 1 : 0, ySign ? 1 : 0) !== 0 ? bigInt(-1) : bigInt(0);
-	        for (var i = result.length - 1; i >= 0; i -= 1) {
-	          sum = sum.multiply(highestPower2).add(bigInt(result[i]));
-	        }
-	        return sum;
-	      }
-	      BigInteger.prototype.not = function () {
-	        return this.negate().prev();
-	      };
-	      NativeBigInt.prototype.not = SmallInteger.prototype.not = BigInteger.prototype.not;
-	      BigInteger.prototype.and = function (n) {
-	        return bitwise(this, n, function (a, b) {
-	          return a & b;
-	        });
-	      };
-	      NativeBigInt.prototype.and = SmallInteger.prototype.and = BigInteger.prototype.and;
-	      BigInteger.prototype.or = function (n) {
-	        return bitwise(this, n, function (a, b) {
-	          return a | b;
-	        });
-	      };
-	      NativeBigInt.prototype.or = SmallInteger.prototype.or = BigInteger.prototype.or;
-	      BigInteger.prototype.xor = function (n) {
-	        return bitwise(this, n, function (a, b) {
-	          return a ^ b;
-	        });
-	      };
-	      NativeBigInt.prototype.xor = SmallInteger.prototype.xor = BigInteger.prototype.xor;
-	      var LOBMASK_I = 1 << 30,
-	        LOBMASK_BI = (BASE & -BASE) * (BASE & -BASE) | LOBMASK_I;
-	      function roughLOB(n) {
-	        // get lowestOneBit (rough)
-	        // SmallInteger: return Min(lowestOneBit(n), 1 << 30)
-	        // BigInteger: return Min(lowestOneBit(n), 1 << 14) [BASE=1e7]
-	        var v = n.value,
-	          x = typeof v === "number" ? v | LOBMASK_I : typeof v === "bigint" ? v | BigInt(LOBMASK_I) : v[0] + v[1] * BASE | LOBMASK_BI;
-	        return x & -x;
-	      }
-	      function integerLogarithm(value, base) {
-	        if (base.compareTo(value) <= 0) {
-	          var tmp = integerLogarithm(value, base.square(base));
-	          var p = tmp.p;
-	          var e = tmp.e;
-	          var t = p.multiply(base);
-	          return t.compareTo(value) <= 0 ? {
-	            p: t,
-	            e: e * 2 + 1
-	          } : {
-	            p: p,
-	            e: e * 2
-	          };
-	        }
-	        return {
-	          p: bigInt(1),
-	          e: 0
-	        };
-	      }
-	      BigInteger.prototype.bitLength = function () {
-	        var n = this;
-	        if (n.compareTo(bigInt(0)) < 0) {
-	          n = n.negate().subtract(bigInt(1));
-	        }
-	        if (n.compareTo(bigInt(0)) === 0) {
-	          return bigInt(0);
-	        }
-	        return bigInt(integerLogarithm(n, bigInt(2)).e).add(bigInt(1));
-	      };
-	      NativeBigInt.prototype.bitLength = SmallInteger.prototype.bitLength = BigInteger.prototype.bitLength;
-	      function max(a, b) {
-	        a = parseValue(a);
-	        b = parseValue(b);
-	        return a.greater(b) ? a : b;
-	      }
-	      function min(a, b) {
-	        a = parseValue(a);
-	        b = parseValue(b);
-	        return a.lesser(b) ? a : b;
-	      }
-	      function gcd(a, b) {
-	        a = parseValue(a).abs();
-	        b = parseValue(b).abs();
-	        if (a.equals(b)) return a;
-	        if (a.isZero()) return b;
-	        if (b.isZero()) return a;
-	        var c = Integer[1],
-	          d,
-	          t;
-	        while (a.isEven() && b.isEven()) {
-	          d = min(roughLOB(a), roughLOB(b));
-	          a = a.divide(d);
-	          b = b.divide(d);
-	          c = c.multiply(d);
-	        }
-	        while (a.isEven()) {
-	          a = a.divide(roughLOB(a));
-	        }
-	        do {
-	          while (b.isEven()) {
-	            b = b.divide(roughLOB(b));
-	          }
-	          if (a.greater(b)) {
-	            t = b;
-	            b = a;
-	            a = t;
-	          }
-	          b = b.subtract(a);
-	        } while (!b.isZero());
-	        return c.isUnit() ? a : a.multiply(c);
-	      }
-	      function lcm(a, b) {
-	        a = parseValue(a).abs();
-	        b = parseValue(b).abs();
-	        return a.divide(gcd(a, b)).multiply(b);
-	      }
-	      function randBetween(a, b, rng) {
-	        a = parseValue(a);
-	        b = parseValue(b);
-	        var usedRNG = rng || Math.random;
-	        var low = min(a, b),
-	          high = max(a, b);
-	        var range = high.subtract(low).add(1);
-	        if (range.isSmall) return low.add(Math.floor(usedRNG() * range));
-	        var digits = toBase(range, BASE).value;
-	        var result = [],
-	          restricted = true;
-	        for (var i = 0; i < digits.length; i++) {
-	          var top = restricted ? digits[i] + (i + 1 < digits.length ? digits[i + 1] / BASE : 0) : BASE;
-	          var digit = truncate(usedRNG() * top);
-	          result.push(digit);
-	          if (digit < digits[i]) restricted = false;
-	        }
-	        return low.add(Integer.fromArray(result, BASE, false));
-	      }
-	      var parseBase = function (text, base, alphabet, caseSensitive) {
-	        alphabet = alphabet || DEFAULT_ALPHABET;
-	        text = String(text);
-	        if (!caseSensitive) {
-	          text = text.toLowerCase();
-	          alphabet = alphabet.toLowerCase();
-	        }
-	        var length = text.length;
-	        var i;
-	        var absBase = Math.abs(base);
-	        var alphabetValues = {};
-	        for (i = 0; i < alphabet.length; i++) {
-	          alphabetValues[alphabet[i]] = i;
-	        }
-	        for (i = 0; i < length; i++) {
-	          var c = text[i];
-	          if (c === "-") continue;
-	          if (c in alphabetValues) {
-	            if (alphabetValues[c] >= absBase) {
-	              if (c === "1" && absBase === 1) continue;
-	              throw new Error(c + " is not a valid digit in base " + base + ".");
-	            }
-	          }
-	        }
-	        base = parseValue(base);
-	        var digits = [];
-	        var isNegative = text[0] === "-";
-	        for (i = isNegative ? 1 : 0; i < text.length; i++) {
-	          var c = text[i];
-	          if (c in alphabetValues) digits.push(parseValue(alphabetValues[c]));else if (c === "<") {
-	            var start = i;
-	            do {
-	              i++;
-	            } while (text[i] !== ">" && i < text.length);
-	            digits.push(parseValue(text.slice(start + 1, i)));
-	          } else throw new Error(c + " is not a valid character");
-	        }
-	        return parseBaseFromArray(digits, base, isNegative);
-	      };
-	      function parseBaseFromArray(digits, base, isNegative) {
-	        var val = Integer[0],
-	          pow = Integer[1],
-	          i;
-	        for (i = digits.length - 1; i >= 0; i--) {
-	          val = val.add(digits[i].times(pow));
-	          pow = pow.times(base);
-	        }
-	        return isNegative ? val.negate() : val;
-	      }
-	      function stringify(digit, alphabet) {
-	        alphabet = alphabet || DEFAULT_ALPHABET;
-	        if (digit < alphabet.length) {
-	          return alphabet[digit];
-	        }
-	        return "<" + digit + ">";
-	      }
-	      function toBase(n, base) {
-	        base = bigInt(base);
-	        if (base.isZero()) {
-	          if (n.isZero()) return {
-	            value: [0],
-	            isNegative: false
-	          };
-	          throw new Error("Cannot convert nonzero numbers to base 0.");
-	        }
-	        if (base.equals(-1)) {
-	          if (n.isZero()) return {
-	            value: [0],
-	            isNegative: false
-	          };
-	          if (n.isNegative()) return {
-	            value: [].concat.apply([], Array.apply(null, Array(-n.toJSNumber())).map(Array.prototype.valueOf, [1, 0])),
-	            isNegative: false
-	          };
-	          var arr = Array.apply(null, Array(n.toJSNumber() - 1)).map(Array.prototype.valueOf, [0, 1]);
-	          arr.unshift([1]);
-	          return {
-	            value: [].concat.apply([], arr),
-	            isNegative: false
-	          };
-	        }
-	        var neg = false;
-	        if (n.isNegative() && base.isPositive()) {
-	          neg = true;
-	          n = n.abs();
-	        }
-	        if (base.isUnit()) {
-	          if (n.isZero()) return {
-	            value: [0],
-	            isNegative: false
-	          };
-	          return {
-	            value: Array.apply(null, Array(n.toJSNumber())).map(Number.prototype.valueOf, 1),
-	            isNegative: neg
-	          };
-	        }
-	        var out = [];
-	        var left = n,
-	          divmod;
-	        while (left.isNegative() || left.compareAbs(base) >= 0) {
-	          divmod = left.divmod(base);
-	          left = divmod.quotient;
-	          var digit = divmod.remainder;
-	          if (digit.isNegative()) {
-	            digit = base.minus(digit).abs();
-	            left = left.next();
-	          }
-	          out.push(digit.toJSNumber());
-	        }
-	        out.push(left.toJSNumber());
-	        return {
-	          value: out.reverse(),
-	          isNegative: neg
-	        };
-	      }
-	      function toBaseString(n, base, alphabet) {
-	        var arr = toBase(n, base);
-	        return (arr.isNegative ? "-" : "") + arr.value.map(function (x) {
-	          return stringify(x, alphabet);
-	        }).join('');
-	      }
-	      BigInteger.prototype.toArray = function (radix) {
-	        return toBase(this, radix);
-	      };
-	      SmallInteger.prototype.toArray = function (radix) {
-	        return toBase(this, radix);
-	      };
-	      NativeBigInt.prototype.toArray = function (radix) {
-	        return toBase(this, radix);
-	      };
-	      BigInteger.prototype.toString = function (radix, alphabet) {
-	        if (radix === undefined$1) radix = 10;
-	        if (radix !== 10 || alphabet) return toBaseString(this, radix, alphabet);
-	        var v = this.value,
-	          l = v.length,
-	          str = String(v[--l]),
-	          zeros = "0000000",
-	          digit;
-	        while (--l >= 0) {
-	          digit = String(v[l]);
-	          str += zeros.slice(digit.length) + digit;
-	        }
-	        var sign = this.sign ? "-" : "";
-	        return sign + str;
-	      };
-	      SmallInteger.prototype.toString = function (radix, alphabet) {
-	        if (radix === undefined$1) radix = 10;
-	        if (radix != 10 || alphabet) return toBaseString(this, radix, alphabet);
-	        return String(this.value);
-	      };
-	      NativeBigInt.prototype.toString = SmallInteger.prototype.toString;
-	      NativeBigInt.prototype.toJSON = BigInteger.prototype.toJSON = SmallInteger.prototype.toJSON = function () {
-	        return this.toString();
-	      };
-	      BigInteger.prototype.valueOf = function () {
-	        return parseInt(this.toString(), 10);
-	      };
-	      BigInteger.prototype.toJSNumber = BigInteger.prototype.valueOf;
-	      SmallInteger.prototype.valueOf = function () {
-	        return this.value;
-	      };
-	      SmallInteger.prototype.toJSNumber = SmallInteger.prototype.valueOf;
-	      NativeBigInt.prototype.valueOf = NativeBigInt.prototype.toJSNumber = function () {
-	        return parseInt(this.toString(), 10);
-	      };
-	      function parseStringValue(v) {
-	        if (isPrecise(+v)) {
-	          var x = +v;
-	          if (x === truncate(x)) return supportsNativeBigInt ? new NativeBigInt(BigInt(x)) : new SmallInteger(x);
-	          throw new Error("Invalid integer: " + v);
-	        }
-	        var sign = v[0] === "-";
-	        if (sign) v = v.slice(1);
-	        var split = v.split(/e/i);
-	        if (split.length > 2) throw new Error("Invalid integer: " + split.join("e"));
-	        if (split.length === 2) {
-	          var exp = split[1];
-	          if (exp[0] === "+") exp = exp.slice(1);
-	          exp = +exp;
-	          if (exp !== truncate(exp) || !isPrecise(exp)) throw new Error("Invalid integer: " + exp + " is not a valid exponent.");
-	          var text = split[0];
-	          var decimalPlace = text.indexOf(".");
-	          if (decimalPlace >= 0) {
-	            exp -= text.length - decimalPlace - 1;
-	            text = text.slice(0, decimalPlace) + text.slice(decimalPlace + 1);
-	          }
-	          if (exp < 0) throw new Error("Cannot include negative exponent part for integers");
-	          text += new Array(exp + 1).join("0");
-	          v = text;
-	        }
-	        var isValid = /^([0-9][0-9]*)$/.test(v);
-	        if (!isValid) throw new Error("Invalid integer: " + v);
-	        if (supportsNativeBigInt) {
-	          return new NativeBigInt(BigInt(sign ? "-" + v : v));
-	        }
-	        var r = [],
-	          max = v.length,
-	          l = LOG_BASE,
-	          min = max - l;
-	        while (max > 0) {
-	          r.push(+v.slice(min, max));
-	          min -= l;
-	          if (min < 0) min = 0;
-	          max -= l;
-	        }
-	        trim(r);
-	        return new BigInteger(r, sign);
-	      }
-	      function parseNumberValue(v) {
-	        if (supportsNativeBigInt) {
-	          return new NativeBigInt(BigInt(v));
-	        }
-	        if (isPrecise(v)) {
-	          if (v !== truncate(v)) throw new Error(v + " is not an integer.");
-	          return new SmallInteger(v);
-	        }
-	        return parseStringValue(v.toString());
-	      }
-	      function parseValue(v) {
-	        if (typeof v === "number") {
-	          return parseNumberValue(v);
-	        }
-	        if (typeof v === "string") {
-	          return parseStringValue(v);
-	        }
-	        if (typeof v === "bigint") {
-	          return new NativeBigInt(v);
-	        }
-	        return v;
-	      }
-	      // Pre-define numbers in range [-999,999]
-	      for (var i = 0; i < 1000; i++) {
-	        Integer[i] = parseValue(i);
-	        if (i > 0) Integer[-i] = parseValue(-i);
-	      }
-	      // Backwards compatibility
-	      Integer.one = Integer[1];
-	      Integer.zero = Integer[0];
-	      Integer.minusOne = Integer[-1];
-	      Integer.max = max;
-	      Integer.min = min;
-	      Integer.gcd = gcd;
-	      Integer.lcm = lcm;
-	      Integer.isInstance = function (x) {
-	        return x instanceof BigInteger || x instanceof SmallInteger || x instanceof NativeBigInt;
-	      };
-	      Integer.randBetween = randBetween;
-	      Integer.fromArray = function (digits, base, isNegative) {
-	        return parseBaseFromArray(digits.map(parseValue), parseValue(base || 10), isNegative);
-	      };
-	      return Integer;
-	    }();
-
-	    // Node.js check
-	    if (module.hasOwnProperty("exports")) {
-	      module.exports = bigInt;
+	const assigned = new Map();
+	const overrides = new Map();
+	function setColorOverrides(pairs) {
+	  overrides.clear();
+	  for (const [key, value] of pairs) {
+	    if (value) {
+	      overrides.set(key, value);
 	    }
-	  })(BigInteger);
-	  return BigInteger.exports;
+	  }
 	}
-
-	var lib;
-	var hasRequiredLib$1;
-	function requireLib$1() {
-	  if (hasRequiredLib$1) return lib;
-	  hasRequiredLib$1 = 1;
-	  const bigInt = requireBigInteger();
-	  const knownBases = {
-	    base64url: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_',
-	    base64: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/',
-	    base62: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-	    base58: '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz',
-	    // Bitcoin base58
-	    base36: '0123456789abcdefghijklmnopqrstuvwxyz',
-	    base32: '0123456789abcdefghjkmnpqrstvwxyz',
-	    // Crockford's base32
-	    base16: '0123456789abcdef',
-	    base10: '0123456789',
-	    base2: '01'
-	  };
-	  const caseSensitiveBases = {
-	    base64url: true,
-	    base64: true,
-	    base62: true,
-	    base58: true,
-	    base36: false,
-	    base32: false,
-	    base16: false,
-	    base10: true,
-	    base2: true
-	  };
-	  class UuidEncoder {
-	    /**
-	     * @public
-	     * @param [baseEncodingStr] A string containing all usable letters for encoding
-	     * @constructor
-	     */
-	    constructor(baseEncodingStr = 'base36') {
-	      this.setBaseEncodingStr(baseEncodingStr);
-	    }
-
-	    /**
-	     * Set encoding base
-	     * @param {string} baseEncodingStr A string containing all usable letters for encoding
-	     * @public
-	     */
-	    setBaseEncodingStr(baseEncodingStr) {
-	      this.encStr = UuidEncoder.resolveEncodingStr(baseEncodingStr);
-	      this.isCaseSensitive = UuidEncoder.isCaseSensitiveBase(baseEncodingStr);
-	      this.base = this.encStr.length;
-	    }
-
-	    /**
-	     * @private
-	     * @param {string} baseEncodingStr
-	     * @returns {string}
-	     */
-	    static resolveEncodingStr(baseEncodingStr) {
-	      return Object.prototype.hasOwnProperty.call(knownBases, baseEncodingStr) ? knownBases[baseEncodingStr] : baseEncodingStr;
-	    }
-
-	    /**
-	     * @public
-	     * @param baseEncodingStr
-	     * @returns {boolean}
-	     */
-	    static isCaseSensitiveBase(baseEncodingStr) {
-	      return Object.prototype.hasOwnProperty.call(caseSensitiveBases, baseEncodingStr) ? caseSensitiveBases[baseEncodingStr] : true;
-	    }
-
-	    /**
-	     * Encode a UUID
-	     * @param {string} uuid Properly formatted UUID
-	     * @returns {string} Encoded UUID
-	     * @public
-	     */
-	    encode(uuid) {
-	      const cleanUuid = uuid.replace(/-/g, '');
-	      const {
-	        base,
-	        encStr
-	      } = this;
-	      let iUuid = bigInt(cleanUuid, 16);
-	      let str = '';
-	      do {
-	        str = encStr.substr(iUuid.mod(base).valueOf(), 1) + str;
-	        iUuid = iUuid.divide(base);
-	      } while (iUuid.greater(0));
-	      return str;
-	    }
-
-	    /**
-	     * Decode an encoded UUID
-	     * @public
-	     * @param {string} str Previously encoded string
-	     * @returns {string} Properly formatted UUID
-	     * @throws Throws an {Error} when encountering invalid data
-	     */
-	    decode(str) {
-	      let iUuid = bigInt(0);
-	      const {
-	        base,
-	        encStr
-	      } = this;
-	      const len = str.length;
-	      const finalStr = this.isCaseSensitive ? str : str.toLowerCase();
-	      for (let pos = 0; pos < len; pos += 1) {
-	        const ch = finalStr.substr(pos, 1);
-	        const encPos = encStr.indexOf(ch);
-	        if (encPos < 0) {
-	          throw new Error('Invalid encoded data');
-	        }
-	        iUuid = iUuid.add(encPos);
-	        if (pos < len - 1) {
-	          iUuid = iUuid.multiply(base);
-	        }
-	      }
-	      const uuid = iUuid.toString(16).padStart(32, '0');
-	      return `${uuid.substr(0, 8)}-${uuid.substr(8, 4)}-${uuid.substr(12, 4)}-${uuid.substr(16, 4)}-${uuid.substr(20)}`;
-	    }
-	  }
-	  lib = UuidEncoder;
-	  return lib;
+	function paletteCss() {
+	  return ITEM_PALETTE.map(value => '#' + value.toString(16).padStart(6, '0'));
 	}
-
-	var colorName;
-	var hasRequiredColorName;
-	function requireColorName() {
-	  if (hasRequiredColorName) return colorName;
-	  hasRequiredColorName = 1;
-	  colorName = {
-	    "aliceblue": [240, 248, 255],
-	    "antiquewhite": [250, 235, 215],
-	    "aqua": [0, 255, 255],
-	    "aquamarine": [127, 255, 212],
-	    "azure": [240, 255, 255],
-	    "beige": [245, 245, 220],
-	    "bisque": [255, 228, 196],
-	    "black": [0, 0, 0],
-	    "blanchedalmond": [255, 235, 205],
-	    "blue": [0, 0, 255],
-	    "blueviolet": [138, 43, 226],
-	    "brown": [165, 42, 42],
-	    "burlywood": [222, 184, 135],
-	    "cadetblue": [95, 158, 160],
-	    "chartreuse": [127, 255, 0],
-	    "chocolate": [210, 105, 30],
-	    "coral": [255, 127, 80],
-	    "cornflowerblue": [100, 149, 237],
-	    "cornsilk": [255, 248, 220],
-	    "crimson": [220, 20, 60],
-	    "cyan": [0, 255, 255],
-	    "darkblue": [0, 0, 139],
-	    "darkcyan": [0, 139, 139],
-	    "darkgoldenrod": [184, 134, 11],
-	    "darkgray": [169, 169, 169],
-	    "darkgreen": [0, 100, 0],
-	    "darkgrey": [169, 169, 169],
-	    "darkkhaki": [189, 183, 107],
-	    "darkmagenta": [139, 0, 139],
-	    "darkolivegreen": [85, 107, 47],
-	    "darkorange": [255, 140, 0],
-	    "darkorchid": [153, 50, 204],
-	    "darkred": [139, 0, 0],
-	    "darksalmon": [233, 150, 122],
-	    "darkseagreen": [143, 188, 143],
-	    "darkslateblue": [72, 61, 139],
-	    "darkslategray": [47, 79, 79],
-	    "darkslategrey": [47, 79, 79],
-	    "darkturquoise": [0, 206, 209],
-	    "darkviolet": [148, 0, 211],
-	    "deeppink": [255, 20, 147],
-	    "deepskyblue": [0, 191, 255],
-	    "dimgray": [105, 105, 105],
-	    "dimgrey": [105, 105, 105],
-	    "dodgerblue": [30, 144, 255],
-	    "firebrick": [178, 34, 34],
-	    "floralwhite": [255, 250, 240],
-	    "forestgreen": [34, 139, 34],
-	    "fuchsia": [255, 0, 255],
-	    "gainsboro": [220, 220, 220],
-	    "ghostwhite": [248, 248, 255],
-	    "gold": [255, 215, 0],
-	    "goldenrod": [218, 165, 32],
-	    "gray": [128, 128, 128],
-	    "green": [0, 128, 0],
-	    "greenyellow": [173, 255, 47],
-	    "grey": [128, 128, 128],
-	    "honeydew": [240, 255, 240],
-	    "hotpink": [255, 105, 180],
-	    "indianred": [205, 92, 92],
-	    "indigo": [75, 0, 130],
-	    "ivory": [255, 255, 240],
-	    "khaki": [240, 230, 140],
-	    "lavender": [230, 230, 250],
-	    "lavenderblush": [255, 240, 245],
-	    "lawngreen": [124, 252, 0],
-	    "lemonchiffon": [255, 250, 205],
-	    "lightblue": [173, 216, 230],
-	    "lightcoral": [240, 128, 128],
-	    "lightcyan": [224, 255, 255],
-	    "lightgoldenrodyellow": [250, 250, 210],
-	    "lightgray": [211, 211, 211],
-	    "lightgreen": [144, 238, 144],
-	    "lightgrey": [211, 211, 211],
-	    "lightpink": [255, 182, 193],
-	    "lightsalmon": [255, 160, 122],
-	    "lightseagreen": [32, 178, 170],
-	    "lightskyblue": [135, 206, 250],
-	    "lightslategray": [119, 136, 153],
-	    "lightslategrey": [119, 136, 153],
-	    "lightsteelblue": [176, 196, 222],
-	    "lightyellow": [255, 255, 224],
-	    "lime": [0, 255, 0],
-	    "limegreen": [50, 205, 50],
-	    "linen": [250, 240, 230],
-	    "magenta": [255, 0, 255],
-	    "maroon": [128, 0, 0],
-	    "mediumaquamarine": [102, 205, 170],
-	    "mediumblue": [0, 0, 205],
-	    "mediumorchid": [186, 85, 211],
-	    "mediumpurple": [147, 112, 219],
-	    "mediumseagreen": [60, 179, 113],
-	    "mediumslateblue": [123, 104, 238],
-	    "mediumspringgreen": [0, 250, 154],
-	    "mediumturquoise": [72, 209, 204],
-	    "mediumvioletred": [199, 21, 133],
-	    "midnightblue": [25, 25, 112],
-	    "mintcream": [245, 255, 250],
-	    "mistyrose": [255, 228, 225],
-	    "moccasin": [255, 228, 181],
-	    "navajowhite": [255, 222, 173],
-	    "navy": [0, 0, 128],
-	    "oldlace": [253, 245, 230],
-	    "olive": [128, 128, 0],
-	    "olivedrab": [107, 142, 35],
-	    "orange": [255, 165, 0],
-	    "orangered": [255, 69, 0],
-	    "orchid": [218, 112, 214],
-	    "palegoldenrod": [238, 232, 170],
-	    "palegreen": [152, 251, 152],
-	    "paleturquoise": [175, 238, 238],
-	    "palevioletred": [219, 112, 147],
-	    "papayawhip": [255, 239, 213],
-	    "peachpuff": [255, 218, 185],
-	    "peru": [205, 133, 63],
-	    "pink": [255, 192, 203],
-	    "plum": [221, 160, 221],
-	    "powderblue": [176, 224, 230],
-	    "purple": [128, 0, 128],
-	    "rebeccapurple": [102, 51, 153],
-	    "red": [255, 0, 0],
-	    "rosybrown": [188, 143, 143],
-	    "royalblue": [65, 105, 225],
-	    "saddlebrown": [139, 69, 19],
-	    "salmon": [250, 128, 114],
-	    "sandybrown": [244, 164, 96],
-	    "seagreen": [46, 139, 87],
-	    "seashell": [255, 245, 238],
-	    "sienna": [160, 82, 45],
-	    "silver": [192, 192, 192],
-	    "skyblue": [135, 206, 235],
-	    "slateblue": [106, 90, 205],
-	    "slategray": [112, 128, 144],
-	    "slategrey": [112, 128, 144],
-	    "snow": [255, 250, 250],
-	    "springgreen": [0, 255, 127],
-	    "steelblue": [70, 130, 180],
-	    "tan": [210, 180, 140],
-	    "teal": [0, 128, 128],
-	    "thistle": [216, 191, 216],
-	    "tomato": [255, 99, 71],
-	    "turquoise": [64, 224, 208],
-	    "violet": [238, 130, 238],
-	    "wheat": [245, 222, 179],
-	    "white": [255, 255, 255],
-	    "whitesmoke": [245, 245, 245],
-	    "yellow": [255, 255, 0],
-	    "yellowgreen": [154, 205, 50]
-	  };
-	  return colorName;
+	function colorKey(item) {
+	  return item.group || String(item.id || '').replace(/#\d+$/, '');
 	}
-
-	/* MIT license */
-	var conversions;
-	var hasRequiredConversions;
-	function requireConversions() {
-	  if (hasRequiredConversions) return conversions;
-	  hasRequiredConversions = 1;
-	  /* eslint-disable no-mixed-operators */
-	  const cssKeywords = requireColorName();
-
-	  // NOTE: conversions should only return primitive values (i.e. arrays, or
-	  //       values that give correct `typeof` results).
-	  //       do not use box values types (i.e. Number(), String(), etc.)
-
-	  const reverseKeywords = {};
-	  for (const key of Object.keys(cssKeywords)) {
-	    reverseKeywords[cssKeywords[key]] = key;
-	  }
-	  const convert = {
-	    rgb: {
-	      channels: 3,
-	      labels: 'rgb'
-	    },
-	    hsl: {
-	      channels: 3,
-	      labels: 'hsl'
-	    },
-	    hsv: {
-	      channels: 3,
-	      labels: 'hsv'
-	    },
-	    hwb: {
-	      channels: 3,
-	      labels: 'hwb'
-	    },
-	    cmyk: {
-	      channels: 4,
-	      labels: 'cmyk'
-	    },
-	    xyz: {
-	      channels: 3,
-	      labels: 'xyz'
-	    },
-	    lab: {
-	      channels: 3,
-	      labels: 'lab'
-	    },
-	    lch: {
-	      channels: 3,
-	      labels: 'lch'
-	    },
-	    hex: {
-	      channels: 1,
-	      labels: ['hex']
-	    },
-	    keyword: {
-	      channels: 1,
-	      labels: ['keyword']
-	    },
-	    ansi16: {
-	      channels: 1,
-	      labels: ['ansi16']
-	    },
-	    ansi256: {
-	      channels: 1,
-	      labels: ['ansi256']
-	    },
-	    hcg: {
-	      channels: 3,
-	      labels: ['h', 'c', 'g']
-	    },
-	    apple: {
-	      channels: 3,
-	      labels: ['r16', 'g16', 'b16']
-	    },
-	    gray: {
-	      channels: 1,
-	      labels: ['gray']
+	function resetColors(keys) {
+	  assigned.clear();
+	  keys.forEach(key => {
+	    if (!assigned.has(key)) {
+	      assigned.set(key, ITEM_PALETTE[assigned.size % ITEM_PALETTE.length]);
 	    }
-	  };
-	  conversions = convert;
-
-	  // Hide .channels and .labels properties
-	  for (const model of Object.keys(convert)) {
-	    if (!('channels' in convert[model])) {
-	      throw new Error('missing channels property: ' + model);
-	    }
-	    if (!('labels' in convert[model])) {
-	      throw new Error('missing channel labels property: ' + model);
-	    }
-	    if (convert[model].labels.length !== convert[model].channels) {
-	      throw new Error('channel and label counts mismatch: ' + model);
-	    }
-	    const {
-	      channels,
-	      labels
-	    } = convert[model];
-	    delete convert[model].channels;
-	    delete convert[model].labels;
-	    Object.defineProperty(convert[model], 'channels', {
-	      value: channels
-	    });
-	    Object.defineProperty(convert[model], 'labels', {
-	      value: labels
-	    });
-	  }
-	  convert.rgb.hsl = function (rgb) {
-	    const r = rgb[0] / 255;
-	    const g = rgb[1] / 255;
-	    const b = rgb[2] / 255;
-	    const min = Math.min(r, g, b);
-	    const max = Math.max(r, g, b);
-	    const delta = max - min;
-	    let h;
-	    let s;
-	    if (max === min) {
-	      h = 0;
-	    } else if (r === max) {
-	      h = (g - b) / delta;
-	    } else if (g === max) {
-	      h = 2 + (b - r) / delta;
-	    } else if (b === max) {
-	      h = 4 + (r - g) / delta;
-	    }
-	    h = Math.min(h * 60, 360);
-	    if (h < 0) {
-	      h += 360;
-	    }
-	    const l = (min + max) / 2;
-	    if (max === min) {
-	      s = 0;
-	    } else if (l <= 0.5) {
-	      s = delta / (max + min);
-	    } else {
-	      s = delta / (2 - max - min);
-	    }
-	    return [h, s * 100, l * 100];
-	  };
-	  convert.rgb.hsv = function (rgb) {
-	    let rdif;
-	    let gdif;
-	    let bdif;
-	    let h;
-	    let s;
-	    const r = rgb[0] / 255;
-	    const g = rgb[1] / 255;
-	    const b = rgb[2] / 255;
-	    const v = Math.max(r, g, b);
-	    const diff = v - Math.min(r, g, b);
-	    const diffc = function (c) {
-	      return (v - c) / 6 / diff + 1 / 2;
-	    };
-	    if (diff === 0) {
-	      h = 0;
-	      s = 0;
-	    } else {
-	      s = diff / v;
-	      rdif = diffc(r);
-	      gdif = diffc(g);
-	      bdif = diffc(b);
-	      if (r === v) {
-	        h = bdif - gdif;
-	      } else if (g === v) {
-	        h = 1 / 3 + rdif - bdif;
-	      } else if (b === v) {
-	        h = 2 / 3 + gdif - rdif;
-	      }
-	      if (h < 0) {
-	        h += 1;
-	      } else if (h > 1) {
-	        h -= 1;
-	      }
-	    }
-	    return [h * 360, s * 100, v * 100];
-	  };
-	  convert.rgb.hwb = function (rgb) {
-	    const r = rgb[0];
-	    const g = rgb[1];
-	    let b = rgb[2];
-	    const h = convert.rgb.hsl(rgb)[0];
-	    const w = 1 / 255 * Math.min(r, Math.min(g, b));
-	    b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
-	    return [h, w * 100, b * 100];
-	  };
-	  convert.rgb.cmyk = function (rgb) {
-	    const r = rgb[0] / 255;
-	    const g = rgb[1] / 255;
-	    const b = rgb[2] / 255;
-	    const k = Math.min(1 - r, 1 - g, 1 - b);
-	    const c = (1 - r - k) / (1 - k) || 0;
-	    const m = (1 - g - k) / (1 - k) || 0;
-	    const y = (1 - b - k) / (1 - k) || 0;
-	    return [c * 100, m * 100, y * 100, k * 100];
-	  };
-	  function comparativeDistance(x, y) {
-	    /*
-	    	See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
-	    */
-	    return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
-	  }
-	  convert.rgb.keyword = function (rgb) {
-	    const reversed = reverseKeywords[rgb];
-	    if (reversed) {
-	      return reversed;
-	    }
-	    let currentClosestDistance = Infinity;
-	    let currentClosestKeyword;
-	    for (const keyword of Object.keys(cssKeywords)) {
-	      const value = cssKeywords[keyword];
-
-	      // Compute comparative distance
-	      const distance = comparativeDistance(rgb, value);
-
-	      // Check if its less, if so set as closest
-	      if (distance < currentClosestDistance) {
-	        currentClosestDistance = distance;
-	        currentClosestKeyword = keyword;
-	      }
-	    }
-	    return currentClosestKeyword;
-	  };
-	  convert.keyword.rgb = function (keyword) {
-	    return cssKeywords[keyword];
-	  };
-	  convert.rgb.xyz = function (rgb) {
-	    let r = rgb[0] / 255;
-	    let g = rgb[1] / 255;
-	    let b = rgb[2] / 255;
-
-	    // Assume sRGB
-	    r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
-	    g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
-	    b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
-	    const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
-	    const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
-	    const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-	    return [x * 100, y * 100, z * 100];
-	  };
-	  convert.rgb.lab = function (rgb) {
-	    const xyz = convert.rgb.xyz(rgb);
-	    let x = xyz[0];
-	    let y = xyz[1];
-	    let z = xyz[2];
-	    x /= 95.047;
-	    y /= 100;
-	    z /= 108.883;
-	    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-	    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-	    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-	    const l = 116 * y - 16;
-	    const a = 500 * (x - y);
-	    const b = 200 * (y - z);
-	    return [l, a, b];
-	  };
-	  convert.hsl.rgb = function (hsl) {
-	    const h = hsl[0] / 360;
-	    const s = hsl[1] / 100;
-	    const l = hsl[2] / 100;
-	    let t2;
-	    let t3;
-	    let val;
-	    if (s === 0) {
-	      val = l * 255;
-	      return [val, val, val];
-	    }
-	    if (l < 0.5) {
-	      t2 = l * (1 + s);
-	    } else {
-	      t2 = l + s - l * s;
-	    }
-	    const t1 = 2 * l - t2;
-	    const rgb = [0, 0, 0];
-	    for (let i = 0; i < 3; i++) {
-	      t3 = h + 1 / 3 * -(i - 1);
-	      if (t3 < 0) {
-	        t3++;
-	      }
-	      if (t3 > 1) {
-	        t3--;
-	      }
-	      if (6 * t3 < 1) {
-	        val = t1 + (t2 - t1) * 6 * t3;
-	      } else if (2 * t3 < 1) {
-	        val = t2;
-	      } else if (3 * t3 < 2) {
-	        val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
-	      } else {
-	        val = t1;
-	      }
-	      rgb[i] = val * 255;
-	    }
-	    return rgb;
-	  };
-	  convert.hsl.hsv = function (hsl) {
-	    const h = hsl[0];
-	    let s = hsl[1] / 100;
-	    let l = hsl[2] / 100;
-	    let smin = s;
-	    const lmin = Math.max(l, 0.01);
-	    l *= 2;
-	    s *= l <= 1 ? l : 2 - l;
-	    smin *= lmin <= 1 ? lmin : 2 - lmin;
-	    const v = (l + s) / 2;
-	    const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
-	    return [h, sv * 100, v * 100];
-	  };
-	  convert.hsv.rgb = function (hsv) {
-	    const h = hsv[0] / 60;
-	    const s = hsv[1] / 100;
-	    let v = hsv[2] / 100;
-	    const hi = Math.floor(h) % 6;
-	    const f = h - Math.floor(h);
-	    const p = 255 * v * (1 - s);
-	    const q = 255 * v * (1 - s * f);
-	    const t = 255 * v * (1 - s * (1 - f));
-	    v *= 255;
-	    switch (hi) {
-	      case 0:
-	        return [v, t, p];
-	      case 1:
-	        return [q, v, p];
-	      case 2:
-	        return [p, v, t];
-	      case 3:
-	        return [p, q, v];
-	      case 4:
-	        return [t, p, v];
-	      case 5:
-	        return [v, p, q];
-	    }
-	  };
-	  convert.hsv.hsl = function (hsv) {
-	    const h = hsv[0];
-	    const s = hsv[1] / 100;
-	    const v = hsv[2] / 100;
-	    const vmin = Math.max(v, 0.01);
-	    let sl;
-	    let l;
-	    l = (2 - s) * v;
-	    const lmin = (2 - s) * vmin;
-	    sl = s * vmin;
-	    sl /= lmin <= 1 ? lmin : 2 - lmin;
-	    sl = sl || 0;
-	    l /= 2;
-	    return [h, sl * 100, l * 100];
-	  };
-
-	  // http://dev.w3.org/csswg/css-color/#hwb-to-rgb
-	  convert.hwb.rgb = function (hwb) {
-	    const h = hwb[0] / 360;
-	    let wh = hwb[1] / 100;
-	    let bl = hwb[2] / 100;
-	    const ratio = wh + bl;
-	    let f;
-
-	    // Wh + bl cant be > 1
-	    if (ratio > 1) {
-	      wh /= ratio;
-	      bl /= ratio;
-	    }
-	    const i = Math.floor(6 * h);
-	    const v = 1 - bl;
-	    f = 6 * h - i;
-	    if ((i & 0x01) !== 0) {
-	      f = 1 - f;
-	    }
-	    const n = wh + f * (v - wh); // Linear interpolation
-
-	    let r;
-	    let g;
-	    let b;
-	    /* eslint-disable max-statements-per-line,no-multi-spaces */
-	    switch (i) {
-	      default:
-	      case 6:
-	      case 0:
-	        r = v;
-	        g = n;
-	        b = wh;
-	        break;
-	      case 1:
-	        r = n;
-	        g = v;
-	        b = wh;
-	        break;
-	      case 2:
-	        r = wh;
-	        g = v;
-	        b = n;
-	        break;
-	      case 3:
-	        r = wh;
-	        g = n;
-	        b = v;
-	        break;
-	      case 4:
-	        r = n;
-	        g = wh;
-	        b = v;
-	        break;
-	      case 5:
-	        r = v;
-	        g = wh;
-	        b = n;
-	        break;
-	    }
-	    /* eslint-enable max-statements-per-line,no-multi-spaces */
-
-	    return [r * 255, g * 255, b * 255];
-	  };
-	  convert.cmyk.rgb = function (cmyk) {
-	    const c = cmyk[0] / 100;
-	    const m = cmyk[1] / 100;
-	    const y = cmyk[2] / 100;
-	    const k = cmyk[3] / 100;
-	    const r = 1 - Math.min(1, c * (1 - k) + k);
-	    const g = 1 - Math.min(1, m * (1 - k) + k);
-	    const b = 1 - Math.min(1, y * (1 - k) + k);
-	    return [r * 255, g * 255, b * 255];
-	  };
-	  convert.xyz.rgb = function (xyz) {
-	    const x = xyz[0] / 100;
-	    const y = xyz[1] / 100;
-	    const z = xyz[2] / 100;
-	    let r;
-	    let g;
-	    let b;
-	    r = x * 3.2406 + y * -1.5372 + z * -0.4986;
-	    g = x * -0.9689 + y * 1.8758 + z * 0.0415;
-	    b = x * 0.0557 + y * -0.204 + z * 1.0570;
-
-	    // Assume sRGB
-	    r = r > 0.0031308 ? 1.055 * r ** (1.0 / 2.4) - 0.055 : r * 12.92;
-	    g = g > 0.0031308 ? 1.055 * g ** (1.0 / 2.4) - 0.055 : g * 12.92;
-	    b = b > 0.0031308 ? 1.055 * b ** (1.0 / 2.4) - 0.055 : b * 12.92;
-	    r = Math.min(Math.max(0, r), 1);
-	    g = Math.min(Math.max(0, g), 1);
-	    b = Math.min(Math.max(0, b), 1);
-	    return [r * 255, g * 255, b * 255];
-	  };
-	  convert.xyz.lab = function (xyz) {
-	    let x = xyz[0];
-	    let y = xyz[1];
-	    let z = xyz[2];
-	    x /= 95.047;
-	    y /= 100;
-	    z /= 108.883;
-	    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-	    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-	    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-	    const l = 116 * y - 16;
-	    const a = 500 * (x - y);
-	    const b = 200 * (y - z);
-	    return [l, a, b];
-	  };
-	  convert.lab.xyz = function (lab) {
-	    const l = lab[0];
-	    const a = lab[1];
-	    const b = lab[2];
-	    let x;
-	    let y;
-	    let z;
-	    y = (l + 16) / 116;
-	    x = a / 500 + y;
-	    z = y - b / 200;
-	    const y2 = y ** 3;
-	    const x2 = x ** 3;
-	    const z2 = z ** 3;
-	    y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
-	    x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
-	    z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
-	    x *= 95.047;
-	    y *= 100;
-	    z *= 108.883;
-	    return [x, y, z];
-	  };
-	  convert.lab.lch = function (lab) {
-	    const l = lab[0];
-	    const a = lab[1];
-	    const b = lab[2];
-	    let h;
-	    const hr = Math.atan2(b, a);
-	    h = hr * 360 / 2 / Math.PI;
-	    if (h < 0) {
-	      h += 360;
-	    }
-	    const c = Math.sqrt(a * a + b * b);
-	    return [l, c, h];
-	  };
-	  convert.lch.lab = function (lch) {
-	    const l = lch[0];
-	    const c = lch[1];
-	    const h = lch[2];
-	    const hr = h / 360 * 2 * Math.PI;
-	    const a = c * Math.cos(hr);
-	    const b = c * Math.sin(hr);
-	    return [l, a, b];
-	  };
-	  convert.rgb.ansi16 = function (args, saturation = null) {
-	    const [r, g, b] = args;
-	    let value = saturation === null ? convert.rgb.hsv(args)[2] : saturation; // Hsv -> ansi16 optimization
-
-	    value = Math.round(value / 50);
-	    if (value === 0) {
-	      return 30;
-	    }
-	    let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
-	    if (value === 2) {
-	      ansi += 60;
-	    }
-	    return ansi;
-	  };
-	  convert.hsv.ansi16 = function (args) {
-	    // Optimization here; we already know the value and don't need to get
-	    // it converted for us.
-	    return convert.rgb.ansi16(convert.hsv.rgb(args), args[2]);
-	  };
-	  convert.rgb.ansi256 = function (args) {
-	    const r = args[0];
-	    const g = args[1];
-	    const b = args[2];
-
-	    // We use the extended greyscale palette here, with the exception of
-	    // black and white. normal palette only has 4 greyscale shades.
-	    if (r === g && g === b) {
-	      if (r < 8) {
-	        return 16;
-	      }
-	      if (r > 248) {
-	        return 231;
-	      }
-	      return Math.round((r - 8) / 247 * 24) + 232;
-	    }
-	    const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
-	    return ansi;
-	  };
-	  convert.ansi16.rgb = function (args) {
-	    let color = args % 10;
-
-	    // Handle greyscale
-	    if (color === 0 || color === 7) {
-	      if (args > 50) {
-	        color += 3.5;
-	      }
-	      color = color / 10.5 * 255;
-	      return [color, color, color];
-	    }
-	    const mult = (~~(args > 50) + 1) * 0.5;
-	    const r = (color & 1) * mult * 255;
-	    const g = (color >> 1 & 1) * mult * 255;
-	    const b = (color >> 2 & 1) * mult * 255;
-	    return [r, g, b];
-	  };
-	  convert.ansi256.rgb = function (args) {
-	    // Handle greyscale
-	    if (args >= 232) {
-	      const c = (args - 232) * 10 + 8;
-	      return [c, c, c];
-	    }
-	    args -= 16;
-	    let rem;
-	    const r = Math.floor(args / 36) / 5 * 255;
-	    const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
-	    const b = rem % 6 / 5 * 255;
-	    return [r, g, b];
-	  };
-	  convert.rgb.hex = function (args) {
-	    const integer = ((Math.round(args[0]) & 0xFF) << 16) + ((Math.round(args[1]) & 0xFF) << 8) + (Math.round(args[2]) & 0xFF);
-	    const string = integer.toString(16).toUpperCase();
-	    return '000000'.substring(string.length) + string;
-	  };
-	  convert.hex.rgb = function (args) {
-	    const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
-	    if (!match) {
-	      return [0, 0, 0];
-	    }
-	    let colorString = match[0];
-	    if (match[0].length === 3) {
-	      colorString = colorString.split('').map(char => {
-	        return char + char;
-	      }).join('');
-	    }
-	    const integer = parseInt(colorString, 16);
-	    const r = integer >> 16 & 0xFF;
-	    const g = integer >> 8 & 0xFF;
-	    const b = integer & 0xFF;
-	    return [r, g, b];
-	  };
-	  convert.rgb.hcg = function (rgb) {
-	    const r = rgb[0] / 255;
-	    const g = rgb[1] / 255;
-	    const b = rgb[2] / 255;
-	    const max = Math.max(Math.max(r, g), b);
-	    const min = Math.min(Math.min(r, g), b);
-	    const chroma = max - min;
-	    let grayscale;
-	    let hue;
-	    if (chroma < 1) {
-	      grayscale = min / (1 - chroma);
-	    } else {
-	      grayscale = 0;
-	    }
-	    if (chroma <= 0) {
-	      hue = 0;
-	    } else if (max === r) {
-	      hue = (g - b) / chroma % 6;
-	    } else if (max === g) {
-	      hue = 2 + (b - r) / chroma;
-	    } else {
-	      hue = 4 + (r - g) / chroma;
-	    }
-	    hue /= 6;
-	    hue %= 1;
-	    return [hue * 360, chroma * 100, grayscale * 100];
-	  };
-	  convert.hsl.hcg = function (hsl) {
-	    const s = hsl[1] / 100;
-	    const l = hsl[2] / 100;
-	    const c = l < 0.5 ? 2.0 * s * l : 2.0 * s * (1.0 - l);
-	    let f = 0;
-	    if (c < 1.0) {
-	      f = (l - 0.5 * c) / (1.0 - c);
-	    }
-	    return [hsl[0], c * 100, f * 100];
-	  };
-	  convert.hsv.hcg = function (hsv) {
-	    const s = hsv[1] / 100;
-	    const v = hsv[2] / 100;
-	    const c = s * v;
-	    let f = 0;
-	    if (c < 1.0) {
-	      f = (v - c) / (1 - c);
-	    }
-	    return [hsv[0], c * 100, f * 100];
-	  };
-	  convert.hcg.rgb = function (hcg) {
-	    const h = hcg[0] / 360;
-	    const c = hcg[1] / 100;
-	    const g = hcg[2] / 100;
-	    if (c === 0.0) {
-	      return [g * 255, g * 255, g * 255];
-	    }
-	    const pure = [0, 0, 0];
-	    const hi = h % 1 * 6;
-	    const v = hi % 1;
-	    const w = 1 - v;
-	    let mg = 0;
-
-	    /* eslint-disable max-statements-per-line */
-	    switch (Math.floor(hi)) {
-	      case 0:
-	        pure[0] = 1;
-	        pure[1] = v;
-	        pure[2] = 0;
-	        break;
-	      case 1:
-	        pure[0] = w;
-	        pure[1] = 1;
-	        pure[2] = 0;
-	        break;
-	      case 2:
-	        pure[0] = 0;
-	        pure[1] = 1;
-	        pure[2] = v;
-	        break;
-	      case 3:
-	        pure[0] = 0;
-	        pure[1] = w;
-	        pure[2] = 1;
-	        break;
-	      case 4:
-	        pure[0] = v;
-	        pure[1] = 0;
-	        pure[2] = 1;
-	        break;
-	      default:
-	        pure[0] = 1;
-	        pure[1] = 0;
-	        pure[2] = w;
-	    }
-	    /* eslint-enable max-statements-per-line */
-
-	    mg = (1.0 - c) * g;
-	    return [(c * pure[0] + mg) * 255, (c * pure[1] + mg) * 255, (c * pure[2] + mg) * 255];
-	  };
-	  convert.hcg.hsv = function (hcg) {
-	    const c = hcg[1] / 100;
-	    const g = hcg[2] / 100;
-	    const v = c + g * (1.0 - c);
-	    let f = 0;
-	    if (v > 0.0) {
-	      f = c / v;
-	    }
-	    return [hcg[0], f * 100, v * 100];
-	  };
-	  convert.hcg.hsl = function (hcg) {
-	    const c = hcg[1] / 100;
-	    const g = hcg[2] / 100;
-	    const l = g * (1.0 - c) + 0.5 * c;
-	    let s = 0;
-	    if (l > 0.0 && l < 0.5) {
-	      s = c / (2 * l);
-	    } else if (l >= 0.5 && l < 1.0) {
-	      s = c / (2 * (1 - l));
-	    }
-	    return [hcg[0], s * 100, l * 100];
-	  };
-	  convert.hcg.hwb = function (hcg) {
-	    const c = hcg[1] / 100;
-	    const g = hcg[2] / 100;
-	    const v = c + g * (1.0 - c);
-	    return [hcg[0], (v - c) * 100, (1 - v) * 100];
-	  };
-	  convert.hwb.hcg = function (hwb) {
-	    const w = hwb[1] / 100;
-	    const b = hwb[2] / 100;
-	    const v = 1 - b;
-	    const c = v - w;
-	    let g = 0;
-	    if (c < 1) {
-	      g = (v - c) / (1 - c);
-	    }
-	    return [hwb[0], c * 100, g * 100];
-	  };
-	  convert.apple.rgb = function (apple) {
-	    return [apple[0] / 65535 * 255, apple[1] / 65535 * 255, apple[2] / 65535 * 255];
-	  };
-	  convert.rgb.apple = function (rgb) {
-	    return [rgb[0] / 255 * 65535, rgb[1] / 255 * 65535, rgb[2] / 255 * 65535];
-	  };
-	  convert.gray.rgb = function (args) {
-	    return [args[0] / 100 * 255, args[0] / 100 * 255, args[0] / 100 * 255];
-	  };
-	  convert.gray.hsl = function (args) {
-	    return [0, 0, args[0]];
-	  };
-	  convert.gray.hsv = convert.gray.hsl;
-	  convert.gray.hwb = function (gray) {
-	    return [0, 100, gray[0]];
-	  };
-	  convert.gray.cmyk = function (gray) {
-	    return [0, 0, 0, gray[0]];
-	  };
-	  convert.gray.lab = function (gray) {
-	    return [gray[0], 0, 0];
-	  };
-	  convert.gray.hex = function (gray) {
-	    const val = Math.round(gray[0] / 100 * 255) & 0xFF;
-	    const integer = (val << 16) + (val << 8) + val;
-	    const string = integer.toString(16).toUpperCase();
-	    return '000000'.substring(string.length) + string;
-	  };
-	  convert.rgb.gray = function (rgb) {
-	    const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
-	    return [val / 255 * 100];
-	  };
-	  return conversions;
-	}
-
-	var route;
-	var hasRequiredRoute;
-	function requireRoute() {
-	  if (hasRequiredRoute) return route;
-	  hasRequiredRoute = 1;
-	  const conversions = requireConversions();
-
-	  /*
-	  	This function routes a model to all other models.
-	  		all functions that are routed have a property `.conversion` attached
-	  	to the returned synthetic function. This property is an array
-	  	of strings, each with the steps in between the 'from' and 'to'
-	  	color models (inclusive).
-	  		conversions that are not possible simply are not included.
-	  */
-
-	  function buildGraph() {
-	    const graph = {};
-	    // https://jsperf.com/object-keys-vs-for-in-with-closure/3
-	    const models = Object.keys(conversions);
-	    for (let len = models.length, i = 0; i < len; i++) {
-	      graph[models[i]] = {
-	        // http://jsperf.com/1-vs-infinity
-	        // micro-opt, but this is simple.
-	        distance: -1,
-	        parent: null
-	      };
-	    }
-	    return graph;
-	  }
-
-	  // https://en.wikipedia.org/wiki/Breadth-first_search
-	  function deriveBFS(fromModel) {
-	    const graph = buildGraph();
-	    const queue = [fromModel]; // Unshift -> queue -> pop
-
-	    graph[fromModel].distance = 0;
-	    while (queue.length) {
-	      const current = queue.pop();
-	      const adjacents = Object.keys(conversions[current]);
-	      for (let len = adjacents.length, i = 0; i < len; i++) {
-	        const adjacent = adjacents[i];
-	        const node = graph[adjacent];
-	        if (node.distance === -1) {
-	          node.distance = graph[current].distance + 1;
-	          node.parent = current;
-	          queue.unshift(adjacent);
-	        }
-	      }
-	    }
-	    return graph;
-	  }
-	  function link(from, to) {
-	    return function (args) {
-	      return to(from(args));
-	    };
-	  }
-	  function wrapConversion(toModel, graph) {
-	    const path = [graph[toModel].parent, toModel];
-	    let fn = conversions[graph[toModel].parent][toModel];
-	    let cur = graph[toModel].parent;
-	    while (graph[cur].parent) {
-	      path.unshift(graph[cur].parent);
-	      fn = link(conversions[graph[cur].parent][cur], fn);
-	      cur = graph[cur].parent;
-	    }
-	    fn.conversion = path;
-	    return fn;
-	  }
-	  route = function (fromModel) {
-	    const graph = deriveBFS(fromModel);
-	    const conversion = {};
-	    const models = Object.keys(graph);
-	    for (let len = models.length, i = 0; i < len; i++) {
-	      const toModel = models[i];
-	      const node = graph[toModel];
-	      if (node.parent === null) {
-	        // No possible conversion, or this node is the source model.
-	        continue;
-	      }
-	      conversion[toModel] = wrapConversion(toModel, graph);
-	    }
-	    return conversion;
-	  };
-	  return route;
-	}
-
-	var colorConvert;
-	var hasRequiredColorConvert;
-	function requireColorConvert() {
-	  if (hasRequiredColorConvert) return colorConvert;
-	  hasRequiredColorConvert = 1;
-	  const conversions = requireConversions();
-	  const route = requireRoute();
-	  const convert = {};
-	  const models = Object.keys(conversions);
-	  function wrapRaw(fn) {
-	    const wrappedFn = function (...args) {
-	      const arg0 = args[0];
-	      if (arg0 === undefined || arg0 === null) {
-	        return arg0;
-	      }
-	      if (arg0.length > 1) {
-	        args = arg0;
-	      }
-	      return fn(args);
-	    };
-
-	    // Preserve .conversion property if there is one
-	    if ('conversion' in fn) {
-	      wrappedFn.conversion = fn.conversion;
-	    }
-	    return wrappedFn;
-	  }
-	  function wrapRounded(fn) {
-	    const wrappedFn = function (...args) {
-	      const arg0 = args[0];
-	      if (arg0 === undefined || arg0 === null) {
-	        return arg0;
-	      }
-	      if (arg0.length > 1) {
-	        args = arg0;
-	      }
-	      const result = fn(args);
-
-	      // We're assuming the result is an array here.
-	      // see notice in conversions.js; don't use box types
-	      // in conversion functions.
-	      if (typeof result === 'object') {
-	        for (let len = result.length, i = 0; i < len; i++) {
-	          result[i] = Math.round(result[i]);
-	        }
-	      }
-	      return result;
-	    };
-
-	    // Preserve .conversion property if there is one
-	    if ('conversion' in fn) {
-	      wrappedFn.conversion = fn.conversion;
-	    }
-	    return wrappedFn;
-	  }
-	  models.forEach(fromModel => {
-	    convert[fromModel] = {};
-	    Object.defineProperty(convert[fromModel], 'channels', {
-	      value: conversions[fromModel].channels
-	    });
-	    Object.defineProperty(convert[fromModel], 'labels', {
-	      value: conversions[fromModel].labels
-	    });
-	    const routes = route(fromModel);
-	    const routeModels = Object.keys(routes);
-	    routeModels.forEach(toModel => {
-	      const fn = routes[toModel];
-	      convert[fromModel][toModel] = wrapRounded(fn);
-	      convert[fromModel][toModel].raw = wrapRaw(fn);
-	    });
 	  });
-	  colorConvert = convert;
-	  return colorConvert;
 	}
-
-	var hasRequiredLib;
-	function requireLib() {
-	  if (hasRequiredLib) return lib$1;
-	  hasRequiredLib = 1;
-	  var __spreadArray = lib$1 && lib$1.__spreadArray || function (to, from, pack) {
-	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-	      if (ar || !(i in from)) {
-	        if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-	        ar[i] = from[i];
-	      }
-	    }
-	    return to.concat(ar || Array.prototype.slice.call(from));
-	  };
-	  Object.defineProperty(lib$1, "__esModule", {
-	    value: true
-	  });
-	  lib$1.colorFromUuid = void 0;
-	  var uuid_1 = esmBrowser;
-	  var UuidEncoder = requireLib$1();
-	  var convert = requireColorConvert();
-	  var DEFAULT_COLOR_FORMAT = "hex";
-	  var DEFAULT_IS_RAW = false;
-	  var encoder = new UuidEncoder("base10");
-	  /**
-	   * Returns the generated color associated with the given uuid.
-	   *
-	   * @param uuid - The uuid for which to generate a color
-	   * @param options - An optional object to configure the color generation, and attach callbacks that directly receive the generated color code or components in various formats
-	   * @returns The generated color as a CSS `<color>` notation string
-	   *
-	   * @throws {@link https://developer.mozilla.org/en-US/docs/web/javascript/reference/global_objects/error | Error}
-	   * This exception is thrown if the input uuid string is not a valid UUID.
-	   *
-	   * @public
-	   */
-	  function colorFromUuid(uuid, options) {
-	    if (options === void 0) {
-	      options = {};
-	    }
-	    if (!(0, uuid_1.validate)(uuid)) {
-	      throw new Error("Given string is not a valid UUID.");
-	    }
-	    var encodedUuid = BigInt(encoder.encode(uuid));
-	    var colorCode = Number(encodedUuid % BigInt(0x1000000));
-	    var red = colorCode >> 16;
-	    var green = colorCode >> 8 & 0xff;
-	    var blue = colorCode & 0xff;
-	    var receivers = {};
-	    if (options.hasOwnProperty("receivers")) {
-	      ["rgb", "hsl", "hex"].forEach(function (format) {
-	        if (options.receivers.hasOwnProperty(format)) {
-	          receivers[format] = options.receivers[format]; // link to callbacks
-	        }
-	      });
-	    }
-	    var isRaw = DEFAULT_IS_RAW;
-	    if (options.hasOwnProperty("raw")) {
-	      isRaw = options.raw;
-	    }
-	    var alpha;
-	    if (options.hasOwnProperty("alpha")) {
-	      alpha = Math.min(Math.max(options.alpha, 0), 1); // clamp to [0; 1]
-	    }
-	    if ("rgb" in receivers) {
-	      if (alpha === undefined) {
-	        receivers.rgb(red, green, blue);
-	      } else {
-	        receivers.rgb(red, green, blue, alpha);
-	      }
-	    }
-	    if ("hsl" in receivers) {
-	      var hsl = isRaw ? convert.rgb.hsl.raw(red, green, blue) : convert.rgb.hsl(red, green, blue);
-	      if (alpha === undefined) {
-	        receivers.hsl.apply(receivers, hsl);
-	      } else {
-	        receivers.hsl.apply(receivers, __spreadArray(__spreadArray([], hsl, true), [alpha], false));
-	      }
-	    }
-	    if ("hex" in receivers) {
-	      var hexColorCode = convert.rgb.hex(red, green, blue).toLowerCase();
-	      if (alpha === undefined) {
-	        receivers.hex(hexColorCode);
-	      } else {
-	        var hexAlphaCode = Math.floor(alpha * 255).toString(16);
-	        receivers.hex(hexColorCode + hexAlphaCode);
-	      }
-	    }
-	    var format = DEFAULT_COLOR_FORMAT;
-	    if (options.hasOwnProperty("format")) {
-	      format = options.format;
-	    }
-	    switch (format) {
-	      case "rgb":
-	        return alpha === undefined ? "rgb(".concat(red, ", ").concat(green, ", ").concat(blue, ")") : "rgb(".concat(red, ", ").concat(green, ", ").concat(blue, ", ").concat(alpha, ")");
-	      case "hsl":
-	        var hsl = isRaw ? convert.rgb.hsl.raw(red, green, blue) : convert.rgb.hsl(red, green, blue);
-	        return alpha === undefined ? "hsl(".concat(hsl[0], ", ").concat(hsl[1], "%, ").concat(hsl[2], "%)") : "hsl(".concat(hsl[0], ", ").concat(hsl[1], "%, ").concat(hsl[2], "%, ").concat(alpha, ")");
-	      default: // don't error
-	      case "hex":
-	        var hexColorCode = convert.rgb.hex(red, green, blue).toLowerCase();
-	        var hexAlphaCode = Math.floor(alpha * 255).toString(16);
-	        return alpha === undefined ? "#".concat(hexColorCode) : "#".concat(hexColorCode).concat(hexAlphaCode);
-	    }
+	function baseColor(key) {
+	  if (!assigned.has(key)) {
+	    assigned.set(key, ITEM_PALETTE[(assigned.size + hashOf(key)) % ITEM_PALETTE.length]);
 	  }
-	  lib$1.colorFromUuid = colorFromUuid;
-	  return lib$1;
+	  return assigned.get(key);
 	}
-
-	var libExports = /*@__PURE__*/ requireLib();
-
+	const shadeSteps = [0, -0.11, 0.1, -0.055, 0.16, -0.16, 0.05, -0.1, 0.13];
+	function itemColor(item) {
+	  const key = colorKey(item);
+	  const chosen = overrides.get(key);
+	  const base = chosen === undefined ? baseColor(key) : Number.parseInt(chosen.replace('#', ''), 16);
+	  const copy = /#(\d+)$/.exec(String(item.id || ''));
+	  if (!copy) {
+	    return base;
+	  }
+	  const shade = shadeSteps[(Number(copy[1]) - 1) % shadeSteps.length];
+	  const hsl = {};
+	  const color = new Color(base);
+	  color.getHSL(hsl);
+	  color.setHSL((hsl.h + shade * 0.16 + 1) % 1, Math.min(1, Math.max(0.25, hsl.s + shade * 0.35)), Math.min(0.82, Math.max(0.32, hsl.l + shade)));
+	  return color.getHex();
+	}
+	function itemColorCss(item) {
+	  return '#' + itemColor(item).toString(16).padStart(6, '0');
+	}
 	class CameraAnimation {
 	  constructor(camera, controls, targetPosition, targetLookAt, duration) {
 	    this.camera = camera;
@@ -47138,16 +44672,10 @@ void main() {
 	    if (!this.isActive) return false;
 	    const elapsed = Date.now() - this.startTime;
 	    const progress = Math.min(elapsed / this.duration, 1);
-
-	    // Ease in-out cubic function for smooth animation
 	    const easedProgress = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-
-	    // Interpolate camera position using manual calculation
 	    this.camera.position.x = this.startPosition.x + (this.targetPosition.x - this.startPosition.x) * easedProgress;
 	    this.camera.position.y = this.startPosition.y + (this.targetPosition.y - this.startPosition.y) * easedProgress;
 	    this.camera.position.z = this.startPosition.z + (this.targetPosition.z - this.startPosition.z) * easedProgress;
-
-	    // Interpolate look-at target
 	    this.controls.target.x = this.startLookAt.x + (this.targetLookAt.x - this.startLookAt.x) * easedProgress;
 	    this.controls.target.y = this.startLookAt.y + (this.targetLookAt.y - this.startLookAt.y) * easedProgress;
 	    this.controls.target.z = this.startLookAt.z + (this.targetLookAt.z - this.startLookAt.z) * easedProgress;
@@ -47169,25 +44697,9 @@ void main() {
 	  cameraControls;
 	  ambientLight;
 	  light;
-
-	  /**
-	   * @type {[THREE.Mesh]}
-	   */
 	  boxes = [];
-
-	  /**
-	   * @type {[THREE.Mesh]}
-	   */
 	  items = [];
-
-	  /**
-	   * @type {Map<string, THREE.Mesh>}
-	   */
 	  boxMap = new Map();
-
-	  /**
-	   * @type {Map<string, THREE.Mesh>}
-	   */
 	  itemMap = new Map();
 	  materials = {};
 	  animationFrameId = null;
@@ -47200,16 +44712,29 @@ void main() {
 	  showAnimation = true;
 	  cameraAnimation = null;
 	  boxList = [];
+	  overlay = null;
+	  itemColors = new Map();
+	  pendingAnimations = [];
+	  ground = null;
 	  mouseDownPos = null;
 	  isDragging = false;
 	  constructor(container) {
-	    this.camera = new PerspectiveCamera(45, container.offsetWidth / window.innerHeight, 1, 80000);
+	    if (container) {
+	      this.attach(container);
+	    }
+	  }
+	  attach(container) {
+	    this.camera = new PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 1, 80000);
 	    this.camera.position.set(-600, 550, 1300);
-	    this.ambientLight = new AmbientLight(0x7c7c7c, 3.0);
-	    this.light = new DirectionalLight(0xFFFFFF, 3.0);
-	    this.light.position.set(0.32, 0.39, 0.7);
+	    this.ambientLight = new HemisphereLight(0xc8d6d2, 0x0e1012, 1.5);
+	    this.light = new DirectionalLight(0xfff1dc, 2.2);
+	    this.light.position.set(0.6, 1.0, 0.45);
+	    this.fillLight = new DirectionalLight(0x9fb4c9, 0.85);
+	    this.fillLight.position.set(-0.7, 0.35, -0.5);
+	    this.rimLight = new DirectionalLight(0xffffff, 0.55);
+	    this.rimLight.position.set(-0.2, 0.6, -1);
 	    const canvasWidth = container.offsetWidth;
-	    const canvasHeight = window.innerHeight;
+	    const canvasHeight = container.offsetHeight;
 	    this.renderer = new WebGLRenderer({
 	      antialias: true,
 	      alpha: true
@@ -47217,92 +44742,189 @@ void main() {
 	    this.renderer.setPixelRatio(window.devicePixelRatio);
 	    this.renderer.setSize(canvasWidth, canvasHeight);
 	    container.appendChild(this.renderer.domElement);
+	    this.createOverlay(container);
 	    window.addEventListener('resize', e => this.onWindowResize(e, container));
 	    window.addEventListener('keydown', e => this.onKeyboard(e));
 	    this.cameraControls = new OrbitControls(this.camera, this.renderer.domElement);
+	    this.cameraControls.enableDamping = true;
+	    this.cameraControls.dampingFactor = 0.09;
+	    this.cameraControls.rotateSpeed = 0.55;
+	    this.cameraControls.zoomSpeed = 0.7;
+	    this.cameraControls.panSpeed = 0.8;
+	    this.cameraControls.screenSpacePanning = true;
+	    this.cameraControls.maxPolarAngle = Math.PI * 0.495;
+	    this.cameraControls.mouseButtons = {
+	      LEFT: MOUSE.ROTATE,
+	      MIDDLE: MOUSE.DOLLY,
+	      RIGHT: MOUSE.PAN
+	    };
+	    this.cameraControls.touches = {
+	      ONE: TOUCH.ROTATE,
+	      TWO: TOUCH.DOLLY_PAN
+	    };
 	    this.cameraControls.addEventListener('change', () => this.renderer.render(this.scene, this.camera));
-
-	    // Add click handler for box selection
 	    this.raycaster = new Raycaster();
 	    this.mouse = new Vector2$1();
 	    const canvas = this.renderer.domElement;
-
-	    // Track mouse down position to detect dragging
+	    canvas.style.cursor = 'grab';
+	    canvas.addEventListener('contextmenu', e => e.preventDefault());
 	    canvas.addEventListener('mousedown', e => {
 	      this.mouseDownPos = {
 	        x: e.clientX,
 	        y: e.clientY
 	      };
 	      this.isDragging = false;
+	      canvas.style.cursor = 'grabbing';
 	    });
-
-	    // Track mouse movement to detect dragging
 	    canvas.addEventListener('mousemove', e => {
 	      if (this.mouseDownPos) {
 	        const dx = Math.abs(e.clientX - this.mouseDownPos.x);
 	        const dy = Math.abs(e.clientY - this.mouseDownPos.y);
-	        // If mouse moved more than 5 pixels, consider it a drag
-	        if (dx > 5 || dy > 5) {
+	        if (dx > 4 || dy > 4) {
 	          this.isDragging = true;
 	        }
 	      }
 	    });
-
-	    // Reset on mouse up
 	    canvas.addEventListener('mouseup', () => {
 	      this.mouseDownPos = null;
+	      canvas.style.cursor = 'grab';
 	    });
-
-	    // Handle click - only if it wasn't a drag
+	    canvas.addEventListener('dblclick', e => {
+	      const hit = this.pick(e);
+	      if (hit && hit.itemId) {
+	        this.selectItem(hit.itemId, true);
+	      } else if (hit && hit.boxId) {
+	        this.selectBox(hit.boxId, true);
+	      } else {
+	        this.viewFrom('fit');
+	      }
+	    });
 	    canvas.addEventListener('click', e => {
-	      // Only process click if it wasn't a drag
 	      if (!this.isDragging) {
 	        this.onCanvasClick(e);
 	      }
 	      this.isDragging = false;
 	    });
 	    this.materials['wireframe'] = new MeshBasicMaterial({
-	      wireframe: true,
-	      color: 0x888888,
+	      color: 0x000000,
 	      transparent: true,
-	      opacity: 0.5
+	      opacity: 0,
+	      depthWrite: false
 	    });
-	    this.materials['wireframe_selected'] = new MeshBasicMaterial({
-	      wireframe: true,
-	      color: 0x00ff00,
-	      linewidth: 2
+	    this.materials['edges'] = new LineBasicMaterial({
+	      color: 0x4a5457,
+	      transparent: true,
+	      opacity: 0.75
 	    });
-	    this.materials['flat'] = new MeshPhongMaterial({
-	      specular: 0x000000,
-	      flatShading: true,
-	      side: DoubleSide
+	    this.materials['edges_unused'] = new LineBasicMaterial({
+	      color: 0x6c7a7d,
+	      transparent: true,
+	      opacity: 0.22
 	    });
-	    this.materials['smooth'] = new MeshLambertMaterial({
-	      side: DoubleSide
+	    this.materials['edges_selected'] = new LineBasicMaterial({
+	      color: 0xffb74d
 	    });
-	    this.materials['glossy'] = new MeshPhongMaterial({
-	      side: DoubleSide
-	    });
-	    this.materials['item_selected'] = new MeshPhongMaterial({
-	      color: 0xffff00,
-	      flatShading: true,
+	    this.materials['box_floor'] = new MeshBasicMaterial({
+	      color: 0xffb74d,
+	      transparent: true,
+	      opacity: 0.05,
 	      side: DoubleSide,
+	      depthWrite: false
+	    });
+	    this.materials['item_outline'] = new LineBasicMaterial({
+	      color: 0x030506,
 	      transparent: true,
-	      opacity: 1.0,
-	      emissive: 0xffff00,
-	      emissiveIntensity: 0.5
+	      opacity: 0.55
+	    });
+	    this.materials['unfit_outline'] = new LineBasicMaterial({
+	      color: 0xff5252,
+	      transparent: true,
+	      opacity: 0.8
+	    });
+	    this.materials['item_selected'] = new MeshStandardMaterial({
+	      color: 0xffb74d,
+	      roughness: 0.3,
+	      metalness: 0.0,
+	      emissive: 0xff9946,
+	      emissiveIntensity: 0.45
 	    });
 	    this.scene = new Scene();
-	    this.scene.background = new Color(0x0a0a0a); // Very dark background
-
+	    this.scene.background = null;
 	    this.scene.add(this.ambientLight);
 	    this.scene.add(this.light);
+	    this.scene.add(this.fillLight);
+	    this.scene.add(this.rimLight);
 	    this.animate();
+	  }
+	  setFlat(flat) {
+	    this.flat = flat;
+	  }
+	  setEmpty(empty) {
+	    if (this.emptyNote) {
+	      this.emptyNote.style.display = empty ? 'flex' : 'none';
+	    }
+	  }
+	  createOverlay(container) {
+	    this.emptyNote = document.createElement('div');
+	    this.emptyNote.className = 'scene-empty';
+	    this.emptyNote.innerHTML = '<span class="scene-empty-title">Nothing packed yet</span>' + '<span class="scene-empty-hint">Add items on the left and the packing appears here.</span>';
+	    this.emptyNote.style.display = 'none';
+	    container.appendChild(this.emptyNote);
+	    const overlay = document.createElement('div');
+	    overlay.className = 'hud';
+	    overlay.innerHTML = `
+            <div class="hud-views">
+                <button type="button" data-view="fit">fit</button>
+                <button type="button" data-view="iso">iso</button>
+                <button type="button" data-view="top">top</button>
+                <button type="button" data-view="front">front</button>
+                <button type="button" data-view="side">side</button>
+            </div>
+            <div class="hud-hint">
+                left-drag orbit · right-drag pan · wheel zoom · click select · double-click focus · esc clear
+            </div>
+        `;
+	    overlay.querySelectorAll('[data-view]').forEach(button => {
+	      button.addEventListener('click', () => this.viewFrom(button.dataset.view));
+	    });
+	    container.appendChild(overlay);
+	    this.overlay = overlay;
+	  }
+	  setSummary(summary) {
+	    if (!this.overlay) {
+	      return;
+	    }
+	    for (const [key, value] of Object.entries(summary)) {
+	      const node = this.overlay.querySelector(`[data-hud="${key}"]`);
+	      if (node) {
+	        node.textContent = value;
+	      }
+	    }
+	  }
+	  viewFrom(preset) {
+	    const bounds = new Box3$1();
+	    for (const mesh of this.boxes) bounds.expandByObject(mesh);
+	    for (const mesh of this.items) bounds.expandByObject(mesh);
+	    if (bounds.isEmpty()) {
+	      return;
+	    }
+	    const size = bounds.getSize(new Vector3$1());
+	    const center = bounds.getCenter(new Vector3$1());
+	    const radius = Math.max(size.x, size.y, size.z) * 0.5;
+	    const distance = radius / Math.sin(this.camera.fov * Math.PI / 180 / 2) * 1.35;
+	    const directions = {
+	      fit: new Vector3$1(-0.55, 0.5, 1),
+	      iso: new Vector3$1(-0.8, 0.65, 0.8),
+	      top: new Vector3$1(0, 1, 0.001),
+	      front: new Vector3$1(0, 0.12, 1),
+	      side: new Vector3$1(1, 0.12, 0.001)
+	    };
+	    const direction = (directions[preset] || directions.fit).clone().normalize();
+	    const target = center.clone().add(direction.multiplyScalar(distance));
+	    this.cameraAnimation = new CameraAnimation(this.camera, this.cameraControls, target, center, 700);
 	  }
 	  animate() {
 	    this.animationFrameId = requestAnimationFrame(() => this.animate());
-
-	    // Update camera animation if active
 	    if (this.cameraAnimation) {
 	      this.cameraAnimation.update();
 	    }
@@ -47312,25 +44934,26 @@ void main() {
 	  render(request) {
 	    if (request !== undefined && typeof request.boxes !== 'undefined' && request.boxes.length > 0) {
 	      this.createObjects(request);
+	      this.fitToScene();
 	    }
 	  }
 	  selectBox(boxId, animate = true) {
 	    if (this.selectedBox) {
 	      const oldBox = this.boxMap.get(this.selectedBox);
 	      if (oldBox) {
-	        oldBox.material = this.materials['wireframe'];
+	        if (oldBox.userData.edges) oldBox.userData.edges.material = this.materials['edges'];
 	      }
 	    }
-
-	    // Reset selected item when selecting a box
 	    if (this.selectedItem) {
 	      const oldItem = this.itemMap.get(this.selectedItem);
 	      if (oldItem) {
-	        const color = libExports.colorFromUuid(this.selectedItem);
-	        oldItem.material = new MeshPhongMaterial({
+	        const color = this.itemColors.get(this.selectedItem) ?? 0x8b9791;
+	        oldItem.material = new MeshStandardMaterial({
 	          color: color,
-	          flatShading: true,
-	          side: DoubleSide,
+	          roughness: 0.55,
+	          metalness: 0.05,
+	          emissive: color,
+	          emissiveIntensity: 0.12,
 	          transparent: true,
 	          opacity: 0.9
 	        });
@@ -47340,33 +44963,22 @@ void main() {
 	    this.selectedBox = boxId;
 	    const box = this.boxMap.get(boxId);
 	    if (box) {
-	      box.material = this.materials['wireframe_selected'];
-
-	      // Calculate optimal camera position
+	      if (box.userData.edges) box.userData.edges.material = this.materials['edges_selected'];
 	      const boxPosition = box.position.clone();
 	      const boxData = box.userData.boxData;
 	      Math.max(boxData.width, boxData.height, boxData.depth);
-
-	      // Calculate optimal viewing angle
 	      const diagonal = Math.sqrt(boxData.width * boxData.width + boxData.height * boxData.height + boxData.depth * boxData.depth);
-	      const distance = diagonal * 1.5; // Optimal distance for viewing
-
-	      // Calculate camera position with better angle
-	      const angle = Math.PI / 4; // 45 degrees
-	      const height = boxData.height * 0.7; // Slightly above center
-
+	      const distance = diagonal * 1.5;
+	      const angle = Math.PI / 4;
+	      const height = boxData.depth * 0.7;
 	      const targetPosition = new Vector3$1(boxPosition.x + Math.cos(angle) * distance, boxPosition.y + height, boxPosition.z + Math.sin(angle) * distance);
-	      const targetLookAt = new Vector3$1(boxPosition.x, boxPosition.y + boxData.height * 0.3, boxPosition.z);
+	      const targetLookAt = new Vector3$1(boxPosition.x, boxPosition.y + boxData.depth * 0.3, boxPosition.z);
 	      if (animate && this.cameraAnimation) {
-	        // Stop current animation
 	        this.cameraAnimation.stop();
 	      }
 	      if (animate) {
-	        // Animate camera movement
-	        this.cameraAnimation = new CameraAnimation(this.camera, this.cameraControls, targetPosition, targetLookAt, 1000 // 1 second animation
-	        );
+	        this.cameraAnimation = new CameraAnimation(this.camera, this.cameraControls, targetPosition, targetLookAt, 1000);
 	      } else {
-	        // Instant move
 	        this.camera.position.copy(targetPosition);
 	        this.cameraControls.target.copy(targetLookAt);
 	        this.cameraControls.update();
@@ -47377,16 +44989,16 @@ void main() {
 	    }
 	  }
 	  selectItem(itemId, animate = true) {
-	    // Reset previously selected item
 	    if (this.selectedItem) {
 	      const oldItem = this.itemMap.get(this.selectedItem);
 	      if (oldItem) {
-	        // Restore original color based on item ID
-	        const color = libExports.colorFromUuid(this.selectedItem);
-	        oldItem.material = new MeshPhongMaterial({
+	        const color = this.itemColors.get(this.selectedItem) ?? 0x8b9791;
+	        oldItem.material = new MeshStandardMaterial({
 	          color: color,
-	          flatShading: true,
-	          side: DoubleSide,
+	          roughness: 0.55,
+	          metalness: 0.05,
+	          emissive: color,
+	          emissiveIntensity: 0.12,
 	          transparent: true,
 	          opacity: 0.9
 	        });
@@ -47395,28 +45007,27 @@ void main() {
 	    this.selectedItem = itemId;
 	    const item = this.itemMap.get(itemId);
 	    if (item) {
-	      // Highlight selected item with yellow color
 	      item.material = this.materials['item_selected'];
-
-	      // Calculate optimal camera position to focus on the item
+	      if (this.onItemSelect) {
+	        this.onItemSelect(itemId, item.parent?.userData?.boxId);
+	      }
 	      if (animate) {
 	        const itemPosition = new Vector3$1();
 	        item.getWorldPosition(itemPosition);
 	        const itemData = item.userData?.itemData;
 	        if (itemData) {
-	          Math.max(itemData.width, itemData.height, itemData.depth);
 	          const diagonal = Math.sqrt(itemData.width * itemData.width + itemData.height * itemData.height + itemData.depth * itemData.depth);
-	          const distance = diagonal * 2; // Distance to view the item
-
-	          const angle = Math.PI / 4; // 45 degrees
-	          const height = itemData.height * 0.5;
+	          const boxData = item.parent?.userData?.boxData;
+	          const around = boxData ? Math.sqrt(boxData.width * boxData.width + boxData.height * boxData.height + boxData.depth * boxData.depth) : diagonal * 4;
+	          const distance = Math.max(diagonal * 3, around * 0.85);
+	          const angle = Math.PI / 4;
+	          const height = Math.max(itemData.depth, distance * 0.35);
 	          const targetPosition = new Vector3$1(itemPosition.x + Math.cos(angle) * distance, itemPosition.y + height, itemPosition.z + Math.sin(angle) * distance);
 	          const targetLookAt = itemPosition.clone();
 	          if (this.cameraAnimation) {
 	            this.cameraAnimation.stop();
 	          }
-	          this.cameraAnimation = new CameraAnimation(this.camera, this.cameraControls, targetPosition, targetLookAt, 800 // 0.8 second animation
-	          );
+	          this.cameraAnimation = new CameraAnimation(this.camera, this.cameraControls, targetPosition, targetLookAt, 800);
 	        }
 	      }
 	    }
@@ -47425,12 +45036,13 @@ void main() {
 	    if (this.selectedItem) {
 	      const oldItem = this.itemMap.get(this.selectedItem);
 	      if (oldItem) {
-	        // Restore original color based on item ID
-	        const color = libExports.colorFromUuid(this.selectedItem);
-	        oldItem.material = new MeshPhongMaterial({
+	        const color = this.itemColors.get(this.selectedItem) ?? 0x8b9791;
+	        oldItem.material = new MeshStandardMaterial({
 	          color: color,
-	          flatShading: true,
-	          side: DoubleSide,
+	          roughness: 0.55,
+	          metalness: 0.05,
+	          emissive: color,
+	          emissiveIntensity: 0.12,
 	          transparent: true,
 	          opacity: 0.9
 	        });
@@ -47445,11 +45057,9 @@ void main() {
 	    if (this.selectedBox) {
 	      const oldBox = this.boxMap.get(this.selectedBox);
 	      if (oldBox) {
-	        oldBox.material = this.materials['wireframe'];
+	        if (oldBox.userData.edges) oldBox.userData.edges.material = this.materials['edges'];
 	      }
 	      this.selectedBox = null;
-
-	      // Also deselect item if selected
 	      this.deselectItem();
 	      if (this.onBoxDeselect) {
 	        this.onBoxDeselect();
@@ -47469,15 +45079,21 @@ void main() {
 	    this.selectBox(this.boxList[prevIndex]);
 	  }
 	  onWindowResize(e, container) {
-	    const canvasWidth = container.offsetWidth;
-	    const canvasHeight = window.innerHeight;
+	    const canvasWidth = container.clientWidth;
+	    const canvasHeight = container.clientHeight;
+	    if (canvasWidth === 0 || canvasHeight === 0) {
+	      return;
+	    }
 	    this.renderer.setSize(canvasWidth, canvasHeight);
 	    this.camera.aspect = canvasWidth / canvasHeight;
 	    this.camera.updateProjectionMatrix();
-	    this.render();
+	    this.renderer.render(this.scene, this.camera);
 	  }
 	  onKeyboard(e) {
-	    // ESC key to deselect
+	    const target = e.target;
+	    if (target && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) {
+	      return;
+	    }
 	    if (e.key === 'Escape') {
 	      e.preventDefault();
 	      if (this.selectedItem) {
@@ -47488,8 +45104,6 @@ void main() {
 	        return;
 	      }
 	    }
-
-	    // Navigation between boxes with Ctrl+Arrow keys
 	    if (e.ctrlKey || e.metaKey) {
 	      if (e.key === 'ArrowLeft') {
 	        e.preventDefault();
@@ -47501,8 +45115,6 @@ void main() {
 	        return;
 	      }
 	    }
-
-	    // Camera movement with WASD or Arrow keys (without Ctrl)
 	    const delta = 200;
 	    switch (e.code) {
 	      case "KeyA":
@@ -47528,123 +45140,242 @@ void main() {
 	    }
 	    this.cameraControls.update();
 	  }
-	  onCanvasClick(event) {
+	  pick(event) {
 	    const rect = this.renderer.domElement.getBoundingClientRect();
 	    this.mouse.x = (event.clientX - rect.left) / rect.width * 2 - 1;
 	    this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 	    this.raycaster.setFromCamera(this.mouse, this.camera);
-	    const intersects = this.raycaster.intersectObjects(this.boxes, true);
-	    if (intersects.length > 0) {
-	      // Find the box mesh (not the item mesh)
-	      let boxMesh = intersects[0].object;
-	      while (boxMesh && !this.boxMap.has(boxMesh.userData?.boxId)) {
-	        boxMesh = boxMesh.parent;
-	      }
-	      if (boxMesh && boxMesh.userData?.boxId) {
-	        this.selectBox(boxMesh.userData.boxId);
+	    const hits = this.raycaster.intersectObjects([...this.items, ...this.boxes], true);
+	    let fallback = null;
+	    for (const hit of hits) {
+	      let node = hit.object;
+	      while (node) {
+	        const itemId = node.userData?.itemData?.id;
+	        if (itemId !== undefined && this.itemMap.has(itemId)) {
+	          return {
+	            itemId,
+	            boxId: node.parent?.userData?.boxId
+	          };
+	        }
+	        if (fallback === null && this.boxMap.has(node.userData?.boxId)) {
+	          fallback = node.userData.boxId;
+	        }
+	        node = node.parent;
 	      }
 	    }
+	    return fallback === null ? null : {
+	      boxId: fallback
+	    };
+	  }
+	  onCanvasClick(event) {
+	    const hit = this.pick(event);
+	    if (!hit) {
+	      return;
+	    }
+	    if (hit.itemId) {
+	      this.selectItem(hit.itemId, false);
+	      return;
+	    }
+	    this.selectBox(hit.boxId, false);
+	  }
+	  release(root) {
+	    const shared = new Set(Object.values(this.materials));
+	    root.traverse(node => {
+	      if (node.geometry) {
+	        node.geometry.dispose();
+	      }
+	      for (const material of [].concat(node.material || [])) {
+	        if (!shared.has(material)) {
+	          material.dispose();
+	        }
+	      }
+	    });
 	  }
 	  destroy() {
-	    for (const item of this.items) {
-	      item.geometry.dispose();
-	      if (item.material) item.material.dispose();
-	      this.scene.remove(item);
+	    for (const timer of this.pendingAnimations) {
+	      clearTimeout(timer);
 	    }
-	    for (const box of this.boxes) {
-	      box.geometry.dispose();
-	      this.scene.remove(box);
+	    this.pendingAnimations = [];
+	    if (this.ground) {
+	      this.scene.remove(this.ground);
+	      this.ground.geometry.dispose();
+	      this.ground.material.dispose();
+	      this.ground = null;
+	    }
+	    for (const mesh of this.items.concat(this.boxes)) {
+	      this.release(mesh);
+	      this.scene.remove(mesh);
 	    }
 	    this.boxes = [];
 	    this.items = [];
 	    this.boxMap.clear();
 	    this.itemMap.clear();
+	    this.itemColors.clear();
 	    this.selectedBox = null;
 	    this.selectedItem = null;
 	  }
 	  createObjects(request) {
 	    this.destroy();
-
-	    // Store box list for navigation
-	    this.boxList = request.boxes.map(box => box.id);
-	    const delta = 50;
-	    let point = {
-	      x: 0,
-	      z: 0
-	    };
-	    let zMax = 0;
-
-	    // Create boxes first
-	    for (const box of request.boxes) {
-	      const boxGeometry = new BoxGeometry(box.width, box.height, box.depth);
+	    const filled = request.boxes.filter(box => box.items && box.items.length > 0);
+	    const drawn = this.showUnusedBoxes ? request.boxes : filled;
+	    this.setEmpty(drawn.length === 0);
+	    if (drawn.length === 0) {
+	      this.renderer.render(this.scene, this.camera);
+	      return;
+	    }
+	    const ordered = drawn.slice().sort((a, b) => {
+	      const filledA = a.items && a.items.length > 0 ? 0 : 1;
+	      const filledB = b.items && b.items.length > 0 ? 0 : 1;
+	      return filledA - filledB || b.width * b.height - a.width * a.height;
+	    });
+	    this.addGround({
+	      boxes: ordered
+	    });
+	    this.boxList = ordered.map(box => box.id);
+	    const delta = Math.max(50, ordered.reduce((largest, box) => Math.max(largest, box.width, box.height), 0) * 0.12);
+	    const spanBudget = Math.max(ordered.reduce((total, box) => total + box.width + delta, 0) ** 0.5 * Math.max(...ordered.map(box => box.width)) ** 0.5, Math.max(...ordered.map(box => box.width)));
+	    let cursorX = 0;
+	    let rowFront = 0;
+	    let rowDepth = 0;
+	    let layoutDepth = 0;
+	    for (const box of ordered) {
+	      if (cursorX > 0 && cursorX + box.width > spanBudget) {
+	        rowFront += rowDepth + delta;
+	        rowDepth = 0;
+	        cursorX = 0;
+	      }
+	      const boxGeometry = new BoxGeometry(box.width, box.depth, box.height);
 	      const boxMesh = new Mesh(boxGeometry, this.materials['wireframe']);
-	      point.x += box.width / 2;
-	      boxMesh.position.set(point.x, box.height / 2, point.z);
+	      const empty = !box.items || box.items.length === 0;
+	      const edges = new LineSegments(new EdgesGeometry(boxGeometry), this.materials[empty ? 'edges_unused' : 'edges']);
+	      boxMesh.add(edges);
+	      if (!empty) {
+	        const floor = new Mesh(new PlaneGeometry(box.width, box.height), this.materials['box_floor']);
+	        floor.rotation.x = -Math.PI / 2;
+	        floor.position.y = -box.depth / 2 + 0.5;
+	        boxMesh.add(floor);
+	      }
+	      boxMesh.position.set(cursorX + box.width / 2, box.depth / 2, rowFront + box.height / 2);
 	      this.boxes = this.boxes.concat(boxMesh);
 	      this.boxMap.set(box.id, boxMesh);
 	      this.scene.add(boxMesh);
-
-	      // Store box data for later use
 	      boxMesh.userData = {
 	        boxId: box.id,
 	        boxData: box,
-	        items: []
+	        items: [],
+	        edges
 	      };
-
-	      // Add items with animation
 	      if (this.showAnimation) {
 	        this.animateItemsIntoBox(boxMesh, box.items, box);
 	      } else {
 	        this.addItemsToBox(boxMesh, box.items, box);
 	      }
-	      point.x += box.width / 2 + delta;
-	      zMax = Math.max(box.depth, zMax);
+	      cursorX += box.width + delta;
+	      rowDepth = Math.max(rowDepth, box.height);
+	      layoutDepth = Math.max(layoutDepth, rowFront + box.height);
 	    }
-
-	    // Add unfit items
+	    const zMax = layoutDepth;
+	    let point = {
+	      x: 0,
+	      z: 0
+	    };
+	    const deepest = ordered.reduce((largest, box) => Math.max(largest, box.height), 0);
 	    point = {
 	      x: 0,
 	      y: 0,
-	      z: zMax + delta + 100
+	      z: zMax + delta + Math.max(300, deepest * 0.9)
 	    };
 	    for (const item of request.items || []) {
-	      const color = libExports.colorFromUuid(item.id);
-	      const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
-	      const itemMaterial = new MeshPhongMaterial({
+	      const color = itemColor(item);
+	      const itemGeometry = new BoxGeometry(item.width, item.depth, item.height);
+	      const itemMaterial = new MeshStandardMaterial({
 	        color: color,
-	        flatShading: true,
-	        side: DoubleSide,
+	        roughness: 0.55,
+	        metalness: 0.05,
+	        emissive: color,
+	        emissiveIntensity: 0.12,
 	        transparent: true,
-	        opacity: 0.5
+	        opacity: 0.35
 	      });
 	      const itemMesh = new Mesh(itemGeometry, itemMaterial);
-	      itemMesh.position.set(point.x + item.width / 2, item.height / 2, point.z);
+	      itemMesh.add(new LineSegments(new EdgesGeometry(itemGeometry), this.materials['unfit_outline']));
+	      this.itemColors.set(item.id, color);
+	      itemMesh.position.set(point.x + item.width / 2, item.depth / 2, point.z);
 	      this.items = this.items.concat(itemMesh);
 	      this.itemMap.set(item.id, itemMesh);
 	      this.scene.add(itemMesh);
 	      point.x += item.width + delta;
 	    }
 	  }
+	  addGround(request) {
+	    const span = (request.boxes || []).reduce((total, box) => total + box.width + 50, 0) || 1000;
+	    const size = Math.max(span, 1000) * 1.6;
+	    const divisions = Math.max(8, Math.round(size / 250));
+	    this.ground = new GridHelper(size, divisions, 0x6c7a7d, 0x333c3f);
+	    this.ground.position.set(span / 2, -0.5, 0);
+	    this.ground.material.transparent = true;
+	    this.ground.material.opacity = 0.9;
+	    this.scene.add(this.ground);
+	  }
+	  fitToScene() {
+	    let bounds = new Box3$1();
+	    const everything = new Box3$1();
+	    for (const mesh of this.boxes) {
+	      const data = mesh.userData.boxData;
+	      everything.expandByObject(mesh);
+	      if (data && data.items && data.items.length > 0) {
+	        bounds.expandByObject(mesh);
+	      }
+	    }
+	    for (const mesh of this.items) {
+	      bounds.expandByObject(mesh);
+	      everything.expandByObject(mesh);
+	    }
+	    if (bounds.isEmpty()) {
+	      bounds = everything;
+	    }
+	    if (bounds.isEmpty()) {
+	      return;
+	    }
+	    if (this.showUnusedBoxes && bounds !== everything) {
+	      const span = box => Math.max(...box.getSize(new Vector3$1()).toArray());
+	      const packed = span(bounds);
+	      bounds = span(everything) <= packed * 2.5 ? everything : bounds.clone().expandByScalar(packed * 0.45);
+	    }
+	    const size = bounds.getSize(new Vector3$1());
+	    const center = bounds.getCenter(new Vector3$1());
+	    const radius = Math.max(size.x, size.y, size.z) * 0.5;
+	    const fov = this.camera.fov * (Math.PI / 180);
+	    const distance = radius / Math.sin(fov / 2) * 1.35;
+	    this.camera.near = Math.max(distance / 1000, 0.1);
+	    this.camera.far = distance * 12;
+	    this.camera.updateProjectionMatrix();
+	    this.cameraControls.maxPolarAngle = this.flat ? Math.PI * 0.98 : Math.PI * 0.495;
+	    const direction = this.flat ? new Vector3$1(0, 1, 0) : new Vector3$1(-0.55, 0.5, 1).normalize();
+	    this.camera.position.copy(center.clone().add(direction.multiplyScalar(distance)));
+	    this.cameraControls.target.copy(center);
+	    this.cameraControls.minDistance = radius * 0.25;
+	    this.cameraControls.maxDistance = distance * 6;
+	    this.cameraControls.update();
+	  }
 	  addItemsToBox(boxMesh, items, boxData) {
 	    for (const item of items) {
-	      const color = libExports.colorFromUuid(item.id);
-	      const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
-	      const itemMaterial = new MeshPhongMaterial({
+	      const color = itemColor(item);
+	      const itemGeometry = new BoxGeometry(item.width, item.depth, item.height);
+	      const itemMaterial = new MeshStandardMaterial({
 	        color: color,
-	        flatShading: true,
+	        roughness: 0.55,
+	        metalness: 0.05,
+	        emissive: color,
+	        emissiveIntensity: 0.12,
 	        side: DoubleSide,
 	        transparent: true,
 	        opacity: 0.9
 	      });
 	      const itemMesh = new Mesh(itemGeometry, itemMaterial);
-
-	      // In boxpacker3, item.position is the bottom-left-front corner (pivot point)
-	      // In Three.js, mesh position is the center of the geometry
-	      // BoxGeometry center is at (0,0,0) in local coordinates
-	      // So we need to convert from pivot point to center point
-	      itemMesh.position.set(item.position.x + item.width / 2 - boxData.width / 2, item.position.y + item.height / 2 - boxData.height / 2, item.position.z + item.depth / 2 - boxData.depth / 2);
-
-	      // Store item data for camera positioning
+	      itemMesh.add(new LineSegments(new EdgesGeometry(itemGeometry), this.materials['item_outline']));
+	      this.itemColors.set(item.id, color);
+	      itemMesh.position.set(item.position.x + item.width / 2 - boxData.width / 2, item.position.z + item.depth / 2 - boxData.depth / 2, item.position.y + item.height / 2 - boxData.height / 2);
 	      itemMesh.userData.itemData = item;
 	      this.items = this.items.concat(itemMesh);
 	      this.itemMap.set(item.id, itemMesh);
@@ -47654,46 +45385,41 @@ void main() {
 	  }
 	  animateItemsIntoBox(boxMesh, items, boxData) {
 	    let delay = 0;
-	    const itemDelay = 100 / this.animationSpeed;
+	    const itemDelay = Math.min(60, 900 / Math.max(items.length, 1)) / this.animationSpeed;
 	    for (const item of items) {
-	      setTimeout(() => {
-	        const color = libExports.colorFromUuid(item.id);
-	        const itemGeometry = new BoxGeometry(item.width, item.height, item.depth);
-	        const itemMaterial = new MeshPhongMaterial({
+	      this.pendingAnimations.push(setTimeout(() => {
+	        const color = itemColor(item);
+	        const itemGeometry = new BoxGeometry(item.width, item.depth, item.height);
+	        const itemMaterial = new MeshStandardMaterial({
 	          color: color,
-	          flatShading: true,
+	          roughness: 0.55,
+	          metalness: 0.05,
+	          emissive: color,
+	          emissiveIntensity: 0.12,
 	          side: DoubleSide,
 	          transparent: true,
 	          opacity: 0.9
 	        });
 	        const itemMesh = new Mesh(itemGeometry, itemMaterial);
-
-	        // Start position (above the box)
-	        const startY = boxData.height + item.height / 2 + 100;
-	        // In boxpacker3, item.position is the bottom-left-front corner (pivot point)
-	        // In Three.js, mesh position is the center of the geometry
-	        // BoxGeometry center is at (0,0,0) in local coordinates
+	        itemMesh.add(new LineSegments(new EdgesGeometry(itemGeometry), this.materials['item_outline']));
+	        this.itemColors.set(item.id, color);
+	        const startY = boxData.depth + item.depth / 2 + 100;
 	        const finalX = item.position.x + item.width / 2 - boxData.width / 2;
-	        const finalY = item.position.y + item.height / 2 - boxData.height / 2;
-	        const finalZ = item.position.z + item.depth / 2 - boxData.depth / 2;
+	        const finalY = item.position.z + item.depth / 2 - boxData.depth / 2;
+	        const finalZ = item.position.y + item.height / 2 - boxData.height / 2;
 	        itemMesh.position.set(finalX, startY, finalZ);
 	        itemMesh.scale.set(0.1, 0.1, 0.1);
-
-	        // Store item data for camera positioning
 	        itemMesh.userData.itemData = item;
 	        this.items = this.items.concat(itemMesh);
 	        this.itemMap.set(item.id, itemMesh);
 	        boxMesh.add(itemMesh);
 	        boxMesh.userData.items.push(item);
-
-	        // Animate
 	        const startTime = Date.now();
-	        const duration = 800 / this.animationSpeed;
+	        const duration = 420 / this.animationSpeed;
 	        const animate = () => {
 	          const elapsed = Date.now() - startTime;
 	          const progress = Math.min(elapsed / duration, 1);
-	          const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-
+	          const easeProgress = 1 - Math.pow(1 - progress, 3);
 	          itemMesh.position.y = startY + (finalY - startY) * easeProgress;
 	          itemMesh.scale.set(0.1 + (1 - 0.1) * easeProgress, 0.1 + (1 - 0.1) * easeProgress, 0.1 + (1 - 0.1) * easeProgress);
 	          if (progress < 1) {
@@ -47701,7 +45427,7 @@ void main() {
 	          }
 	        };
 	        animate();
-	      }, delay);
+	      }, delay));
 	      delay += itemDelay;
 	    }
 	  }
@@ -52717,79 +50443,700 @@ void main() {
 	} = axios;
 
 	async function api (url, data) {
-	  return await axios.post(url, data).then(resp => resp.data);
+	  try {
+	    const response = await axios.post(url, data);
+	    return response.data;
+	  } catch (error) {
+	    const detail = error.response?.data;
+	    return {
+	      error: typeof detail === 'string' && detail !== '' ? detail.trim() : error.message
+	    };
+	  }
 	}
 
-	const datumValidate = /^(\d+);(\d+);(\d+);(\d+)$/;
 	const boxType = 0;
 	const itemType = 1;
+	const defaultSettings = {
+	  order: 'decreasing',
+	  selection: 'fullest-box',
+	  parallel: false,
+	  algorithms: ['FullestBoxDecreasing', 'FirstFitDecreasing', 'BestFitDecreasing'],
+	  goal: 'FewestBoxes',
+	  supportRatio: 0,
+	  auto: false,
+	  balanceWeight: true,
+	  search: false,
+	  searchFills: false,
+	  freeSpaceCorners: false,
+	  merit: 'contact-first',
+	  rehome: false,
+	  singleContainer: false
+	};
+	const AUTO_PRESET = -2;
+	const FLAT_DEPTH = 1;
+	const EXPORT_HEADER = 'kind;width;height;depth;weight;qty;rotation;group;colour;enabled;tare;inner;top;class;apart';
+	function parseExported(line) {
+	  const owned = /^(box|item)([;,\t])/.exec(line);
+	  const parts = (owned ? line.split(owned[2]) : line.split(/[;,\t]/)).map(part => part.trim());
+	  const numbers = values => values.every(value => Number.isFinite(value) && value > 0);
+	  if (parts[0] === 'box' || parts[0] === 'item') {
+	    const [kind, width, height, depth, weight, qty, rotation, group, colour, enabled, tare, inner, top, klass, apart, takes] = parts;
+	    const sides = (inner || '').split(/[x×*]/).map(Number);
+	    const lined = sides.length === 3 && sides.every(v => isFinite(v) && v > 0);
+	    const dims = [width, height, depth].map(Number);
+	    const mass = Number(weight);
+	    if (!numbers(dims) || !Number.isFinite(mass) || mass < 0) {
+	      return null;
+	    }
+	    return {
+	      type: kind === 'box' ? boxType : itemType,
+	      width: dims[0],
+	      height: dims[1],
+	      depth: dims[2],
+	      weight: mass,
+	      quantity: Math.max(parseInt(qty, 10) || 1, 1),
+	      rotation: rotation || '',
+	      group: group || '',
+	      color: colour || '',
+	      enabled: enabled === undefined || enabled === '' || enabled === '1' || enabled === 'true',
+	      tare: Number(tare) || 0,
+	      innerWidth: lined ? sides[0] : 0,
+	      innerHeight: lined ? sides[1] : 0,
+	      innerDepth: lined ? sides[2] : 0,
+	      nothingOnTop: top === 'none',
+	      maxLoadOnTop: top === 'none' ? 0 : Math.max(Number(top) || 0, 0),
+	      class: klass || '',
+	      separateFrom: (apart || '').split(',').map(part => part.trim()).filter(Boolean),
+	      accepts: (takes || '').split(',').map(part => part.trim()).filter(Boolean)
+	    };
+	  }
+	  const legacy = parts.filter(Boolean);
+	  if (legacy.length < 4) {
+	    return null;
+	  }
+	  const dims = legacy.slice(0, 3).map(Number);
+	  const mass = Number(legacy[3]);
+	  if (!numbers(dims) || !Number.isFinite(mass) || mass < 0) {
+	    return null;
+	  }
+	  return {
+	    type: Number(legacy[4]) === boxType ? boxType : itemType,
+	    width: dims[0],
+	    height: dims[1],
+	    depth: dims[2],
+	    weight: mass,
+	    quantity: 1,
+	    rotation: '',
+	    group: '',
+	    color: '',
+	    enabled: true,
+	    tare: 0,
+	    innerWidth: 0,
+	    innerHeight: 0,
+	    innerDepth: 0
+	  };
+	}
+	function swatchOf(datum) {
+	  return datum.color || itemColorCss({
+	    id: datum.id,
+	    group: datum.group
+	  });
+	}
+	function formatWeight(grams) {
+	  return grams >= 1000 ? `${(grams / 1000).toFixed(2)} kg` : `${Math.round(grams)} g`;
+	}
+	function meterRow(label, percent, detail, kind = 'limit') {
+	  const level = kind === 'fill' ? '' : percent > 90 ? ' is-danger' : percent > 75 ? ' is-warn' : '';
+	  return /*#__PURE__*/gn.createElement("div", {
+	    className: "meter",
+	    title: detail
+	  }, /*#__PURE__*/gn.createElement("span", {
+	    className: "meter-label"
+	  }, label), /*#__PURE__*/gn.createElement("span", {
+	    className: "meter-track"
+	  }, /*#__PURE__*/gn.createElement("span", {
+	    className: `meter-fill${level}`,
+	    style: {
+	      width: `${Math.min(percent, 100)}%`
+	    }
+	  })), /*#__PURE__*/gn.createElement("span", {
+	    className: "meter-value"
+	  }, percent.toFixed(0), "%"));
+	}
+	function flatPlaceholder(flat, type, boxKind) {
+	  if (type === boxKind) {
+	    return flat ? '1200;800;50000' : '400;300;200;20000';
+	  }
+	  return flat ? '297;210;40' : '120;90;70;500';
+	}
+	function flatDefaults(flat) {
+	  if (!flat) {
+	    return [];
+	  }
+	  const sheets = [[1200, 800], [1000, 600], [600, 400], [400, 300]].map(([w, h]) => new Datum(generateUUID(), boxType, w, h, FLAT_DEPTH, 50000, {
+	    quantity: 20
+	  }));
+	  const cuts = [[420, 297, 4], [297, 210, 8], [210, 148, 6], [180, 120, 4]].map(([w, h, qty]) => new Datum(generateUUID(), itemType, w, h, FLAT_DEPTH, 40, {
+	    quantity: qty
+	  }));
+	  return sheets.concat(cuts);
+	}
+	function centreOfGravity(box) {
+	  let mass = 0;
+	  let x = 0;
+	  let y = 0;
+	  let z = 0;
+	  for (const item of box.items) {
+	    const w = item.weight || 0;
+	    mass += w;
+	    x += w * (item.position.x + item.width / 2);
+	    y += w * (item.position.y + item.height / 2);
+	    z += w * (item.position.z + item.depth / 2);
+	  }
+	  if (mass <= 0) {
+	    return null;
+	  }
+	  const centre = {
+	    x: x / mass,
+	    y: y / mass,
+	    z: z / mass,
+	    mass
+	  };
+	  const share = axis => centre[axis] / box[{
+	    x: 'width',
+	    y: 'height',
+	    z: 'depth'
+	  }[axis]];
+	  centre.balanced = ['x', 'y'].every(axis => share(axis) > 1 / 3 && share(axis) < 2 / 3);
+	  centre.shareX = share('x');
+	  centre.shareY = share('y');
+	  return centre;
+	}
+	function cargoList(box, articles) {
+	  const rows = new Map();
+	  for (const item of box.items) {
+	    const article = articleOf(articles, item);
+	    const row = rows.get(article.label) || {
+	      label: article.label,
+	      dims: article.dims,
+	      group: article.group,
+	      color: article.color,
+	      unit: item.weight,
+	      count: 0,
+	      nothingOnTop: item.nothingOnTop || false,
+	      maxLoadOnTop: item.maxLoadOnTop || 0,
+	      class: item.class || '',
+	      separateFrom: item.separateFrom || []
+	    };
+	    row.count += 1;
+	    rows.set(article.label, row);
+	  }
+	  return [...rows.values()].sort((a, b) => a.label.localeCompare(b.label));
+	}
+	function cargoNote(row) {
+	  const notes = [];
+	  if (row.nothingOnTop) {
+	    notes.push('nothing on top');
+	  } else if (row.maxLoadOnTop > 0) {
+	    notes.push(`carries ${formatWeight(row.maxLoadOnTop)}`);
+	  }
+	  if (row.separateFrom.length) {
+	    notes.push(`away from ${row.separateFrom.join(', ')}`);
+	  }
+	  if (row.group) {
+	    notes.push(`ships with ${row.group}`);
+	  }
+	  return notes.join(' · ');
+	}
+	function niceStep(span) {
+	  const raw = span / 6;
+	  const power = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1))));
+	  for (const multiple of [1, 2, 2.5, 5]) {
+	    if (raw <= multiple * power) {
+	      return multiple * power;
+	    }
+	  }
+	  return 10 * power;
+	}
+	function rulerTicks(span, scale) {
+	  const step = niceStep(span);
+	  const ticks = [];
+	  for (let at = 0; at < span - step * 0.4; at += step) {
+	    ticks.push({
+	      at: Math.round(at),
+	      pos: at * scale
+	    });
+	  }
+	  ticks.push({
+	    at: Math.round(span),
+	    pos: span * scale
+	  });
+	  return ticks;
+	}
+	const BADGE = 9;
+	function compareOutcome(a, b) {
+	  return a.unfit - b.unfit || Math.round(a.capacity) - Math.round(b.capacity) || a.boxes - b.boxes || b.fill - a.fill;
+	}
+	function outcomePreview(containers, canvas, tall) {
+	  const shown = containers.slice(0, 12);
+	  const gap = 4;
+	  if (shown.length === 0) {
+	    return {
+	      width: canvas,
+	      height: tall,
+	      boxes: []
+	    };
+	  }
+	  const widest = shown.reduce((total, box) => total + box.width, 0) + gap * (shown.length - 1);
+	  const deepest = Math.max(...shown.map(box => box.depth));
+	  const scale = Math.min(canvas / widest, tall / deepest);
+	  let cursor = 0;
+	  const boxes = shown.map((box, index) => {
+	    const drawn = {
+	      key: index,
+	      x: cursor,
+	      width: Math.max(box.width * scale, 2),
+	      height: Math.max(box.depth * scale, 2),
+	      fill: box.fill,
+	      items: box.items
+	    };
+	    cursor += box.width * scale + gap;
+	    return drawn;
+	  });
+	  return {
+	    width: cursor - gap,
+	    height: deepest * scale,
+	    boxes,
+	    hidden: containers.length - shown.length
+	  };
+	}
+	function labelOf(options, value) {
+	  return (options || []).find(o => o.value === value)?.label || value || '';
+	}
+	function ruleGist(meta, rule) {
+	  return (meta?.selections || []).find(o => o.value === rule)?.gist || '';
+	}
+	function ruleNote(meta, rule) {
+	  const found = (meta?.selections || []).find(o => o.value === rule);
+	  if (!found) {
+	    return rule;
+	  }
+	  return [found.description, found.bound && `Worst case: ${found.bound}.`].filter(Boolean).join(' ');
+	}
+	function formatVolume(cubicMillimetres) {
+	  if (cubicMillimetres >= 1e9) {
+	    return `${(cubicMillimetres / 1e9).toFixed(2)} m³`;
+	  }
+	  return `${Math.round(cubicMillimetres / 1e6)} L`;
+	}
+	const PANE_SLOTS = [0, 240, 330, 430, 560];
+	const STRIP_SLOTS = [0, 130, 200, 300, 440];
+	const SNAP = 16;
+	function pieceBadges(pieces) {
+	  return pieces.map(piece => {
+	    const inside = piece.w >= BADGE * 2.4 && piece.h >= BADGE * 2.4;
+	    return {
+	      ...piece,
+	      inside,
+	      bx: inside ? piece.x + piece.w / 2 : piece.x + piece.w + BADGE + 3,
+	      by: inside ? piece.y + piece.h / 2 : piece.y + piece.h / 2
+	    };
+	  });
+	}
+	function planPieces(box, items, articles, scale) {
+	  return items.map((item, index) => {
+	    const article = articleOf(articles, item);
+	    return {
+	      key: item.id,
+	      step: index + 1,
+	      label: article.label,
+	      color: article.color,
+	      x: item.position.x * scale,
+	      y: (box.height - item.position.y - item.height) * scale,
+	      w: Math.max(item.width * scale, 1),
+	      h: Math.max(item.height * scale, 1)
+	    };
+	  });
+	}
+	function unfoldedNet(box, items, articles, canvas) {
+	  const scale = canvas / (box.width + box.depth * 2);
+	  const left = box.depth * scale;
+	  const top = box.depth * scale;
+	  const floorWidth = box.width * scale;
+	  const floorHeight = box.height * scale;
+	  const wall = box.depth * scale;
+	  const piece = (item, x, y, w, h) => {
+	    const article = articleOf(articles, item);
+	    return {
+	      key: item.id,
+	      x,
+	      y,
+	      w: Math.max(w, 1),
+	      h: Math.max(h, 1),
+	      color: article.color,
+	      label: article.label
+	    };
+	  };
+	  const againstBack = items.filter(item => item.position.y + item.height >= box.height - 0.5);
+	  const againstFront = items.filter(item => item.position.y <= 0.5);
+	  const againstLeft = items.filter(item => item.position.x <= 0.5);
+	  const againstRight = items.filter(item => item.position.x + item.width >= box.width - 0.5);
+	  const onFloor = items.filter(item => item.position.z <= 0.5);
+	  const panels = [{
+	    key: 'back',
+	    title: 'Back wall',
+	    labelX: left + floorWidth / 2,
+	    labelY: -8,
+	    anchor: 'middle',
+	    x: left,
+	    y: 0,
+	    w: floorWidth,
+	    h: wall,
+	    pieces: againstBack.map(item => piece(item, left + item.position.x * scale, top - (item.position.z + item.depth) * scale, item.width * scale, item.depth * scale))
+	  }, {
+	    key: 'left',
+	    title: 'Left wall',
+	    labelX: -8,
+	    labelY: top + floorHeight / 2,
+	    anchor: 'end',
+	    x: 0,
+	    y: top,
+	    w: wall,
+	    h: floorHeight,
+	    pieces: againstLeft.map(item => piece(item, left - (item.position.z + item.depth) * scale, top + (box.height - item.position.y - item.height) * scale, item.depth * scale, item.height * scale))
+	  }, {
+	    key: 'floor',
+	    title: 'Floor · bottom layer',
+	    labelX: left + 4,
+	    labelY: top + 12,
+	    anchor: 'start',
+	    x: left,
+	    y: top,
+	    w: floorWidth,
+	    h: floorHeight,
+	    pieces: onFloor.map(item => piece(item, left + item.position.x * scale, top + (box.height - item.position.y - item.height) * scale, item.width * scale, item.height * scale))
+	  }, {
+	    key: 'right',
+	    title: 'Right wall',
+	    labelX: left + floorWidth + wall + 8,
+	    labelY: top + floorHeight / 2,
+	    anchor: 'start',
+	    x: left + floorWidth,
+	    y: top,
+	    w: wall,
+	    h: floorHeight,
+	    pieces: againstRight.map(item => piece(item, left + floorWidth + item.position.z * scale, top + (box.height - item.position.y - item.height) * scale, item.depth * scale, item.height * scale))
+	  }, {
+	    key: 'front',
+	    title: 'Front wall — the side you open',
+	    labelX: left + floorWidth / 2,
+	    labelY: top + floorHeight + wall + 13,
+	    anchor: 'middle',
+	    x: left,
+	    y: top + floorHeight,
+	    w: floorWidth,
+	    h: wall,
+	    pieces: againstFront.map(item => piece(item, left + item.position.x * scale, top + floorHeight + item.position.z * scale, item.width * scale, item.depth * scale))
+	  }];
+	  return {
+	    scale,
+	    width: floorWidth + wall * 2,
+	    height: floorHeight + wall * 2,
+	    panels
+	  };
+	}
+	function layerOf(box, item) {
+	  const floors = [...new Set(box.items.map(other => Math.round(other.position.z)))].sort((a, b) => a - b);
+	  return {
+	    index: floors.indexOf(Math.round(item.position.z)) + 1,
+	    total: floors.length
+	  };
+	}
+	function coveredBy(box, item) {
+	  const top = item.position.z + item.depth;
+	  return box.items.filter(other => other !== item && Math.abs(other.position.z - top) < 0.5 && other.position.x < item.position.x + item.width - 0.5 && item.position.x < other.position.x + other.width - 0.5 && other.position.y < item.position.y + item.height - 0.5 && item.position.y < other.position.y + other.height - 0.5);
+	}
+	function loadOn(box, item) {
+	  const top = item.position.z + item.depth;
+	  return box.items.filter(other => other !== item && other.position.z + 0.5 >= top && other.position.x < item.position.x + item.width - 0.5 && item.position.x < other.position.x + other.width - 0.5 && other.position.y < item.position.y + item.height - 0.5 && item.position.y < other.position.y + other.height - 0.5).reduce((total, other) => total + other.weight, 0);
+	}
+	const SPREADING_RULES = ['worst-fit', 'almost-worst-fit'];
+	function boxSizesOffered(elements) {
+	  const sizes = new Set();
+	  for (const element of elements) {
+	    if (element.enabled && element.type === boxType) {
+	      sizes.add(`${element.width}x${element.height}x${element.depth}`);
+	    }
+	  }
+	  return sizes.size;
+	}
+	function orderSummary(elements, packResult) {
+	  const active = elements.filter(element => element.enabled);
+	  const goods = active.filter(element => element.type === itemType);
+	  const crates = active.filter(element => element.type === boxType);
+	  const pieces = goods.reduce((sum, element) => sum + Math.max(element.quantity || 1, 1), 0);
+	  const weight = goods.reduce((sum, element) => sum + element.weight * Math.max(element.quantity || 1, 1), 0);
+	  const volume = goods.reduce((sum, element) => sum + element.width * element.height * element.depth * Math.max(element.quantity || 1, 1), 0);
+	  const used = (packResult?.boxes || []).filter(box => box.items.length > 0);
+	  const capacity = used.reduce((sum, box) => sum + (box.volumeAvailable || 0), 0);
+	  const filled = used.reduce((sum, box) => sum + (box.volumeUsed || 0), 0);
+	  const classes = [...new Set(goods.map(element => element.class).filter(Boolean))];
+	  const keptApart = goods.filter(element => element.separateFrom.length > 0).length;
+	  const loadLimited = goods.filter(element => element.nothingOnTop || element.maxLoadOnTop > 0).length;
+	  const dedicated = crates.filter(element => element.accepts.length > 0).length;
+	  return {
+	    kinds: goods.length,
+	    classes,
+	    keptApart,
+	    loadLimited,
+	    dedicated,
+	    pieces,
+	    weight,
+	    volume,
+	    crateKinds: crates.length,
+	    containers: used.length,
+	    capacity,
+	    fill: capacity > 0 ? filled / capacity * 100 : 0,
+	    left: packResult?.items?.length || 0
+	  };
+	}
+	function articleIndex(elements) {
+	  const index = new Map();
+	  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+	  elements.filter(element => element.type === itemType && element.enabled).forEach((element, at) => {
+	    index.set(element.id, {
+	      label: at < letters.length ? letters[at] : `#${at + 1}`,
+	      dims: `${element.width}×${element.height}×${element.depth}`,
+	      group: element.group,
+	      color: element.color || itemColorCss({
+	        id: element.id,
+	        group: element.group
+	      })
+	    });
+	  });
+	  return index;
+	}
+	function articleOf(index, item) {
+	  const base = String(item.id || '').replace(/#\d+$/, '');
+	  return index.get(base) || {
+	    label: '—',
+	    dims: `${Math.round(item.width)}×${Math.round(item.height)}×${Math.round(item.depth)}`,
+	    group: item.group,
+	    color: itemColorCss(item)
+	  };
+	}
+	function loadingPlan(result) {
+	  return (result.boxes || []).filter(box => box.items.length > 0).map((box, index) => {
+	    const steps = box.items.slice().sort((a, b) => a.position.z - b.position.z || a.position.y - b.position.y || a.position.x - b.position.x);
+	    const layers = [];
+	    for (const item of steps) {
+	      const floor = Math.round(item.position.z);
+	      let layer = layers.find(l => l.floor === floor);
+	      if (!layer) {
+	        layer = {
+	          floor,
+	          items: []
+	        };
+	        layers.push(layer);
+	      }
+	      layer.items.push(item);
+	    }
+	    const weight = box.items.reduce((total, item) => total + item.weight, 0);
+	    return {
+	      number: String(index + 1).padStart(2, '0'),
+	      id: box.id,
+	      box,
+	      dims: `${Math.round(box.width)}×${Math.round(box.height)}×${Math.round(box.depth)}`,
+	      count: box.items.length,
+	      fill: box.volumeAvailable > 0 ? `${Math.round(box.volumeUsed / box.volumeAvailable * 100)}%` : '—',
+	      weight: formatWeight(weight),
+	      gross: formatWeight(weight + (box.emptyWeight || 0)),
+	      limit: formatWeight(box.weight),
+	      layers
+	    };
+	  });
+	}
+	function summarise(result) {
+	  const stats = summaryValues(result);
+	  const report = result.report || {};
+	  const cells = [{
+	    label: 'boxes',
+	    value: stats.boxes,
+	    ink: 'var(--ink)'
+	  }, {
+	    label: 'packed',
+	    value: stats.packed,
+	    ink: 'var(--ink)'
+	  }, {
+	    label: 'left',
+	    value: stats.left,
+	    ink: stats.left === '0' ? 'var(--ink-faint)' : 'var(--alarm)'
+	  }, {
+	    label: 'fill',
+	    value: stats.fill,
+	    ink: 'var(--accent)'
+	  }, {
+	    label: 'time',
+	    value: stats.time,
+	    ink: 'var(--ink-muted)'
+	  }];
+	  if (report.boundBoxes > 0) {
+	    cells.push({
+	      label: 'least possible',
+	      value: report.gapBoxes > 0 ? `${report.boundBoxes} (+${report.gapBoxes})` : String(report.boundBoxes),
+	      ink: report.gapBoxes > 0 ? 'var(--ink-muted)' : 'var(--accent)'
+	    });
+	  }
+	  if (report.nodes > 0) {
+	    cells.push({
+	      label: 'states searched',
+	      value: String(report.nodes),
+	      ink: 'var(--ink-muted)'
+	    });
+	  }
+	  if (report.truncated) {
+	    cells.push({
+	      label: 'budget',
+	      value: 'ran out',
+	      ink: 'var(--alarm)'
+	    });
+	  }
+	  return Object.assign({}, stats, {
+	    cells,
+	    algorithm: report.algorithm || ''
+	  });
+	}
+	function summaryValues(result) {
+	  const used = (result.boxes || []).filter(box => box.items.length > 0);
+	  const packed = used.reduce((total, box) => total + box.items.length, 0);
+	  const capacity = used.reduce((total, box) => total + box.volumeAvailable, 0);
+	  const filled = used.reduce((total, box) => total + box.volumeUsed, 0);
+	  return {
+	    boxes: String(used.length),
+	    packed: String(packed),
+	    left: String((result.items || []).length),
+	    fill: capacity > 0 ? `${Math.round(filled / capacity * 100)}%` : '—',
+	    time: `${result.executionTime ?? 0} ms`
+	  };
+	}
+	const rotationValues = ['best-fit', 'keep-flat', 'never'];
+	function parseDatum(text, type, flat) {
+	  const parts = text.split(';').map(part => part.trim()).filter(part => part !== '');
+	  const fields = flat ? 3 : 4;
+	  if (parts.length < fields) {
+	    return null;
+	  }
+	  const numbers = parts.slice(0, fields).map(Number);
+	  if (numbers.some(value => !isFinite(value) || value <= 0)) {
+	    return null;
+	  }
+	  if (flat) {
+	    numbers.splice(2, 0, FLAT_DEPTH);
+	  }
+	  const extras = {};
+	  for (const part of parts.slice(fields)) {
+	    const eq = part.indexOf('=');
+	    if (eq < 1) {
+	      return null;
+	    }
+	    extras[part.slice(0, eq).trim().toLowerCase()] = part.slice(eq + 1).trim();
+	  }
+	  if (extras.rot !== undefined && !rotationValues.includes(extras.rot)) {
+	    return null;
+	  }
+	  let inner = {
+	    innerWidth: 0,
+	    innerHeight: 0,
+	    innerDepth: 0
+	  };
+	  if (extras.inner !== undefined) {
+	    const sides = extras.inner.split(/[x×*]/).map(Number);
+	    if (sides.length !== (flat ? 2 : 3) || sides.some(v => !isFinite(v) || v <= 0)) {
+	      return null;
+	    }
+	    if (flat) {
+	      sides.splice(2, 0, FLAT_DEPTH);
+	    }
+	    inner = {
+	      innerWidth: sides[0],
+	      innerHeight: sides[1],
+	      innerDepth: sides[2]
+	    };
+	  }
+	  const tare = extras.tare === undefined ? 0 : Number(extras.tare);
+	  if (!isFinite(tare) || tare < 0) {
+	    return null;
+	  }
+	  const accepts = (extras.takes || '').split(',').map(part => part.trim()).filter(Boolean);
+	  if (extras.takes !== undefined && accepts.length === 0) {
+	    return null;
+	  }
+	  const separateFrom = (extras.apart || '').split(',').map(part => part.trim()).filter(Boolean);
+	  if (extras.apart !== undefined && separateFrom.length === 0) {
+	    return null;
+	  }
+	  const nothingOnTop = extras.top === 'none';
+	  const maxLoadOnTop = extras.top === undefined || nothingOnTop ? 0 : Number(extras.top);
+	  if (!isFinite(maxLoadOnTop) || maxLoadOnTop < 0) {
+	    return null;
+	  }
+	  return {
+	    width: numbers[0],
+	    height: numbers[1],
+	    depth: numbers[2],
+	    weight: numbers[3],
+	    rotation: extras.rot || '',
+	    group: extras.group || '',
+	    quantity: extras.qty ? parseInt(extras.qty, 10) : 0,
+	    maxLoadOnTop,
+	    nothingOnTop,
+	    class: extras.class || '',
+	    separateFrom,
+	    accepts,
+	    tare,
+	    innerWidth: inner.innerWidth,
+	    innerHeight: inner.innerHeight,
+	    innerDepth: inner.innerDepth,
+	    type
+	  };
+	}
 	class Datum {
-	  constructor(id, type, width, height, depth, weight) {
+	  constructor(id, type, width, height, depth, weight, options = {}) {
 	    this.id = id;
 	    this.type = type;
-	    this.width = parseInt(width);
-	    this.height = parseInt(height);
-	    this.depth = parseInt(depth);
-	    this.weight = parseInt(weight);
+	    this.width = Number(width);
+	    this.height = Number(height);
+	    this.depth = Number(depth);
+	    this.weight = Number(weight);
+	    this.color = options.color || '';
+	    this.rotation = options.rotation || '';
+	    this.group = options.group || '';
+	    this.quantity = options.quantity || 0;
+	    this.maxLoadOnTop = Number(options.maxLoadOnTop) || 0;
+	    this.nothingOnTop = Boolean(options.nothingOnTop);
+	    this.class = options.class || '';
+	    this.separateFrom = options.separateFrom || [];
+	    this.accepts = options.accepts || [];
+	    this.tare = Number(options.tare) || 0;
+	    this.innerWidth = Number(options.innerWidth) || 0;
+	    this.innerHeight = Number(options.innerHeight) || 0;
+	    this.innerDepth = Number(options.innerDepth) || 0;
 	    this.enabled = true;
 	  }
 	  toString() {
-	    return this.width + 'x' + this.height + 'x' + this.depth + ' wg' + this.weight;
+	    const parts = [`${this.width}x${this.height}x${this.depth}`, `wg${this.weight}`];
+	    if (this.quantity > 1) parts.push(`x${this.quantity}`);
+	    if (this.rotation) parts.push(this.rotation);
+	    if (this.group) parts.push(`[${this.group}]`);
+	    if (this.accepts.length) parts.push(`takes ${this.accepts.join(', ')}`);
+	    if (this.separateFrom.length) parts.push(`away from ${this.separateFrom.join(', ')}`);
+	    if (this.nothingOnTop) parts.push('nothing on top');else if (this.maxLoadOnTop) parts.push(`carries ${this.maxLoadOnTop}`);
+	    return parts.join(' ');
 	  }
 	  toExport() {
-	    return [this.width, this.height, this.depth, this.weight, this.type].join(';');
+	    return [this.type === boxType ? 'box' : 'item', this.width, this.height, this.depth, this.weight, Math.max(this.quantity || 1, 1), this.rotation, this.group, this.color, this.enabled ? 1 : 0, this.tare || 0, this.innerWidth ? `${this.innerWidth}x${this.innerHeight}x${this.innerDepth}` : '', this.nothingOnTop ? 'none' : this.maxLoadOnTop || 0, this.class, this.separateFrom.join(','), this.accepts.join(',')].join(';');
 	  }
 	}
-	const STRATEGIES = [{
-	  value: 0,
-	  name: 'Minimize Boxes',
-	  description: 'Minimizes the number of boxes used. Sorts items by volume in descending order and uses First Fit algorithm to place each item in the first box where it fits'
-	}, {
-	  value: 1,
-	  name: 'Greedy',
-	  description: 'Greedy packing strategy (First Fit with ascending sort). Sorts items by volume in ascending order and uses First Fit algorithm. Simple and fast, but may use more boxes than optimal'
-	}, {
-	  value: 2,
-	  name: 'Best Fit',
-	  description: 'Best-fit strategy. For each item, finds the box with the smallest remaining space that can accommodate the item. Minimizes wasted space but requires checking all boxes for each item'
-	}, {
-	  value: 3,
-	  name: 'Best Fit Decreasing (BFD)',
-	  description: 'Best-fit decreasing strategy. Items sorted by volume in descending order, and for each item finds the box with the smallest remaining space. Typically provides 2-5% better space utilization'
-	}, {
-	  value: 4,
-	  name: 'Next Fit',
-	  description: 'Next-fit strategy. Items are placed in the current box if it fits, otherwise a new box is used. Simpler than First Fit but may use more boxes'
-	}, {
-	  value: 5,
-	  name: 'Worst Fit',
-	  description: 'Worst-fit strategy. For each item, finds the box with the largest remaining space that can accommodate the item. Helps distribute items more evenly across boxes'
-	}, {
-	  value: 6,
-	  name: 'Almost Worst Fit',
-	  description: 'Almost-worst-fit strategy. Similar to Worst Fit, but excludes boxes that are too large (almost empty). Prevents items from being placed in boxes that are nearly empty'
-	}];
-	const GOALS = [{
-	  value: 'MinimizeBoxes',
-	  name: 'Minimize Boxes',
-	  description: 'Unfit ↓, then boxes count ↓, then total used box volume ↓.'
-	}, {
-	  value: 'TightestPacking',
-	  name: 'Tightest Packing',
-	  description: 'Unfit ↓, then total used box volume ↓ (less air), then boxes count ↓.'
-	}, {
-	  value: 'MaximizeItems',
-	  name: 'Maximize Items',
-	  description: 'Unfit ↓ (fit as many items as possible), ignoring efficiency.'
-	}, {
-	  value: 'MaxAverageFillRate',
-	  name: 'Max Average Fill Rate',
-	  description: 'Unfit ↓, then maximize average fill rate (itemsVolume/boxVolume) of used boxes.'
-	}, {
-	  value: 'BalancedPacking',
-	  name: 'Balanced Packing',
-	  description: 'Unfit ↓, then minimize weight deviation across boxes, then boxes count ↓.'
-	}];
 	class ItemComponent extends gn.Component {
 	  state = {
 	    hasError: false,
@@ -52799,23 +51146,42 @@ void main() {
 	    packResult: null,
 	    selectedBox: null,
 	    selectedItem: null,
+	    editing: null,
+	    advanced: false,
+	    flat: false,
+	    stash: null,
+	    notice: null,
+	    printing: false,
+	    requestError: null,
+	    comparison: null,
+	    comparing: false,
+	    stagePanel: 'boxes',
+	    clearArmed: null,
+	    leftWidth: 330,
+	    rightWidth: 300,
+	    boxesHeight: 200,
+	    showEmptyBoxes: false,
 	    showAnimation: true,
 	    animationSpeed: 1,
-	    strategy: 0,
-	    parallel: false,
-	    selectedAlgorithms: [0, 1, 2],
-	    // Default: MinimizeBoxes, Greedy, BestFit
-	    goal: 'MinimizeBoxes' // Default goal
+	    meta: null,
+	    settings: {
+	      ...defaultSettings
+	    }
 	  };
 	  constructor() {
 	    super(...arguments);
 	    this.renderTimeout = null;
 	    this.lastRenderElements = null;
+	    this.comparedElements = null;
 	  }
 	  async componentDidMount() {
 	    let {
 	      elements
 	    } = this.state;
+	    const meta = await api('/bp3meta', {});
+	    this.setState({
+	      meta
+	    });
 	    for (const box of await api('/bp3boxes', {})) {
 	      elements = elements.concat(new Datum(box.id, boxType, box.width, box.height, box.depth, box.weight));
 	    }
@@ -52839,19 +51205,50 @@ void main() {
 	        selectedItem: null
 	      });
 	    };
+	    this.props.playground.onItemSelect = (itemId, boxId) => {
+	      this.setState(state => ({
+	        selectedItem: itemId,
+	        selectedBox: boxId || state.selectedBox
+	      }), () => {
+	        const row = document.querySelector('.manifest-row.is-active');
+	        if (row) {
+	          row.scrollIntoView({
+	            block: 'nearest'
+	          });
+	        }
+	      });
+	    };
 	    await this.playgroundRender(elements);
 	    this.lastRenderElements = this.getElementsSnapshot(elements);
 	  }
 	  componentDidUpdate(prevProps, prevState) {
 	    const elementsChanged = prevState.elements !== this.state.elements;
-	    const strategyChanged = prevState.strategy !== this.state.strategy;
-	    const parallelChanged = prevState.parallel !== this.state.parallel;
-	    const algorithmsChanged = JSON.stringify(prevState.selectedAlgorithms) !== JSON.stringify(this.state.selectedAlgorithms);
-	    const goalChanged = prevState.goal !== this.state.goal;
-	    prevState.showAnimation !== this.state.showAnimation;
+	    const settingsChanged = JSON.stringify(prevState.settings) !== JSON.stringify(this.state.settings);
 	    const elementsSnapshot = this.getElementsSnapshot(this.state.elements);
 	    const enabledStateChanged = this.lastRenderElements !== elementsSnapshot;
-	    if ((elementsChanged || strategyChanged || parallelChanged || algorithmsChanged || goalChanged || enabledStateChanged) && this.state.elements.length > 0 && this.state.elements.filter(e => e.enabled).length > 0) {
+	    if (this.state.elements.filter(e => e.enabled).length === 0) {
+	      if (this.state.packResult) {
+	        this.lastRenderElements = elementsSnapshot;
+	        this.props.playground.destroy();
+	        this.props.playground.setEmpty(true);
+	        this.setState({
+	          packResult: null,
+	          selectedBox: null,
+	          selectedItem: null
+	        });
+	      }
+	      return;
+	    }
+	    if (elementsChanged || settingsChanged || enabledStateChanged) {
+	      if (this.state.comparison && this.comparedElements !== elementsSnapshot) {
+	        this.setState({
+	          comparison: null
+	        }, () => {
+	          if (this.state.stagePanel === 'strategies') {
+	            this.runComparison();
+	          }
+	        });
+	      }
 	      if (this.renderTimeout) {
 	        clearTimeout(this.renderTimeout);
 	      }
@@ -52867,17 +51264,174 @@ void main() {
 	    }
 	  }
 	  getElementsSnapshot(elements) {
-	    return elements.filter(e => e.enabled).map(e => `${e.id}:${e.enabled}:${e.type}`).sort().join('|');
+	    return elements.filter(e => e.enabled).map(e => [e.id, e.enabled, e.type, e.width, e.height, e.depth, e.weight, e.rotation, e.group, e.quantity, e.color].join(':')).sort().join('|');
 	  }
 	  setText = e => {
 	    this.setState({
-	      text: e.target.value
+	      text: e.target.value,
+	      hasError: false
 	    });
 	  };
 	  setType = v => {
 	    this.setState({
 	      type: v
 	    });
+	  };
+	  updateElement = (id, patch) => {
+	    this.setState(state => ({
+	      elements: state.elements.map(element => {
+	        if (element.id !== id) {
+	          return element;
+	        }
+	        const next = Object.assign(Object.create(Datum.prototype), element, patch);
+	        return next;
+	      })
+	    }));
+	  };
+	  removeElement = id => {
+	    this.setState(state => ({
+	      elements: state.elements.filter(element => element.id !== id),
+	      editing: state.editing === id ? null : state.editing
+	    }));
+	  };
+	  runComparison = async () => {
+	    const {
+	      elements,
+	      settings
+	    } = this.state;
+	    const enabled = elements.filter(e => e.enabled);
+	    if (this.state.comparing) {
+	      return;
+	    }
+	    this.comparedElements = this.getElementsSnapshot(elements);
+	    this.setState({
+	      comparing: true
+	    });
+	    const rows = await api('/bp3compare', {
+	      boxes: enabled.filter(e => e.type === boxType).map(e => ({
+	        id: e.id,
+	        width: e.width,
+	        height: e.height,
+	        depth: e.depth,
+	        weight: e.weight,
+	        quantity: e.quantity,
+	        emptyWeight: e.tare || undefined,
+	        accepts: e.accepts && e.accepts.length ? e.accepts : undefined,
+	        innerWidth: e.innerWidth || undefined,
+	        innerHeight: e.innerHeight || undefined,
+	        innerDepth: e.innerDepth || undefined
+	      })),
+	      items: enabled.filter(e => e.type === itemType).map(e => ({
+	        id: e.id,
+	        width: e.width,
+	        height: e.height,
+	        depth: e.depth,
+	        weight: e.weight,
+	        rotation: e.rotation,
+	        group: e.group,
+	        maxLoadOnTop: e.maxLoadOnTop || undefined,
+	        nothingOnTop: e.nothingOnTop || undefined,
+	        class: e.class || undefined,
+	        separateFrom: e.separateFrom && e.separateFrom.length ? e.separateFrom : undefined,
+	        quantity: e.quantity
+	      })),
+	      supportRatio: settings.supportRatio,
+	      balanceBoxes: settings.balanceWeight ? 12 : 0,
+	      singleContainer: settings.singleContainer
+	    });
+	    if (rows.error) {
+	      this.setState({
+	        comparing: false,
+	        requestError: rows.error
+	      });
+	      return;
+	    }
+	    const usable = rows.filter(row => !row.failed);
+	    for (const row of rows) {
+	      row.best = !row.failed && usable.every(other => compareOutcome(row, other) <= 0);
+	    }
+	    this.setState({
+	      comparison: rows,
+	      comparing: false,
+	      stagePanel: 'strategies'
+	    });
+	  };
+	  openStrategies = () => {
+	    this.setState({
+	      stagePanel: 'strategies',
+	      boxesHeight: Math.max(this.state.boxesHeight, 260)
+	    }, () => {
+	      this.resizeScene();
+	      if (!this.state.comparison && !this.state.comparing) {
+	        this.runComparison();
+	      }
+	    });
+	  };
+	  setFlat = next => {
+	    if (next === this.state.flat) {
+	      return;
+	    }
+	    this.setState(state => ({
+	      flat: next,
+	      elements: state.stash == null ? flatDefaults(next) : state.stash,
+	      stash: state.elements,
+	      editing: null,
+	      packResult: null,
+	      selectedBox: null,
+	      selectedItem: null,
+	      comparison: null,
+	      printing: false
+	    }));
+	  };
+	  mountScene = node => {
+	    if (!node || this.sceneNode === node) {
+	      return;
+	    }
+	    this.sceneNode = node;
+	    this.props.playground.attach(node);
+	  };
+	  onPrint = event => {
+	    if (event) {
+	      event.preventDefault();
+	    }
+	    const {
+	      packResult
+	    } = this.state;
+	    if (!packResult || !packResult.boxes) {
+	      this.setState({
+	        notice: {
+	          tone: 'is-warning',
+	          text: 'Pack something first — there is no plan to print yet.'
+	        }
+	      });
+	      return;
+	    }
+	    this.setState({
+	      printing: true
+	    });
+	  };
+	  toggleEmptyBoxes = () => {
+	    this.setState(state => ({
+	      showEmptyBoxes: !state.showEmptyBoxes
+	    }), () => this.playgroundRender(this.state.elements));
+	  };
+	  toggleEditing = id => {
+	    this.setState(state => ({
+	      editing: state.editing === id ? null : id
+	    }));
+	  };
+	  setAllEnabled = (type, enabled) => {
+	    this.setState(state => ({
+	      elements: state.elements.map(element => element.type === type ? Object.assign(Object.create(Datum.prototype), element, {
+	        enabled
+	      }) : element)
+	    }));
+	  };
+	  removeAll = type => {
+	    this.setState(state => ({
+	      elements: state.elements.filter(element => element.type !== type),
+	      editing: null
+	    }));
 	  };
 	  switchEnabled = id => {
 	    const {
@@ -52892,93 +51446,175 @@ void main() {
 	    }
 	  };
 	  addElement = () => {
-	    let {
+	    const {
 	      elements,
 	      type,
 	      text
 	    } = this.state;
-	    const matchResult = text.match(datumValidate);
-	    if (matchResult === null) {
+	    const lines = text.split(/[\n,]+/).map(line => line.trim()).filter(Boolean);
+	    if (lines.length === 0) {
 	      this.setState({
 	        hasError: true
 	      });
 	      return;
 	    }
-	    const id = generateUUID();
-	    const datum = new Datum(id, type, matchResult[1], matchResult[2], matchResult[3], matchResult[4]);
+	    const added = [];
+	    for (const line of lines) {
+	      const parsed = parseDatum(line, type, this.state.flat);
+	      if (parsed === null) {
+	        this.setState({
+	          hasError: true
+	        });
+	        return;
+	      }
+	      added.push(new Datum(generateUUID(), type, parsed.width, parsed.height, parsed.depth, parsed.weight, parsed));
+	    }
 	    this.setState({
-	      elements: elements.concat(datum),
+	      elements: elements.concat(added),
 	      text: '',
 	      hasError: false
 	    });
 	  };
+	  onPaste = event => {
+	    const pasted = (event.clipboardData || window.clipboardData).getData('text');
+	    if (!pasted || !/[\n,]/.test(pasted)) {
+	      return;
+	    }
+	    event.preventDefault();
+	    this.setState({
+	      text: pasted
+	    }, this.addElement);
+	  };
 	  playgroundRender = async elements => {
-	    const items = elements.filter(e => e.enabled);
-	    this.props.playground.destroy();
+	    const enabled = elements.filter(e => e.enabled);
+	    const {
+	      settings
+	    } = this.state;
+	    const generation = this.renderGeneration = (this.renderGeneration || 0) + 1;
+	    const items = enabled.filter(e => e.type === itemType);
+	    setColorOverrides(items.map(e => [e.group || e.id, e.color]));
+	    resetColors(items.map(e => e.group || e.id));
 	    const requestData = {
-	      boxes: items.filter(i => i.type === boxType),
-	      items: items.filter(i => i.type === itemType)
+	      boxes: enabled.filter(e => e.type === boxType).map(e => ({
+	        id: e.id,
+	        width: e.width,
+	        height: e.height,
+	        depth: e.depth,
+	        weight: e.weight,
+	        quantity: e.quantity,
+	        emptyWeight: e.tare || undefined,
+	        accepts: e.accepts && e.accepts.length ? e.accepts : undefined,
+	        innerWidth: e.innerWidth || undefined,
+	        innerHeight: e.innerHeight || undefined,
+	        innerDepth: e.innerDepth || undefined
+	      })),
+	      items: enabled.filter(e => e.type === itemType).map(e => ({
+	        id: e.id,
+	        width: e.width,
+	        height: e.height,
+	        depth: e.depth,
+	        weight: e.weight,
+	        rotation: e.rotation,
+	        group: e.group,
+	        maxLoadOnTop: e.maxLoadOnTop || undefined,
+	        nothingOnTop: e.nothingOnTop || undefined,
+	        class: e.class || undefined,
+	        separateFrom: e.separateFrom && e.separateFrom.length ? e.separateFrom : undefined,
+	        quantity: e.quantity
+	      })),
+	      supportRatio: settings.supportRatio,
+	      balanceBoxes: settings.balanceWeight ? 12 : 0,
+	      freeSpaceCorners: settings.freeSpaceCorners || undefined,
+	      merit: settings.merit !== 'contact-first' ? settings.merit : undefined,
+	      finishers: settings.rehome ? ['Rehome'] : undefined,
+	      singleContainer: settings.singleContainer
 	    };
-	    if (this.state.parallel) {
-	      if (this.state.selectedAlgorithms.length > 0) {
-	        requestData.parallel = true;
-	        requestData.algorithms = this.state.selectedAlgorithms;
-	        requestData.goal = this.state.goal;
-	      } else {
-	        // Fallback to default strategy if parallel is enabled but no algorithms selected
-	        requestData.strategy = {
-	          value: 0
-	        };
-	      }
-	    } else if (this.state.strategy !== 0) {
-	      requestData.strategy = {
-	        value: this.state.strategy
+	    if (settings.auto) {
+	      requestData.parallel = true;
+	      requestData.goal = settings.goal;
+	    } else if (settings.search) {
+	      requestData.search = {
+	        nodes: 128,
+	        branching: 3
 	      };
+	      if (settings.searchFills) {
+	        requestData.searchFills = true;
+	        requestData.order = settings.order;
+	        requestData.selection = settings.selection;
+	      }
+	    } else {
+	      requestData.order = settings.order;
+	      requestData.selection = settings.selection;
 	    }
 	    const packResult = await api('/bp3', requestData);
+	    if (generation !== this.renderGeneration) {
+	      return;
+	    }
+	    this.props.playground.destroy();
+	    if (packResult.error) {
+	      this.setState({
+	        packResult: null,
+	        requestError: packResult.error
+	      });
+	      return;
+	    }
+	    const firstLoaded = (packResult.boxes || []).find(box => box.items.length > 0);
 	    this.setState({
 	      packResult,
-	      selectedBox: null,
+	      requestError: null,
+	      selectedBox: firstLoaded ? firstLoaded.id : null,
 	      selectedItem: null
 	    });
+	    this.props.playground.setFlat(this.state.flat);
+	    this.props.playground.showUnusedBoxes = this.state.showEmptyBoxes;
 	    this.props.playground.showAnimation = this.state.showAnimation;
 	    this.props.playground.animationSpeed = this.state.animationSpeed;
+	    this.props.playground.setSummary(summarise(packResult));
 	    this.props.playground.render(packResult);
 	  };
-	  setStrategy = e => {
-	    const strategy = parseInt(e.target.value);
-	    this.setState({
-	      strategy
+	  updateSettings = patch => {
+	    this.setState(state => ({
+	      settings: {
+	        ...state.settings,
+	        ...patch
+	      }
+	    }));
+	  };
+	  setSetting = (key, transform = v => v) => e => {
+	    this.updateSettings({
+	      [key]: transform(e.target.value)
 	    });
 	  };
-	  toggleParallel = () => {
-	    this.setState({
-	      parallel: !this.state.parallel
+	  toggleSetting = key => () => {
+	    this.updateSettings({
+	      [key]: !this.state.settings[key]
 	    });
 	  };
-	  toggleAlgorithm = algorithmValue => {
-	    const {
-	      selectedAlgorithms
-	    } = this.state;
-	    const index = selectedAlgorithms.indexOf(algorithmValue);
-	    if (index > -1) {
-	      // Remove if already selected
-	      const newAlgorithms = [...selectedAlgorithms];
-	      newAlgorithms.splice(index, 1);
-	      this.setState({
-	        selectedAlgorithms: newAlgorithms
+	  applyStrategyPreset = e => {
+	    const value = parseInt(e.target.value, 10);
+	    if (value === AUTO_PRESET) {
+	      this.updateSettings({
+	        auto: true,
+	        search: false
 	      });
-	    } else {
-	      // Add if not selected
-	      this.setState({
-	        selectedAlgorithms: [...selectedAlgorithms, algorithmValue].sort()
+	      return;
+	    }
+	    const preset = (this.state.meta?.rules || []).find(s => s.name === value);
+	    if (preset) {
+	      this.updateSettings({
+	        auto: false,
+	        order: preset.order,
+	        selection: preset.selection
 	      });
 	    }
 	  };
-	  setGoal = e => {
-	    const goal = e.target.value;
-	    this.setState({
-	      goal
+	  toggleAlgorithm = name => {
+	    const {
+	      algorithms
+	    } = this.state.settings;
+	    const next = algorithms.includes(name) ? algorithms.filter(a => a !== name) : [...algorithms, name].sort();
+	    this.updateSettings({
+	      algorithms: next
 	    });
 	  };
 	  selectBox = boxId => {
@@ -52988,8 +51624,8 @@ void main() {
 	      selectedItem: null
 	    });
 	  };
-	  selectItem = itemId => {
-	    this.props.playground.selectItem(itemId);
+	  selectItem = (itemId, focus = false) => {
+	    this.props.playground.selectItem(itemId, focus);
 	    this.setState({
 	      selectedItem: itemId
 	    });
@@ -53014,144 +51650,145 @@ void main() {
 	      return sum + item.width * item.height * item.depth;
 	    }, 0);
 	    const usedWeight = box.items.reduce((sum, item) => sum + item.weight, 0);
+	    const grossWeight = box.grossWeight != null ? box.grossWeight : usedWeight + (box.emptyWeight || 0);
 	    const utilization = totalVolume > 0 ? usedVolume / totalVolume * 100 : 0;
-	    const weightUtilization = box.weight > 0 ? usedWeight / box.weight * 100 : 0;
+	    const weightUtilization = box.weight > 0 ? grossWeight / box.weight * 100 : 0;
 	    return {
 	      totalVolume: Math.round(totalVolume),
 	      usedVolume: Math.round(usedVolume),
 	      freeVolume: Math.round(totalVolume - usedVolume),
 	      utilization: Math.round(utilization * 10) / 10,
 	      usedWeight: Math.round(usedWeight),
+	      grossWeight: Math.round(grossWeight),
+	      tare: Math.round(box.emptyWeight || 0),
 	      weightUtilization: Math.round(weightUtilization * 10) / 10,
 	      itemsCount: box.items.length
 	    };
 	  };
-	  onImport = () => {
+	  onImport = event => {
+	    if (event) {
+	      event.preventDefault();
+	    }
 	    const input = document.createElement('input');
 	    input.type = 'file';
-	    input.accept = '.csv';
+	    input.accept = '.csv,.txt';
 	    input.style.display = 'none';
-	    input.onchange = async e => {
-	      const file = e.target.files[0];
-	      if (!file) {
-	        return;
-	      }
-	      try {
-	        const text = await file.text();
-	        const lines = text.split('\n').filter(line => line.trim());
-	        if (lines.length === 0) {
-	          alert('File is empty');
-	          return;
-	        }
-	        let startIndex = 0;
-	        const firstLine = lines[0].trim().toLowerCase();
-	        if (firstLine.includes('width') || firstLine.includes('height') || firstLine.includes('type') || firstLine.includes('id') || firstLine.includes('depth') || firstLine.includes('weight')) {
-	          startIndex = 1;
-	        }
-	        const importedElements = [];
-	        const errors = [];
-	        for (let i = startIndex; i < lines.length; i++) {
-	          const line = lines[i].trim();
-	          if (!line || line.startsWith('#')) continue;
-	          const parts = line.split(/[;,\t]/).map(p => p.trim()).filter(p => p);
-	          if (parts.length < 4) {
-	            errors.push(`Line ${i + 1}: insufficient data (expected at least 4 fields: width, height, depth, weight)`);
-	            continue;
-	          }
-	          let widthNum, heightNum, depthNum, weightNum, typeNum;
-	          if (parts.length === 5) {
-	            [widthNum, heightNum, depthNum, weightNum, typeNum] = parts.map(p => parseInt(p));
-	          } else if (parts.length === 6) {
-	            const [id, width, type, height, depth, weight] = parts;
-	            widthNum = parseInt(width);
-	            heightNum = parseInt(height);
-	            depthNum = parseInt(depth);
-	            weightNum = parseInt(weight);
-	            typeNum = parseInt(type);
-	          } else {
-	            const firstNum = parseInt(parts[0]);
-	            if (firstNum === 0 || firstNum === 1) {
-	              [typeNum, widthNum, heightNum, depthNum, weightNum] = parts.map(p => parseInt(p));
-	            } else {
-	              [widthNum, heightNum, depthNum, weightNum] = parts.map(p => parseInt(p));
-	              typeNum = itemType;
+	    input.onchange = async pick => {
+	      const file = pick.target.files[0];
+	      if (file) {
+	        try {
+	          this.applyImport(await file.text());
+	        } catch (error) {
+	          this.setState({
+	            notice: {
+	              tone: 'is-danger',
+	              text: `Could not read the file: ${error.message}`
 	            }
-	          }
-	          if (isNaN(widthNum) || isNaN(heightNum) || isNaN(depthNum) || isNaN(weightNum)) {
-	            errors.push(`Line ${i + 1}: invalid data format (expected numbers)`);
-	            continue;
-	          }
-	          if (widthNum <= 0 || heightNum <= 0 || depthNum <= 0 || weightNum <= 0) {
-	            errors.push(`Line ${i + 1}: dimensions and weight must be positive`);
-	            continue;
-	          }
-	          if (typeNum === undefined || isNaN(typeNum)) {
-	            typeNum = itemType;
-	          } else if (typeNum !== boxType && typeNum !== itemType) {
-	            errors.push(`Line ${i + 1}: invalid type (must be 0 for boxes or 1 for items)`);
-	            continue;
-	          }
-	          const elementId = generateUUID();
-	          importedElements.push(new Datum(elementId, typeNum, widthNum, heightNum, depthNum, weightNum));
-	        }
-	        if (importedElements.length === 0) {
-	          alert('Failed to import elements. Please check the file format.\n\nErrors:\n' + errors.join('\n'));
-	          return;
-	        }
-	        if (this.renderTimeout) {
-	          clearTimeout(this.renderTimeout);
-	          this.renderTimeout = null;
-	        }
-	        this.setState({
-	          elements: importedElements,
-	          packResult: null,
-	          selectedBox: null
-	        }, () => {
-	          this.playgroundRender(importedElements);
-	          this.lastRenderElements = this.getElementsSnapshot(importedElements);
-	        });
-	        let message = `Imported elements: ${importedElements.length}`;
-	        const boxesCount = importedElements.filter(e => e.type === boxType).length;
-	        const itemsCount = importedElements.filter(e => e.type === itemType).length;
-	        message += `\nBoxes: ${boxesCount}, Items: ${itemsCount}`;
-	        if (errors.length > 0) {
-	          message += `\nErrors: ${errors.length}`;
-	        }
-	        if (errors.length > 0 && errors.length <= 5) {
-	          message += '\n\nErrors:\n' + errors.join('\n');
-	        }
-	        alert(message);
-	      } catch (error) {
-	        alert('Error reading file: ' + error.message);
-	      } finally {
-	        if (input.parentNode) {
-	          document.body.removeChild(input);
+	          });
 	        }
 	      }
+	      input.remove();
 	    };
 	    document.body.appendChild(input);
 	    input.click();
 	  };
-	  onExport = () => {
+	  applyImport = text => {
+	    const imported = [];
+	    const errors = [];
+	    text.split(/\r?\n/).forEach((raw, index) => {
+	      const line = raw.trim();
+	      if (!line || line.startsWith('#') || /^kind\s*;/i.test(line)) {
+	        return;
+	      }
+	      const parsed = parseExported(line);
+	      if (parsed === null) {
+	        errors.push(index + 1);
+	        return;
+	      }
+	      const datum = new Datum(generateUUID(), parsed.type, parsed.width, parsed.height, parsed.depth, parsed.weight, parsed);
+	      datum.enabled = parsed.enabled;
+	      imported.push(datum);
+	    });
+	    if (imported.length === 0) {
+	      this.setState({
+	        notice: {
+	          tone: 'is-danger',
+	          text: 'Nothing in that file could be read as a box or an item.'
+	        }
+	      });
+	      return;
+	    }
+	    const boxes = imported.filter(e => e.type === boxType).length;
+	    const summary = `Imported ${boxes} boxes and ${imported.length - boxes} items` + (errors.length > 0 ? `; skipped ${errors.length} unreadable line${errors.length > 1 ? 's' : ''}` : '');
+	    this.setState({
+	      elements: imported,
+	      editing: null,
+	      notice: {
+	        tone: errors.length > 0 ? 'is-warning' : 'is-info',
+	        text: summary
+	      }
+	    });
+	  };
+	  onExport = event => {
+	    if (event) {
+	      event.preventDefault();
+	    }
 	    const {
 	      elements
 	    } = this.state;
 	    if (elements.length === 0) {
-	      alert('No elements to export');
+	      this.setState({
+	        notice: {
+	          tone: 'is-warning',
+	          text: 'Nothing to export yet.'
+	        }
+	      });
 	      return;
 	    }
-	    const exportAll = confirm('Export all elements? (Cancel - only enabled)');
-	    const elementsToExport = exportAll ? elements : elements.filter(e => e.enabled);
-	    if (elementsToExport.length === 0) {
-	      alert('No elements to export');
-	      return;
-	    }
-	    const csvContent = "data:text/csv;charset=utf-8," + elementsToExport.map(e => e.toExport()).join("\n");
-	    const link = document.createElement("a");
-	    link.setAttribute("href", encodeURI(csvContent));
-	    link.setAttribute("download", `boxpacker3-export-${new Date().toISOString().split('T')[0]}.csv`);
+	    const csv = [EXPORT_HEADER, ...elements.map(e => e.toExport())].join('\n');
+	    const link = document.createElement('a');
+	    link.href = URL.createObjectURL(new Blob([csv], {
+	      type: 'text/csv;charset=utf-8'
+	    }));
+	    link.download = `boxpacker3-${elements.length}-rows.csv`;
 	    link.click();
+	    URL.revokeObjectURL(link.href);
+	    this.setState({
+	      notice: {
+	        tone: 'is-info',
+	        text: `Exported ${elements.length} rows.`
+	      }
+	    });
 	  };
+	  resizeScene() {
+	    window.dispatchEvent(new Event('resize'));
+	  }
+	  startDrag(event, key, sign, slots) {
+	    event.preventDefault();
+	    const vertical = key === 'boxesHeight';
+	    const start = vertical ? event.clientY : event.clientX;
+	    const from = this.state[key];
+	    const least = slots[0];
+	    const most = slots[slots.length - 1];
+	    const move = moved => {
+	      const travelled = (vertical ? moved.clientY : moved.clientX) - start;
+	      const free = Math.min(most, Math.max(least, from + travelled * sign));
+	      const nearest = slots.reduce((best, slot) => Math.abs(slot - free) < Math.abs(best - free) ? slot : best, slots[0]);
+	      const next = Math.abs(nearest - free) <= SNAP ? nearest : Math.round(free);
+	      this.setState({
+	        [key]: next
+	      }, () => this.resizeScene());
+	    };
+	    const stop = () => {
+	      window.removeEventListener('pointermove', move);
+	      window.removeEventListener('pointerup', stop);
+	      document.body.classList.remove('is-dragging');
+	      this.resizeScene();
+	    };
+	    document.body.classList.add('is-dragging');
+	    window.addEventListener('pointermove', move);
+	    window.addEventListener('pointerup', stop);
+	  }
 	  render({}, {
 	    elements,
 	    type,
@@ -53160,71 +51797,118 @@ void main() {
 	    packResult,
 	    selectedBox,
 	    selectedItem,
+	    editing,
+	    advanced,
+	    comparison,
+	    comparing,
+	    stagePanel,
+	    clearArmed,
+	    leftWidth,
+	    rightWidth,
+	    boxesHeight,
+	    notice,
+	    printing,
+	    flat,
+	    showEmptyBoxes,
 	    showAnimation,
 	    animationSpeed,
-	    strategy,
-	    parallel,
-	    selectedAlgorithms,
-	    goal
+	    meta,
+	    settings,
+	    requestError
 	  }) {
+	    const palette = paletteCss();
+	    const listed = elements.filter(datum => datum.type === type);
+	    const active = listed.filter(datum => datum.enabled);
+	    const totalWeight = active.reduce((sum, d) => sum + d.weight * Math.max(d.quantity || 1, 1), 0);
 	    const selectedBoxData = packResult && selectedBox ? packResult.boxes.find(b => b.id === selectedBox) : null;
 	    const selectedBoxStats = selectedBoxData ? this.calculateBoxStats(selectedBoxData) : null;
+	    const articles = articleIndex(elements);
+	    const selectedItemData = selectedBoxData && selectedItem ? selectedBoxData.items.find(item => item.id === selectedItem) : null;
 	    return /*#__PURE__*/gn.createElement("div", {
+	      className: "app"
+	    }, /*#__PURE__*/gn.createElement("header", {
+	      className: "topbar"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "brand"
+	    }, /*#__PURE__*/gn.createElement("svg", {
+	      className: "brand-mark",
+	      viewBox: "0 0 24 24",
+	      width: "17",
+	      height: "17",
+	      "aria-hidden": "true"
+	    }, /*#__PURE__*/gn.createElement("path", {
+	      d: "M12 2.6 3.2 7.1v9.8L12 21.4l8.8-4.5V7.1L12 2.6Z",
+	      fill: "none",
+	      stroke: "currentColor",
+	      strokeWidth: "1.6",
+	      strokeLinejoin: "round"
+	    }), /*#__PURE__*/gn.createElement("path", {
+	      d: "M3.2 7.1 12 11.6l8.8-4.5M12 11.6v9.8",
+	      fill: "none",
+	      stroke: "currentColor",
+	      strokeWidth: "1.6",
+	      strokeLinejoin: "round"
+	    })), /*#__PURE__*/gn.createElement("span", {
+	      className: "brand-name"
+	    }, "BoxPacker3")), /*#__PURE__*/gn.createElement("span", {
+	      className: "mode-switch"
+	    }, /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: flat ? '' : 'is-on',
+	      onClick: () => this.setFlat(false),
+	      title: "Boxes and cargo in three dimensions"
+	    }, "3D"), /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: flat ? 'is-on' : '',
+	      onClick: () => this.setFlat(true),
+	      title: "Sheets and rectangles \u2014 every depth is one unit"
+	    }, "2D")), /*#__PURE__*/gn.createElement("span", {
+	      className: "brand-tag"
+	    }, flat ? 'sheet nesting' : '3d bin packing playground'), packResult && /*#__PURE__*/gn.createElement("span", {
+	      className: "run-summary"
+	    }, summarise(packResult).cells.map(cell => /*#__PURE__*/gn.createElement("span", {
+	      className: "run-stat",
+	      key: cell.label
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "run-label"
+	    }, cell.label), /*#__PURE__*/gn.createElement("span", {
+	      className: "run-value",
 	      style: {
-	        display: 'flex',
-	        flexDirection: 'column',
-	        height: '100%',
-	        minHeight: '100vh',
-	        overflowY: 'auto',
-	        margin: 0,
-	        padding: 0
+	        color: cell.ink
 	      }
+	    }, cell.value)))), /*#__PURE__*/gn.createElement("span", {
+	      style: {
+	        flex: 1
+	      }
+	    }), /*#__PURE__*/gn.createElement("a", {
+	      href: "#",
+	      onClick: this.onImport,
+	      className: "topbar-link"
+	    }, "Import"), /*#__PURE__*/gn.createElement("a", {
+	      href: "#",
+	      onClick: this.onExport,
+	      className: "topbar-link"
+	    }, "Export"), /*#__PURE__*/gn.createElement("a", {
+	      href: "#",
+	      onClick: this.onPrint,
+	      className: "topbar-link"
+	    }, "Print plan")), /*#__PURE__*/gn.createElement("div", {
+	      className: "workspace",
+	      style: {
+	        gridTemplateColumns: `${leftWidth}px 7px minmax(0, 1fr) 7px ${rightWidth}px`
+	      }
+	    }, /*#__PURE__*/gn.createElement("aside", {
+	      className: "pane pane-left"
 	    }, /*#__PURE__*/gn.createElement("nav", {
 	      className: "panel",
 	      style: {
 	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/gn.createElement("p", {
-	      className: "panel-heading field"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-left"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-item"
-	    }, /*#__PURE__*/gn.createElement("p", {
-	      className: "subtitle is-5",
-	      style: {
-	        margin: 0,
-	        fontSize: '0.875rem',
-	        color: '#ffffff',
-	        fontWeight: 700
-	      }
-	    }, /*#__PURE__*/gn.createElement("strong", {
-	      style: {
-	        color: '#ffffff'
-	      }
-	    }, "Settings")))), /*#__PURE__*/gn.createElement("div", {
-	      className: "level-right"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-item"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "field has-addons"
-	    }, /*#__PURE__*/gn.createElement("p", {
-	      className: "control"
-	    }, /*#__PURE__*/gn.createElement("a", {
-	      href: "#",
-	      onClick: this.onImport,
-	      className: "button is-info is-small",
-	      title: "Import CSV file"
-	    }, "Import")), /*#__PURE__*/gn.createElement("p", {
-	      className: "control"
-	    }, /*#__PURE__*/gn.createElement("a", {
-	      href: "#",
-	      onClick: this.onExport,
-	      className: "button is-success is-small",
-	      title: "Export to CSV"
-	    }, "Export"))))))), /*#__PURE__*/gn.createElement("form", {
+	      className: "panel-heading"
+	    }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	      className: "glyph"
+	    }, "\u25A4"), "Settings")), /*#__PURE__*/gn.createElement("form", {
 	      onSubmit: this.addElement,
 	      action: "javascript:"
 	    }, /*#__PURE__*/gn.createElement("div", {
@@ -53234,12 +51918,15 @@ void main() {
 	    }, /*#__PURE__*/gn.createElement("input", {
 	      value: text,
 	      onInput: this.setText,
+	      onPaste: this.onPaste,
 	      className: "input is-primary",
 	      type: "text",
-	      placeholder: "w;h;d;wg"
-	    }), hasError && /*#__PURE__*/gn.createElement("p", {
+	      placeholder: flatPlaceholder(flat, type, boxType)
+	    }), hasError ? /*#__PURE__*/gn.createElement("p", {
 	      className: "help is-danger"
-	    }, "Incorrect syntax"))), /*#__PURE__*/gn.createElement("p", {
+	    }, "Four positive numbers, then optional ", type === boxType ? 'qty=N and takes=NAME' : 'rot=best-fit|keep-flat|never and group=NAME') : /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, type === boxType ? 'Width, height, depth in mm, then the weight limit in g. Optional qty=N and takes=NAME,NAME to limit the box to certain goods.' : 'Width, height, depth in mm, then weight in g. Optional qty=N, group=NAME, rot= when the item must stay upright, top=none or top=WEIGHT for what may rest on it, and class=NAME with apart=NAME,NAME for goods that must travel separately.'))), /*#__PURE__*/gn.createElement("p", {
 	      className: "panel-tabs"
 	    }, /*#__PURE__*/gn.createElement("a", {
 	      href: "#",
@@ -53249,72 +51936,267 @@ void main() {
 	      href: "#",
 	      className: type === itemType ? "is-active" : "",
 	      onClick: () => this.setType(itemType)
-	    }, "Items"))), elements.filter(datum => datum.type === type).length === 0 ? /*#__PURE__*/gn.createElement("div", {
-	      className: "panel-block",
-	      style: {
-	        textAlign: 'center',
-	        padding: '1.5rem',
-	        color: '#bbb',
-	        fontSize: '0.75rem'
+	    }, "Items"))), /*#__PURE__*/gn.createElement("div", {
+	      className: "list-toolbar"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "list-count"
+	    }, active.length, "/", listed.length, " on", listed.length > 0 && ` · ${formatWeight(totalWeight)}`), /*#__PURE__*/gn.createElement("span", {
+	      className: "list-actions"
+	    }, /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      onClick: () => this.setAllEnabled(type, true),
+	      disabled: listed.length === 0
+	    }, "All on"), /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      onClick: () => this.setAllEnabled(type, false),
+	      disabled: listed.length === 0
+	    }, "All off"), /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: clearArmed === type ? 'is-danger is-on' : 'is-danger',
+	      disabled: listed.length === 0,
+	      title: clearArmed === type ? 'Click again to throw the list away' : 'Remove every line in this list',
+	      onClick: () => {
+	        if (clearArmed === type) {
+	          this.removeAll(type);
+	          this.setState({
+	            clearArmed: null
+	          });
+	          return;
+	        }
+	        this.setState({
+	          clearArmed: type
+	        });
+	        window.setTimeout(() => this.setState(state => state.clearArmed === type ? {
+	          clearArmed: null
+	        } : null), 3000);
 	      }
-	    }, /*#__PURE__*/gn.createElement("p", null, "No ", type === boxType ? 'boxes' : 'items')) : elements.filter(datum => datum.type === type).map(datum => /*#__PURE__*/gn.createElement("label", {
+	    }, clearArmed === type ? 'sure?' : 'Clear'))), listed.length === 0 ? /*#__PURE__*/gn.createElement("div", {
+	      className: "empty-state"
+	    }, /*#__PURE__*/gn.createElement("p", null, "No ", type === boxType ? 'boxes' : 'items', " yet"), /*#__PURE__*/gn.createElement("p", {
+	      className: "empty-hint"
+	    }, "Type ", type === boxType ? '400;300;200;20000' : '120;90;70;500', " above, or import a CSV.")) : listed.map(datum => /*#__PURE__*/gn.createElement("div", {
 	      key: datum.id,
-	      className: "panel-block",
-	      style: {
-	        cursor: 'pointer',
-	        userSelect: 'none',
-	        display: 'flex',
-	        alignItems: 'center'
-	      }
+	      className: `row${datum.enabled ? '' : ' is-off'}${editing === datum.id ? ' is-editing' : ''}`
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "row-head"
 	    }, /*#__PURE__*/gn.createElement("input", {
 	      type: "checkbox",
 	      checked: datum.enabled,
-	      onChange: () => this.switchEnabled(datum.id),
+	      title: datum.enabled ? 'Exclude from packing' : 'Include in packing',
+	      onChange: () => this.switchEnabled(datum.id)
+	    }), /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: "row-label",
+	      onClick: () => this.toggleEditing(datum.id)
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "row-line"
+	    }, type === itemType && /*#__PURE__*/gn.createElement("span", {
+	      className: "dot",
+	      title: "Colour in the scene \u2014 click the row to change it",
 	      style: {
-	        marginRight: '0.75rem'
+	        background: swatchOf(datum),
+	        color: swatchOf(datum)
 	      }
 	    }), /*#__PURE__*/gn.createElement("span", {
+	      className: "row-dims"
+	    }, datum.width, "\xD7", datum.height, "\xD7", datum.depth), /*#__PURE__*/gn.createElement("span", {
+	      className: "row-weight"
+	    }, formatWeight(datum.weight)), /*#__PURE__*/gn.createElement("span", {
+	      className: "row-qty",
+	      title: "Click the row to change the count"
+	    }, "\xD7", datum.quantity || 1)), (datum.rotation || datum.group || datum.tare > 0 || datum.innerWidth > 0) && /*#__PURE__*/gn.createElement("span", {
+	      className: "row-line row-meta"
+	    }, datum.rotation && /*#__PURE__*/gn.createElement("span", {
+	      className: "tag"
+	    }, datum.rotation), datum.group && /*#__PURE__*/gn.createElement("span", {
+	      className: "tag is-dark"
+	    }, datum.group), datum.tare > 0 && /*#__PURE__*/gn.createElement("span", {
+	      className: "tag is-warning",
+	      title: "Weight of the empty box"
+	    }, "tare ", formatWeight(datum.tare)), datum.innerWidth > 0 && /*#__PURE__*/gn.createElement("span", {
+	      className: "tag is-info",
+	      title: "Usable space inside the liner"
+	    }, "inner ", datum.innerWidth, "\xD7", datum.innerHeight, flat ? '' : `×${datum.innerDepth}`))), /*#__PURE__*/gn.createElement("span", {
+	      className: "row-tools"
+	    }, /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      title: "Remove",
+	      className: "is-danger",
+	      onClick: () => this.removeElement(datum.id)
+	    }, "\xD7"))), editing === datum.id && /*#__PURE__*/gn.createElement("div", {
+	      className: "row-editor"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "row-editor-grid"
+	    }, ['width', 'height', 'depth'].map(axis => /*#__PURE__*/gn.createElement("label", {
+	      key: axis
+	    }, /*#__PURE__*/gn.createElement("span", null, axis), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "number",
+	      min: "1",
+	      value: datum[axis],
+	      onInput: e => this.updateElement(datum.id, {
+	        [axis]: Number(e.target.value) || 1
+	      })
+	    }))), /*#__PURE__*/gn.createElement("label", null, /*#__PURE__*/gn.createElement("span", null, type === boxType ? 'max weight' : 'weight'), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "number",
+	      min: "0",
+	      value: datum.weight,
+	      onInput: e => this.updateElement(datum.id, {
+	        weight: Number(e.target.value) || 0
+	      })
+	    })), /*#__PURE__*/gn.createElement("label", null, /*#__PURE__*/gn.createElement("span", null, "quantity"), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "number",
+	      min: "1",
+	      value: datum.quantity || 1,
+	      onInput: e => this.updateElement(datum.id, {
+	        quantity: Math.max(1, parseInt(e.target.value, 10) || 1)
+	      })
+	    })), type === boxType && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("label", null, /*#__PURE__*/gn.createElement("span", null, "tare"), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "number",
+	      min: "0",
+	      value: datum.tare,
+	      title: "What the empty box weighs; it counts against the limit",
+	      onInput: e => this.updateElement(datum.id, {
+	        tare: Number(e.target.value) || 0
+	      })
+	    })), /*#__PURE__*/gn.createElement("label", {
+	      className: "liner-field"
+	    }, /*#__PURE__*/gn.createElement("span", null, "liner \u2014 usable space inside"), /*#__PURE__*/gn.createElement("span", {
+	      className: "liner-row"
+	    }, (flat ? ['innerWidth', 'innerHeight'] : ['innerWidth', 'innerHeight', 'innerDepth']).map(axis => /*#__PURE__*/gn.createElement("input", {
+	      key: axis,
+	      className: "input",
+	      type: "number",
+	      min: "0",
+	      placeholder: "full",
+	      value: datum[axis] || '',
+	      onInput: e => this.updateElement(datum.id, {
+	        [axis]: Number(e.target.value) || 0
+	      })
+	    })), /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: "swatch-reset",
+	      title: "Drop the liner",
+	      onClick: () => this.updateElement(datum.id, {
+	        innerWidth: 0,
+	        innerHeight: 0,
+	        innerDepth: 0
+	      })
+	    }, "none"))), /*#__PURE__*/gn.createElement("label", {
+	      title: "Classes of goods this box takes, separated by commas. Empty takes anything."
+	    }, /*#__PURE__*/gn.createElement("span", null, "takes"), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "text",
+	      placeholder: "anything",
+	      value: datum.accepts.join(', '),
+	      onInput: e => this.updateElement(datum.id, {
+	        accepts: e.target.value.split(',').map(part => part.trim()).filter(Boolean)
+	      })
+	    }))), type === itemType && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("label", {
+	      className: "swatch-field"
+	    }, /*#__PURE__*/gn.createElement("span", null, "colour"), /*#__PURE__*/gn.createElement("span", {
+	      className: "swatch-row"
+	    }, /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: `swatch-chip is-auto${datum.color ? '' : ' is-on'}`,
+	      title: "Back to the palette colour",
+	      onClick: () => this.updateElement(datum.id, {
+	        color: ''
+	      })
+	    }, "auto"), palette.map(colour => /*#__PURE__*/gn.createElement("button", {
+	      key: colour,
+	      type: "button",
+	      className: `swatch-chip${datum.color === colour ? ' is-on' : ''}`,
 	      style: {
-	        flex: 1,
-	        fontFamily: 'monospace',
-	        fontSize: '0.8125rem'
-	      }
-	    }, datum.toString()), !datum.enabled && /*#__PURE__*/gn.createElement("span", {
-	      className: "tag is-light",
-	      style: {
-	        fontSize: '0.7rem',
-	        marginLeft: '0.5rem'
-	      }
-	    }, "OFF")))), /*#__PURE__*/gn.createElement("nav", {
+	        background: colour
+	      },
+	      title: colour,
+	      onClick: () => this.updateElement(datum.id, {
+	        color: colour
+	      })
+	    })))), /*#__PURE__*/gn.createElement("label", null, /*#__PURE__*/gn.createElement("span", null, "rotation"), /*#__PURE__*/gn.createElement("div", {
+	      className: "select is-small is-fullwidth"
+	    }, /*#__PURE__*/gn.createElement("select", {
+	      value: datum.rotation || 'best-fit',
+	      onChange: e => this.updateElement(datum.id, {
+	        rotation: e.target.value
+	      })
+	    }, (meta?.rotations || []).map(r => /*#__PURE__*/gn.createElement("option", {
+	      key: r.value,
+	      value: r.value
+	    }, r.label))))), /*#__PURE__*/gn.createElement("label", null, /*#__PURE__*/gn.createElement("span", null, "group"), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "text",
+	      placeholder: "none",
+	      value: datum.group,
+	      onInput: e => this.updateElement(datum.id, {
+	        group: e.target.value
+	      })
+	    })), /*#__PURE__*/gn.createElement("label", {
+	      title: "Weight this item may carry. Empty means it carries anything."
+	    }, /*#__PURE__*/gn.createElement("span", null, "carries"), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "number",
+	      min: "0",
+	      placeholder: "any",
+	      disabled: datum.nothingOnTop,
+	      value: datum.maxLoadOnTop || '',
+	      onInput: e => this.updateElement(datum.id, {
+	        maxLoadOnTop: Number(e.target.value) || 0
+	      })
+	    })), /*#__PURE__*/gn.createElement("label", {
+	      title: "What these goods are: food, chemicals, batteries."
+	    }, /*#__PURE__*/gn.createElement("span", null, "class"), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "text",
+	      placeholder: "none",
+	      value: datum.class,
+	      onInput: e => this.updateElement(datum.id, {
+	        class: e.target.value
+	      })
+	    })), /*#__PURE__*/gn.createElement("label", {
+	      title: "Classes these goods may not share a box with, separated by commas."
+	    }, /*#__PURE__*/gn.createElement("span", null, "keep from"), /*#__PURE__*/gn.createElement("input", {
+	      className: "input",
+	      type: "text",
+	      placeholder: "nothing",
+	      value: datum.separateFrom.join(', '),
+	      onInput: e => this.updateElement(datum.id, {
+	        separateFrom: e.target.value.split(',').map(part => part.trim()).filter(Boolean)
+	      })
+	    })), /*#__PURE__*/gn.createElement("label", {
+	      className: "check",
+	      title: "Nothing may be stacked on this item."
+	    }, /*#__PURE__*/gn.createElement("input", {
+	      type: "checkbox",
+	      checked: datum.nothingOnTop,
+	      onChange: e => this.updateElement(datum.id, {
+	        nothingOnTop: e.target.checked
+	      })
+	    }), /*#__PURE__*/gn.createElement("span", null, "nothing on top")))))))), /*#__PURE__*/gn.createElement("nav", {
 	      className: "panel",
 	      style: {
 	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/gn.createElement("p", {
 	      className: "panel-heading"
-	    }, /*#__PURE__*/gn.createElement("strong", null, "Strategy")), /*#__PURE__*/gn.createElement("div", {
-	      className: "panel-block"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "field",
-	      style: {
-	        width: '100%'
-	      }
-	    }, /*#__PURE__*/gn.createElement("label", {
-	      className: "checkbox"
-	    }, /*#__PURE__*/gn.createElement("input", {
-	      type: "checkbox",
-	      checked: parallel,
-	      onChange: this.toggleParallel,
-	      style: {
-	        marginRight: '0.5rem'
-	      }
-	    }), "Parallel mode (run multiple algorithms concurrently)"), /*#__PURE__*/gn.createElement("p", {
-	      className: "help",
-	      style: {
-	        marginTop: '0.5rem',
-	        marginBottom: '0.5rem'
-	      }
-	    }, "When enabled, selected algorithms run in parallel and the best result is chosen"))), parallel ? /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("div", {
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "heading-row"
+	    }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	      className: "glyph"
+	    }, "\u25F1"), "Algorithm"), /*#__PURE__*/gn.createElement("span", {
+	      className: "heading-tools"
+	    }, /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: advanced ? 'is-on' : '',
+	      onClick: () => this.setState({
+	        advanced: !advanced
+	      }),
+	      title: "Item order, box selection, search, constraints"
+	    }, advanced ? 'fewer settings' : 'more settings')))), /*#__PURE__*/gn.createElement("div", {
 	      className: "panel-block"
 	    }, /*#__PURE__*/gn.createElement("div", {
 	      className: "field",
@@ -53323,32 +52205,70 @@ void main() {
 	      }
 	    }, /*#__PURE__*/gn.createElement("label", {
 	      className: "label is-small"
-	    }, "Select Algorithms"), /*#__PURE__*/gn.createElement("div", {
+	    }, "Preset"), /*#__PURE__*/gn.createElement("div", {
+	      className: "select is-fullwidth"
+	    }, /*#__PURE__*/gn.createElement("select", {
+	      value: settings.auto ? AUTO_PRESET : (meta?.rules || []).find(s => s.order === settings.order && s.selection === settings.selection)?.name ?? '',
+	      onChange: this.applyStrategyPreset
+	    }, /*#__PURE__*/gn.createElement("option", {
+	      value: "",
+	      disabled: true
+	    }, "Custom"), /*#__PURE__*/gn.createElement("option", {
+	      value: AUTO_PRESET
+	    }, "Auto \u2014 best of every rule"), (meta?.rules || []).map(s => /*#__PURE__*/gn.createElement("option", {
+	      key: s.name,
+	      value: s.name
+	    }, s.name, " \u2014 ", labelOf(meta?.selections, s.selection), ", ", labelOf(meta?.orders, s.order).toLowerCase())))), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, settings.auto ? 'Runs every rule at once and keeps whichever result the goal below prefers. Asking for the fewest boxes also empties boxes into one another afterwards.' : ruleGist(meta, settings.selection) ? `${labelOf(meta?.selections, settings.selection)}: ${ruleGist(meta, settings.selection)}, ${labelOf(meta?.orders, settings.order).toLowerCase()}.` : 'A named pair of item order and box selection.'), !settings.auto && SPREADING_RULES.includes(settings.selection) && boxSizesOffered(elements) > 1 && /*#__PURE__*/gn.createElement("p", {
+	      className: "help is-warning"
+	    }, "With more than one box size on offer, the box with the most room left is the largest one, every time. This rule is stated over boxes of one size; here it buys container volume for nothing. For an even load ask for the balanced goal instead."))), advanced && /*#__PURE__*/gn.createElement(gn.Fragment, null, !settings.auto && /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
 	      style: {
-	        display: 'flex',
-	        flexDirection: 'column',
-	        gap: '0.5rem'
+	        width: '100%'
 	      }
-	    }, STRATEGIES.map(s => /*#__PURE__*/gn.createElement("label", {
-	      key: s.value,
-	      className: "checkbox",
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "label is-small"
+	    }, "Item order"), /*#__PURE__*/gn.createElement("div", {
+	      className: "select is-fullwidth"
+	    }, /*#__PURE__*/gn.createElement("select", {
+	      value: settings.order,
+	      onChange: this.setSetting('order')
+	    }, (meta?.orders || []).map(o => /*#__PURE__*/gn.createElement("option", {
+	      key: o.value,
+	      value: o.value
+	    }, o.label)))), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, (meta?.orders || []).find(o => o.value === settings.order)?.description || ''))), !settings.auto && /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
 	      style: {
-	        cursor: 'pointer',
-	        fontSize: '0.875rem'
+	        width: '100%'
 	      }
-	    }, /*#__PURE__*/gn.createElement("input", {
-	      type: "checkbox",
-	      checked: selectedAlgorithms.includes(s.value),
-	      onChange: () => this.toggleAlgorithm(s.value),
-	      style: {
-	        marginRight: '0.5rem'
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "label is-small"
+	    }, "Box selection"), /*#__PURE__*/gn.createElement("div", {
+	      className: "select is-fullwidth"
+	    }, /*#__PURE__*/gn.createElement("select", {
+	      value: settings.selection,
+	      onChange: this.setSetting('selection')
+	    }, (meta?.selections || []).map(o => /*#__PURE__*/gn.createElement("option", {
+	      key: o.value,
+	      value: o.value
+	    }, o.label)))), (() => {
+	      const rule = (meta?.selections || []).find(o => o.value === settings.selection);
+	      if (!rule) {
+	        return null;
 	      }
-	    }), s.name))), selectedAlgorithms.length === 0 && /*#__PURE__*/gn.createElement("p", {
-	      className: "help is-danger",
-	      style: {
-	        marginTop: '0.5rem'
-	      }
-	    }, "At least one algorithm must be selected"))), /*#__PURE__*/gn.createElement("div", {
+	      return /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("p", {
+	        className: "help"
+	      }, rule.description), /*#__PURE__*/gn.createElement("dl", {
+	        className: "rule-facts"
+	      }, rule.bound && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Worst case"), /*#__PURE__*/gn.createElement("dd", null, rule.bound)), rule.measured && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Measured"), /*#__PURE__*/gn.createElement("dd", null, rule.measured))));
+	    })())), settings.auto && /*#__PURE__*/gn.createElement("div", {
 	      className: "panel-block"
 	    }, /*#__PURE__*/gn.createElement("div", {
 	      className: "field",
@@ -53360,14 +52280,46 @@ void main() {
 	    }, "Goal"), /*#__PURE__*/gn.createElement("div", {
 	      className: "select is-fullwidth"
 	    }, /*#__PURE__*/gn.createElement("select", {
-	      value: goal,
-	      onChange: this.setGoal
-	    }, GOALS.map(g => /*#__PURE__*/gn.createElement("option", {
+	      value: settings.goal,
+	      onChange: this.setSetting('goal')
+	    }, (meta?.goals || []).map(g => /*#__PURE__*/gn.createElement("option", {
 	      key: g.value,
 	      value: g.value
-	    }, g.name)))), /*#__PURE__*/gn.createElement("p", {
+	    }, g.label)))), /*#__PURE__*/gn.createElement("p", {
 	      className: "help"
-	    }, GOALS.find(g => g.value === goal)?.description || '')))) : /*#__PURE__*/gn.createElement("div", {
+	    }, (meta?.goals || []).find(g => g.value === settings.goal)?.description || ''))), !settings.auto && /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/gn.createElement("input", {
+	      type: "checkbox",
+	      checked: settings.search,
+	      onChange: this.toggleSetting('search')
+	    }), ' ', "Search"), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, "The rules commit to the first sensible spot for each item. The search instead carries several half-finished loads forward at once, fills the emptiest corner of each with a stack of identical goods, and scores a load by finishing it greedily. It costs three to five times the time: measured on the Bischoff instances, it is worth about two points of fill where an item may rest on nothing, and six where a load has to stand up."), settings.search && /*#__PURE__*/gn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/gn.createElement("input", {
+	      type: "checkbox",
+	      checked: settings.searchFills,
+	      onChange: this.toggleSetting('searchFills')
+	    }), ' ', "Let the rule choose the box"), settings.search && /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, "The rule above picks which box to open and the search fills it, instead of the search running the whole packing. It keeps the box count the rule would have reached."))))), advanced && /*#__PURE__*/gn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto'
+	      }
+	    }, /*#__PURE__*/gn.createElement("p", {
+	      className: "panel-heading"
+	    }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	      className: "glyph"
+	    }, "\u229E"), "Constraints")), /*#__PURE__*/gn.createElement("div", {
 	      className: "panel-block"
 	    }, /*#__PURE__*/gn.createElement("div", {
 	      className: "field",
@@ -53376,24 +52328,105 @@ void main() {
 	      }
 	    }, /*#__PURE__*/gn.createElement("label", {
 	      className: "label is-small"
-	    }, "Strategy"), /*#__PURE__*/gn.createElement("div", {
-	      className: "select is-fullwidth"
-	    }, /*#__PURE__*/gn.createElement("select", {
-	      value: strategy,
-	      onChange: this.setStrategy
-	    }, STRATEGIES.map(s => /*#__PURE__*/gn.createElement("option", {
-	      key: s.value,
-	      value: s.value
-	    }, s.name)))), /*#__PURE__*/gn.createElement("p", {
+	    }, "Minimum support"), /*#__PURE__*/gn.createElement("input", {
+	      className: "slider is-fullwidth is-small",
+	      type: "range",
+	      min: "0",
+	      max: "1",
+	      step: "0.05",
+	      value: settings.supportRatio,
+	      onChange: this.setSetting('supportRatio', parseFloat)
+	    }), /*#__PURE__*/gn.createElement("p", {
 	      className: "help"
-	    }, STRATEGIES.find(s => s.value === strategy)?.description || '')))), packResult && /*#__PURE__*/gn.createElement("nav", {
+	    }, settings.supportRatio === 0 ? 'Off: an item may rest on nothing.' : `${Math.round(settings.supportRatio * 100)}% of an item's base must rest on what is below it.`))), /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/gn.createElement("input", {
+	      type: "checkbox",
+	      checked: settings.freeSpaceCorners,
+	      onChange: this.toggleSetting('freeSpaceCorners')
+	    }), ' ', "Free space corners"), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, "Offers each piece the corners of every empty space, not only the corners of what is already placed, which finds cavities the ordinary points miss. Measured on the Bischoff instances: worth 2.6 points of fill where an item may rest on nothing, nothing at all under full support, for three times the time."))), /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "label is-small"
+	    }, "How a placement is ranked"), /*#__PURE__*/gn.createElement("div", {
+	      className: "select is-small is-fullwidth"
+	    }, /*#__PURE__*/gn.createElement("select", {
+	      value: settings.merit,
+	      onChange: this.setSetting('merit')
+	    }, (meta?.merits || []).map(m => /*#__PURE__*/gn.createElement("option", {
+	      key: m.value,
+	      value: m.value
+	    }, m.label)))), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, (meta?.merits || []).find(m => m.value === settings.merit)?.description || ''))), /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/gn.createElement("input", {
+	      type: "checkbox",
+	      checked: settings.rehome,
+	      onChange: this.toggleSetting('rehome')
+	    }), ' ', "Move loads into smaller boxes"), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, "Once everything is packed, each box's contents move into the smallest kind that holds all of it. It never opens another box, and it pays off for the rules that reach for the roomiest box they can see."))), /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/gn.createElement("input", {
+	      type: "checkbox",
+	      checked: settings.balanceWeight,
+	      onChange: this.toggleSetting('balanceWeight')
+	    }), ' ', "Even out the weight"), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, "Moves items between the boxes afterwards so no one box is far heavier than the rest."))), /*#__PURE__*/gn.createElement("div", {
+	      className: "panel-block"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "field",
+	      style: {
+	        width: '100%'
+	      }
+	    }, /*#__PURE__*/gn.createElement("label", {
+	      className: "checkbox"
+	    }, /*#__PURE__*/gn.createElement("input", {
+	      type: "checkbox",
+	      checked: settings.singleContainer,
+	      onChange: this.toggleSetting('singleContainer')
+	    }), ' ', "Fill one container"), /*#__PURE__*/gn.createElement("p", {
+	      className: "help"
+	    }, "Packs the first box as densely as it can and leaves the rest behind, even dropping a bulky item to make room for several small ones.")))), packResult && advanced && /*#__PURE__*/gn.createElement("nav", {
 	      className: "panel",
 	      style: {
 	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/gn.createElement("p", {
 	      className: "panel-heading"
-	    }, /*#__PURE__*/gn.createElement("strong", null, "Visualization")), /*#__PURE__*/gn.createElement("div", {
+	    }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	      className: "glyph"
+	    }, "\u25C8"), "Visualization")), /*#__PURE__*/gn.createElement("div", {
 	      className: "panel-block"
 	    }, /*#__PURE__*/gn.createElement("div", {
 	      className: "field",
@@ -53409,482 +52442,897 @@ void main() {
 	      style: {
 	        marginRight: '0.5rem'
 	      }
-	    }), "Show animation"))), showAnimation && /*#__PURE__*/gn.createElement("div", {
-	      className: "panel-block"
+	    }), "Show animation"))))), /*#__PURE__*/gn.createElement("div", {
+	      className: "splitter is-vertical",
+	      title: "Drag to resize \xB7 double-click to collapse",
+	      onPointerDown: event => this.startDrag(event, 'leftWidth', 1, PANE_SLOTS),
+	      onDblClick: () => this.setState(state => ({
+	        leftWidth: state.leftWidth > 0 ? 0 : 330
+	      }), () => this.resizeScene())
+	    }), /*#__PURE__*/gn.createElement("main", {
+	      className: "stage"
 	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "field",
-	      style: {
-	        width: '100%'
-	      }
-	    }, /*#__PURE__*/gn.createElement("label", {
-	      className: "label is-small"
-	    }, "Animation Speed"), /*#__PURE__*/gn.createElement("input", {
-	      className: "slider is-fullwidth is-small",
-	      step: "0.1",
-	      min: "0.1",
-	      max: "3",
-	      type: "range",
-	      value: animationSpeed,
-	      onChange: this.setAnimationSpeed
-	    }), /*#__PURE__*/gn.createElement("p", {
-	      className: "help"
-	    }, animationSpeed.toFixed(1), "x"))), packResult.executionTime !== undefined && /*#__PURE__*/gn.createElement("div", {
-	      className: "panel-block",
-	      style: {
-	        background: '#1a1a1a',
-	        border: '1px solid #333',
-	        fontSize: '0.75rem',
-	        fontFamily: 'monospace'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level is-mobile",
-	      style: {
-	        margin: 0,
-	        width: '100%'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-left"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-item"
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: '#888'
-	      }
-	    }, "Execution time:"))), /*#__PURE__*/gn.createElement("div", {
-	      className: "level-right"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-item"
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: '#4a9eff',
-	        fontWeight: 600
-	      }
-	    }, packResult.executionTime, " ms"))))), /*#__PURE__*/gn.createElement("div", {
-	      className: "panel-block",
-	      style: {
-	        background: '#2a2a2a',
-	        border: '1px solid #333',
-	        fontSize: '0.75rem',
-	        color: '#bbb'
-	      }
-	    }, /*#__PURE__*/gn.createElement("p", {
-	      className: "help",
-	      style: {
-	        margin: 0
-	      }
-	    }, "Click boxes in 3D or list to view details | Ctrl+\u2190/\u2192 to navigate"))), packResult && packResult.boxes && packResult.boxes.length > 0 && /*#__PURE__*/gn.createElement("nav", {
-	      className: "panel",
+	      className: "stage-scene",
+	      ref: node => this.mountScene(node)
+	    }), packResult && packResult.boxes && (packResult.boxes.some(box => box.items.length > 0) || stagePanel === 'strategies') && (() => {
+	      const filled = packResult.boxes.filter(box => box.items.length > 0);
+	      const idle = packResult.boxes.length - filled.length;
+	      const shown = showEmptyBoxes ? packResult.boxes : filled;
+	      return /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("div", {
+	        className: "splitter is-horizontal",
+	        title: "Drag to resize \xB7 double-click to collapse",
+	        onPointerDown: event => this.startDrag(event, 'boxesHeight', -1, STRIP_SLOTS),
+	        onDblClick: () => this.setState(state => ({
+	          boxesHeight: state.boxesHeight > 0 ? 0 : 200
+	        }), () => this.resizeScene())
+	      }), /*#__PURE__*/gn.createElement("nav", {
+	        className: "panel",
+	        style: {
+	          flex: `0 0 ${boxesHeight}px`
+	        }
+	      }, /*#__PURE__*/gn.createElement("p", {
+	        className: "panel-heading"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "heading-row"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "strip-tabs"
+	      }, /*#__PURE__*/gn.createElement("button", {
+	        type: "button",
+	        className: stagePanel === 'boxes' ? 'is-on' : '',
+	        onClick: () => this.setState({
+	          stagePanel: 'boxes'
+	        })
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "glyph"
+	      }, "\u25A3"), "Containers (", filled.length, ")"), /*#__PURE__*/gn.createElement("button", {
+	        type: "button",
+	        className: stagePanel === 'strategies' ? 'is-on' : '',
+	        onClick: this.openStrategies
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "glyph"
+	      }, "\u25C6"), "Strategies")), /*#__PURE__*/gn.createElement("span", {
+	        className: "heading-tools"
+	      }, stagePanel === 'boxes' && idle > 0 && /*#__PURE__*/gn.createElement("button", {
+	        type: "button",
+	        className: showEmptyBoxes ? 'is-on' : '',
+	        onClick: this.toggleEmptyBoxes,
+	        title: "Show the boxes the packer left unused, here and in the scene"
+	      }, showEmptyBoxes ? `hide ${idle} unused` : `show ${idle} unused`), stagePanel === 'boxes' && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("button", {
+	        type: "button",
+	        title: "Previous (Ctrl+\u2190)",
+	        onClick: () => this.props.playground.selectPreviousBox()
+	      }, "\u25C0"), /*#__PURE__*/gn.createElement("button", {
+	        type: "button",
+	        title: "Next (Ctrl+\u2192)",
+	        onClick: () => this.props.playground.selectNextBox()
+	      }, "\u25B6")), stagePanel === 'strategies' && comparing && /*#__PURE__*/gn.createElement("span", {
+	        className: "heading-note"
+	      }, "running\u2026")))), stagePanel === 'strategies' && /*#__PURE__*/gn.createElement("div", {
+	        className: "matrix-wrap"
+	      }, comparing && !comparison && /*#__PURE__*/gn.createElement("p", {
+	        className: "strategy-empty"
+	      }, "Trying every order against every rule\u2026"), comparison && (() => {
+	        const usable = comparison.filter(row => !row.failed);
+	        if (usable.length === 0) {
+	          return /*#__PURE__*/gn.createElement("p", {
+	            className: "strategy-empty"
+	          }, "No trial finished.");
+	        }
+	        const apart = row => row.selection === 'search' || Boolean(row.goal);
+	        const plain = usable.filter(row => !apart(row));
+	        const orders = [...new Set(plain.map(row => row.order))];
+	        const rules = [...new Set(plain.map(row => row.selection))];
+	        const leader = usable.slice().sort(compareOutcome)[0];
+	        const singles = usable.filter(apart);
+	        const ladder = usable.slice().sort(compareOutcome);
+	        const place = new Map();
+	        let rank = 0;
+	        ladder.forEach((row, at) => {
+	          if (at === 0 || compareOutcome(row, ladder[at - 1]) !== 0) {
+	            rank++;
+	          }
+	          place.set(row, rank);
+	        });
+	        const cell = row => {
+	          if (!row) {
+	            return /*#__PURE__*/gn.createElement("span", {
+	              className: "matrix-cell is-blank"
+	            }, "\u2014");
+	          }
+	          const mine = row.order === settings.order && row.selection === settings.selection;
+	          const best = compareOutcome(row, leader) === 0;
+	          const preview = outcomePreview(row.containers, 128, 46);
+	          const classes = ['matrix-cell'];
+	          if (mine) classes.push('is-active');
+	          if (best) classes.push('is-best');
+	          return /*#__PURE__*/gn.createElement("button", {
+	            type: "button",
+	            className: classes.join(' '),
+	            disabled: row.selection === 'search' && !row.goal,
+	            title: row.selection === 'search' ? 'The search is chosen under More settings' : row.goal ? `Pack for ${row.selection}: every rule is tried and the best answer kept` : `Pack with ${row.selection}, ${row.order}`,
+	            onClick: () => this.updateSettings(row.goal ? {
+	              auto: true,
+	              search: false,
+	              goal: row.goal
+	            } : {
+	              order: row.order,
+	              selection: row.selection,
+	              auto: false,
+	              search: false,
+	              parallel: false
+	            })
+	          }, /*#__PURE__*/gn.createElement("svg", {
+	            className: "matrix-view",
+	            viewBox: `-1 -1 ${preview.width + 2} ${preview.height + 2}`,
+	            width: "100%",
+	            height: "46",
+	            preserveAspectRatio: "xMidYMax meet"
+	          }, preview.boxes.map(box => /*#__PURE__*/gn.createElement("g", {
+	            key: box.key
+	          }, /*#__PURE__*/gn.createElement("rect", {
+	            x: box.x,
+	            y: preview.height - box.height,
+	            width: box.width,
+	            height: box.height,
+	            className: "tile-box"
+	          }), /*#__PURE__*/gn.createElement("rect", {
+	            x: box.x,
+	            y: preview.height - box.height * box.fill / 100,
+	            width: box.width,
+	            height: box.height * box.fill / 100,
+	            className: "tile-load"
+	          })))), /*#__PURE__*/gn.createElement("span", {
+	            className: "matrix-facts"
+	          }, /*#__PURE__*/gn.createElement("span", {
+	            className: "matrix-rank"
+	          }, place.get(row)), /*#__PURE__*/gn.createElement("strong", null, row.boxes), preview.hidden > 0 && `+${preview.hidden}`, ' · ', formatVolume(row.capacity)), /*#__PURE__*/gn.createElement("span", {
+	            className: "matrix-sub"
+	          }, row.fill < 10 ? row.fill.toFixed(1) : row.fill.toFixed(0), "% full", ' · ', row.unfit > 0 ? /*#__PURE__*/gn.createElement("span", {
+	            className: "is-alarm"
+	          }, Math.round(row.packed / (row.packed + row.unfit) * 100), "% packed,", ' ', row.unfit, " left") : 'all packed'), /*#__PURE__*/gn.createElement("span", {
+	            className: "matrix-sub"
+	          }, (row.micros / 1000).toFixed(row.micros < 10000 ? 1 : 0), " ms", best && /*#__PURE__*/gn.createElement("span", {
+	            className: "matrix-flag"
+	          }, "best"), mine && /*#__PURE__*/gn.createElement("span", {
+	            className: "matrix-flag is-current"
+	          }, "in use")));
+	        };
+	        return /*#__PURE__*/gn.createElement("div", {
+	          className: "matrix",
+	          style: {
+	            gridTemplateColumns: `12rem repeat(${orders.length}, minmax(0, 1fr))`
+	          }
+	        }, /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-corner"
+	        }, "rule \\ order"), orders.map(order => /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-head",
+	          key: order
+	        }, order)), rules.map(rule => /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-rule",
+	          key: `name-${rule}`,
+	          title: ruleNote(meta, rule)
+	        }, /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-rule-name"
+	        }, rule), /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-rule-gist"
+	        }, ruleGist(meta, rule))), orders.map(order => /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-slot",
+	          key: `${rule}/${order}`
+	        }, cell(plain.find(row => row.selection === rule && row.order === order)))))), singles.map(row => /*#__PURE__*/gn.createElement(gn.Fragment, {
+	          key: `single-${row.selection}`
+	        }, /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-rule"
+	        }, row.selection), /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-slot"
+	        }, cell(row)), orders.slice(1).map(order => /*#__PURE__*/gn.createElement("span", {
+	          className: "matrix-slot",
+	          key: `${row.selection}-${order}`
+	        })))));
+	      })(), comparison && /*#__PURE__*/gn.createElement("p", {
+	        className: "strategy-note"
+	      }, "One cell per trial, drawn to one scale. The number at the front is the place this packing takes among all of them, ranked by goods left behind, then the volume of container you pay for, then how many pieces of it. Times are the fastest of three runs. A row that changes across the columns is a rule the item order matters to; a row that does not is a rule it makes no difference to. The rows below the matrix are not rules: each tries every rule and keeps the answer its goal prefers, so they cost more and can only match or beat the cells above. Click a cell to pack with it.")), stagePanel === 'boxes' && /*#__PURE__*/gn.createElement("div", {
+	        className: "box-list"
+	      }, shown.map((box, index) => {
+	        const stats = this.calculateBoxStats(box);
+	        const isSelected = selectedBox === box.id;
+	        const classes = ['box-card'];
+	        if (isSelected) classes.push('is-active');
+	        if (stats.itemsCount === 0) classes.push('is-empty');
+	        return /*#__PURE__*/gn.createElement("div", {
+	          key: box.id,
+	          className: classes.join(' '),
+	          onClick: () => this.selectBox(box.id)
+	        }, /*#__PURE__*/gn.createElement("div", {
+	          className: "box-card-head"
+	        }, /*#__PURE__*/gn.createElement("span", {
+	          className: "box-card-dims"
+	        }, /*#__PURE__*/gn.createElement("span", {
+	          className: "box-card-index"
+	        }, "#", index + 1), Math.round(box.width), "\xD7", Math.round(box.height), "\xD7", Math.round(box.depth)), /*#__PURE__*/gn.createElement("span", {
+	          className: "box-card-count"
+	        }, stats.itemsCount, " ", stats.itemsCount === 1 ? 'item' : 'items')), /*#__PURE__*/gn.createElement("div", {
+	          className: "box-card-meters"
+	        }, meterRow('vol', stats.utilization, `${stats.usedVolume.toLocaleString()} of ${stats.totalVolume.toLocaleString()} mm³`, 'fill'), meterRow('wgt', stats.weightUtilization, `${stats.grossWeight.toLocaleString()} of ${Math.round(box.weight).toLocaleString()} g gross`)));
+	      }))));
+	    })()), /*#__PURE__*/gn.createElement("div", {
+	      className: "splitter is-vertical",
+	      title: "Drag to resize \xB7 double-click to collapse",
+	      onPointerDown: event => this.startDrag(event, 'rightWidth', -1, PANE_SLOTS),
+	      onDblClick: () => this.setState(state => ({
+	        rightWidth: state.rightWidth > 0 ? 0 : 300
+	      }), () => this.resizeScene())
+	    }), /*#__PURE__*/gn.createElement("aside", {
+	      className: "pane pane-right"
+	    }, notice && /*#__PURE__*/gn.createElement("article", {
+	      className: `message ${notice.tone}`,
 	      style: {
 	        flex: '0 0 auto'
 	      }
-	    }, /*#__PURE__*/gn.createElement("p", {
-	      className: "panel-heading"
 	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level",
-	      style: {
-	        margin: 0
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-left"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-item"
-	    }, /*#__PURE__*/gn.createElement("strong", null, "Boxes (", packResult.boxes.length, ")"))), /*#__PURE__*/gn.createElement("div", {
-	      className: "level-right"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-item"
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "field has-addons"
-	    }, /*#__PURE__*/gn.createElement("p", {
-	      className: "control"
-	    }, /*#__PURE__*/gn.createElement("button", {
-	      className: "button is-small is-info",
-	      onClick: () => this.props.playground.selectPreviousBox(),
-	      title: "Previous (Ctrl+\u2190)",
-	      style: {
-	        minWidth: '2rem',
-	        padding: '0.25rem 0.5rem'
-	      }
-	    }, "\u25C0")), /*#__PURE__*/gn.createElement("p", {
-	      className: "control"
-	    }, /*#__PURE__*/gn.createElement("button", {
-	      className: "button is-small is-info",
-	      onClick: () => this.props.playground.selectNextBox(),
-	      title: "Next (Ctrl+\u2192)",
-	      style: {
-	        minWidth: '2rem',
-	        padding: '0.25rem 0.5rem'
-	      }
-	    }, "\u25B6"))))))), packResult.boxes.map((box, index) => {
-	      const stats = this.calculateBoxStats(box);
-	      const isSelected = selectedBox === box.id;
-	      return /*#__PURE__*/gn.createElement("a", {
-	        key: box.id,
-	        href: "#",
-	        className: `panel-block ${isSelected ? 'is-active' : ''}`,
-	        onClick: e => {
-	          e.preventDefault();
-	          this.selectBox(box.id);
-	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        style: {
-	          width: '100%'
-	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level is-mobile",
-	        style: {
-	          marginBottom: '0.5rem'
-	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level-left"
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level-item",
-	        style: {
-	          fontFamily: 'monospace',
-	          fontSize: '0.8125rem'
-	        }
-	      }, /*#__PURE__*/gn.createElement("strong", null, "#", index + 1), /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          marginLeft: '1rem',
-	          color: '#888'
-	        }
-	      }, "|"), /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          marginLeft: '0.75rem'
-	        }
-	      }, Math.round(box.width), "\xD7", Math.round(box.height), "\xD7", Math.round(box.depth)), isSelected && /*#__PURE__*/gn.createElement("span", {
-	        className: "tag is-success",
-	        style: {
-	          marginLeft: '0.5rem',
-	          fontSize: '0.7rem'
-	        }
-	      }, "ACTIVE"))), /*#__PURE__*/gn.createElement("div", {
-	        className: "level-right"
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level-item"
-	      }, /*#__PURE__*/gn.createElement("span", {
-	        className: "tag is-info",
-	        style: {
-	          fontSize: '0.7rem'
-	        }
-	      }, stats.itemsCount)))), /*#__PURE__*/gn.createElement("div", {
-	        style: {
-	          fontSize: '0.75rem',
-	          fontFamily: 'monospace'
-	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        style: {
-	          marginBottom: '0.5rem'
-	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level is-mobile",
-	        style: {
-	          marginBottom: '0.25rem'
-	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level-left"
-	      }, /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          color: '#bbb'
-	        }
-	      }, "VOL")), /*#__PURE__*/gn.createElement("div", {
-	        className: "level-right"
-	      }, /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          color: stats.utilization > 80 ? '#f14668' : stats.utilization > 60 ? '#ffa726' : '#48c774',
-	          fontWeight: 600
-	        }
-	      }, stats.utilization.toFixed(1), "%"))), /*#__PURE__*/gn.createElement("progress", {
-	        className: "progress",
-	        value: stats.utilization,
-	        max: "100",
-	        style: {
-	          marginBottom: '0.25rem',
-	          height: '3px'
-	        }
-	      }), /*#__PURE__*/gn.createElement("div", {
-	        style: {
-	          color: '#bbb',
-	          fontSize: '0.7rem'
-	        }
-	      }, stats.usedVolume.toLocaleString(), "/", stats.totalVolume.toLocaleString(), " mm\xB3")), /*#__PURE__*/gn.createElement("div", null, /*#__PURE__*/gn.createElement("div", {
-	        className: "level is-mobile",
-	        style: {
-	          marginBottom: '0.25rem'
-	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level-left"
-	      }, /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          color: '#bbb'
-	        }
-	      }, "WGT")), /*#__PURE__*/gn.createElement("div", {
-	        className: "level-right"
-	      }, /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          color: stats.weightUtilization > 80 ? '#f14668' : stats.weightUtilization > 60 ? '#ffa726' : '#48c774',
-	          fontWeight: 600
-	        }
-	      }, stats.weightUtilization.toFixed(1), "%"))), /*#__PURE__*/gn.createElement("progress", {
-	        className: "progress",
-	        value: stats.weightUtilization,
-	        max: "100",
-	        style: {
-	          height: '3px',
-	          marginBottom: '0.25rem'
-	        }
-	      }), /*#__PURE__*/gn.createElement("div", {
-	        style: {
-	          color: '#bbb',
-	          fontSize: '0.7rem'
-	        }
-	      }, stats.usedWeight.toLocaleString(), "/", Math.round(box.weight).toLocaleString(), " g")))));
-	    })), selectedBoxData && selectedBoxStats && /*#__PURE__*/gn.createElement("nav", {
-	      className: "panel",
+	      className: "message-body"
+	    }, notice.text, /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: "notice-close",
+	      onClick: () => this.setState({
+	        notice: null
+	      })
+	    }, "dismiss"))), requestError && /*#__PURE__*/gn.createElement("article", {
+	      className: "message is-danger",
 	      style: {
 	        flex: '0 0 auto'
 	      }
-	    }, /*#__PURE__*/gn.createElement("p", {
-	      className: "panel-heading"
-	    }, /*#__PURE__*/gn.createElement("strong", null, "Details")), /*#__PURE__*/gn.createElement("div", {
-	      className: "panel-block",
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "message-body"
+	    }, requestError)), packResult?.warning && /*#__PURE__*/gn.createElement("article", {
+	      className: "message is-warning",
 	      style: {
-	        flexDirection: 'column',
-	        alignItems: 'stretch',
-	        padding: '1rem'
+	        flex: '0 0 auto'
 	      }
 	    }, /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        fontFamily: 'monospace',
-	        fontSize: '0.8125rem',
-	        marginBottom: '1rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        marginBottom: '0.5rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: '#bbb',
-	        fontSize: '0.7rem',
-	        textTransform: 'uppercase'
-	      }
-	    }, "Size"), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        color: '#f0f0f0',
-	        marginTop: '0.25rem'
-	      }
-	    }, Math.round(selectedBoxData.width), " \xD7 ", Math.round(selectedBoxData.height), " \xD7 ", Math.round(selectedBoxData.depth), " mm")), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        marginBottom: '0.5rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: '#bbb',
-	        fontSize: '0.7rem',
-	        textTransform: 'uppercase'
-	      }
-	    }, "Max Weight"), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        color: '#f0f0f0',
-	        marginTop: '0.25rem'
-	      }
-	    }, Math.round(selectedBoxData.weight).toLocaleString(), " g")), /*#__PURE__*/gn.createElement("div", null, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: '#bbb',
-	        fontSize: '0.7rem',
-	        textTransform: 'uppercase'
-	      }
-	    }, "Items"), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        color: '#f0f0f0',
-	        marginTop: '0.25rem'
-	      }
-	    }, selectedBoxStats.itemsCount))), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        borderTop: '1px solid #333',
-	        paddingTop: '1rem',
-	        marginTop: '1rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        marginBottom: '1rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level is-mobile",
-	      style: {
-	        marginBottom: '0.5rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-left"
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: '#bbb',
-	        fontSize: '0.7rem',
-	        textTransform: 'uppercase'
-	      }
-	    }, "Volume")), /*#__PURE__*/gn.createElement("div", {
-	      className: "level-right"
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: selectedBoxStats.utilization > 80 ? '#f14668' : selectedBoxStats.utilization > 60 ? '#ffa726' : '#48c774',
-	        fontFamily: 'monospace',
-	        fontWeight: 600
-	      }
-	    }, selectedBoxStats.utilization.toFixed(1), "%"))), /*#__PURE__*/gn.createElement("progress", {
-	      className: "progress",
-	      value: selectedBoxStats.utilization,
-	      max: "100",
-	      style: {
-	        height: '3px',
-	        marginBottom: '0.5rem'
-	      }
-	    }), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        fontFamily: 'monospace',
-	        fontSize: '0.7rem',
-	        color: '#bbb'
-	      }
-	    }, selectedBoxStats.usedVolume.toLocaleString(), " / ", selectedBoxStats.totalVolume.toLocaleString(), " mm\xB3", /*#__PURE__*/gn.createElement("br", null), "Free: ", selectedBoxStats.freeVolume.toLocaleString(), " mm\xB3")), /*#__PURE__*/gn.createElement("div", null, /*#__PURE__*/gn.createElement("div", {
-	      className: "level is-mobile",
-	      style: {
-	        marginBottom: '0.5rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      className: "level-left"
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: '#bbb',
-	        fontSize: '0.7rem',
-	        textTransform: 'uppercase'
-	      }
-	    }, "Weight")), /*#__PURE__*/gn.createElement("div", {
-	      className: "level-right"
-	    }, /*#__PURE__*/gn.createElement("span", {
-	      style: {
-	        color: selectedBoxStats.weightUtilization > 80 ? '#f14668' : selectedBoxStats.weightUtilization > 60 ? '#ffa726' : '#48c774',
-	        fontFamily: 'monospace',
-	        fontWeight: 600
-	      }
-	    }, selectedBoxStats.weightUtilization.toFixed(1), "%"))), /*#__PURE__*/gn.createElement("progress", {
-	      className: "progress",
-	      value: selectedBoxStats.weightUtilization,
-	      max: "100",
-	      style: {
-	        height: '3px',
-	        marginBottom: '0.5rem'
-	      }
-	    }), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        fontFamily: 'monospace',
-	        fontSize: '0.7rem',
-	        color: '#bbb'
-	      }
-	    }, selectedBoxStats.usedWeight.toLocaleString(), " / ", Math.round(selectedBoxData.weight).toLocaleString(), " g"))), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        borderTop: '1px solid #333',
-	        paddingTop: '1rem',
-	        marginTop: '1rem'
-	      }
-	    }, /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        color: '#bbb',
-	        fontSize: '0.7rem',
-	        textTransform: 'uppercase',
-	        marginBottom: '0.75rem'
-	      }
-	    }, "Items (", selectedBoxData.items.length, ")"), /*#__PURE__*/gn.createElement("div", {
-	      style: {
-	        maxHeight: '200px',
-	        overflowY: 'auto'
-	      }
-	    }, selectedBoxData.items.map((item, idx) => {
-	      const isSelected = selectedItem === item.id;
-	      return /*#__PURE__*/gn.createElement("div", {
-	        key: item.id,
-	        className: "box",
+	      className: "message-body"
+	    }, packResult.warning)), (() => {
+	      const order = orderSummary(elements, packResult);
+	      return /*#__PURE__*/gn.createElement("nav", {
+	        className: "panel",
 	        style: {
-	          marginBottom: '0.5rem',
-	          cursor: 'pointer',
-	          border: isSelected ? '2px solid #ffff00' : '1px solid #333',
-	          backgroundColor: isSelected ? 'rgba(255, 255, 0, 0.1)' : 'transparent',
-	          padding: isSelected ? '0.5rem' : '0.5rem',
-	          borderRadius: '4px',
-	          transition: 'all 0.2s ease'
-	        },
-	        onClick: () => this.selectItem(item.id)
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level is-mobile",
-	        style: {
-	          marginBottom: '0.25rem'
+	          flex: '0 0 auto'
 	        }
-	      }, /*#__PURE__*/gn.createElement("div", {
-	        className: "level-left"
+	      }, /*#__PURE__*/gn.createElement("p", {
+	        className: "panel-heading"
+	      }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	        className: "glyph"
+	      }, "\u2261"), "This order")), /*#__PURE__*/gn.createElement("div", {
+	        className: "details"
+	      }, order.pieces === 0 ? /*#__PURE__*/gn.createElement("p", {
+	        className: "pane-empty"
+	      }, "Nothing to pack yet. Add ", flat ? 'cuts' : 'goods', " on the left, then click a container or a piece in the scene and its details appear here.") : /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("div", {
+	        className: "stat-grid"
 	      }, /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          color: isSelected ? '#ffff00' : '#4a9eff',
-	          fontFamily: 'monospace',
-	          fontWeight: isSelected ? 'bold' : 'normal'
-	        }
-	      }, "#", idx + 1), /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          marginLeft: '0.5rem',
-	          fontFamily: 'monospace',
-	          color: isSelected ? '#ffff00' : '#f0f0f0'
-	        }
-	      }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth))), /*#__PURE__*/gn.createElement("div", {
-	        className: "level-right"
+	        className: "stat-card"
 	      }, /*#__PURE__*/gn.createElement("span", {
-	        style: {
-	          color: isSelected ? '#ffff00' : '#bbb',
-	          fontFamily: 'monospace',
-	          fontSize: '0.7rem'
-	        }
-	      }, Math.round(item.weight), "g"))), /*#__PURE__*/gn.createElement("div", {
-	        style: {
-	          fontFamily: 'monospace',
-	          fontSize: '0.7rem',
-	          color: isSelected ? '#ffff00' : '#999'
-	        }
-	      }, "(", Math.round(item.position.x), ", ", Math.round(item.position.y), ", ", Math.round(item.position.z), ")"));
-	    }))))), packResult && packResult.items && packResult.items.length > 0 && /*#__PURE__*/gn.createElement("nav", {
+	        className: "stat-label"
+	      }, flat ? 'cuts' : 'goods'), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-value"
+	      }, order.pieces), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-unit"
+	      }, order.kinds, " ", order.kinds === 1 ? 'kind' : 'kinds')), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-card"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-label"
+	      }, "weight"), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-value"
+	      }, formatWeight(order.weight)), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-unit"
+	      }, "as declared")), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-card"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-label"
+	      }, "volume"), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-value"
+	      }, formatVolume(order.volume)), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-unit"
+	      }, "of goods"))), /*#__PURE__*/gn.createElement("dl", {
+	        className: "fact-list"
+	      }, order.containers > 0 && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Packed into"), /*#__PURE__*/gn.createElement("dd", null, order.containers, " ", order.containers === 1 ? 'container' : 'containers', ' · ', formatVolume(order.capacity), " \xB7 ", order.fill.toFixed(0), "% full")), order.left > 0 && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Left behind"), /*#__PURE__*/gn.createElement("dd", {
+	        className: "is-alarm"
+	      }, order.left)), /*#__PURE__*/gn.createElement("dt", null, "Containers offered"), /*#__PURE__*/gn.createElement("dd", null, order.crateKinds, " ", order.crateKinds === 1 ? 'kind' : 'kinds', order.dedicated > 0 && `, ${order.dedicated} dedicated`), order.loadLimited > 0 && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Load limits"), /*#__PURE__*/gn.createElement("dd", null, order.loadLimited, " of ", order.kinds, " state what may rest on them")), order.classes.length > 0 && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Classes"), /*#__PURE__*/gn.createElement("dd", null, order.classes.join(', '), order.keptApart > 0 && ` · ${order.keptApart} kept apart`))), !selectedBoxData && /*#__PURE__*/gn.createElement("p", {
+	        className: "pane-empty"
+	      }, "Click a container or a piece in the scene to see it here."))));
+	    })(), packResult && packResult.items && packResult.items.length > 0 && /*#__PURE__*/gn.createElement("nav", {
 	      className: "panel",
 	      style: {
 	        flex: '0 0 auto',
-	        border: '1px solid #f14668'
+	        border: '1px solid var(--alarm)'
 	      }
 	    }, /*#__PURE__*/gn.createElement("p", {
 	      className: "panel-heading",
 	      style: {
-	        background: '#2a1a1a',
-	        borderBottomColor: '#f14668'
+	        background: 'var(--surface-raised)',
+	        borderBottomColor: 'var(--alarm)'
 	      }
-	    }, /*#__PURE__*/gn.createElement("strong", null, "Unfit (", packResult.items.length, ")")), packResult.items.map(item => /*#__PURE__*/gn.createElement("div", {
+	    }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	      className: "glyph"
+	    }, "\u26A0"), "Unfit (", packResult.items.length, ")")), packResult.items.map(item => /*#__PURE__*/gn.createElement("div", {
 	      key: item.id,
 	      className: "panel-block",
 	      style: {
-	        borderLeft: '2px solid #f14668',
+	        borderLeft: '2px solid var(--alarm)',
 	        fontFamily: 'monospace',
 	        fontSize: '0.8125rem'
 	      }
 	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "dot",
+	      style: {
+	        background: itemColorCss({
+	          id: item.id,
+	          group: item.group
+	        }),
+	        color: itemColorCss({
+	          id: item.id,
+	          group: item.group
+	        }),
+	        marginRight: '0.45rem'
+	      }
+	    }), /*#__PURE__*/gn.createElement("span", {
 	      style: {
 	        flex: 1,
-	        color: '#f0f0f0'
+	        color: 'var(--ink)'
 	      }
-	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth)), /*#__PURE__*/gn.createElement("span", {
+	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth)), item.group && /*#__PURE__*/gn.createElement("span", {
+	      className: "tag is-dark is-small",
 	      style: {
-	        color: '#bbb',
-	        marginLeft: '0.5rem',
-	        fontSize: '0.75rem'
+	        marginLeft: '0.5rem'
 	      }
-	    }, Math.round(item.weight), "g")))));
+	    }, item.group), item.rotationBlocked ? /*#__PURE__*/gn.createElement("span", {
+	      className: "tag is-warning is-small",
+	      style: {
+	        marginLeft: '0.5rem'
+	      },
+	      title: "Free to turn, this item fits. The rotation you set is what stops it."
+	    }, "rotation blocks it") : item.unpackable && /*#__PURE__*/gn.createElement("span", {
+	      className: "tag is-danger is-small",
+	      style: {
+	        marginLeft: '0.5rem'
+	      },
+	      title: "No box you offered could hold this item, even empty"
+	    }, "no box fits"), /*#__PURE__*/gn.createElement("span", {
+	      className: "row-weight",
+	      style: {
+	        marginLeft: '0.5rem'
+	      }
+	    }, formatWeight(item.weight))))), selectedItemData && (() => {
+	      const article = articleOf(articles, selectedItemData);
+	      const laid = `${Math.round(selectedItemData.width)}×${Math.round(selectedItemData.height)}×${Math.round(selectedItemData.depth)}`;
+	      const turned = laid !== article.dims;
+	      const layer = layerOf(selectedBoxData, selectedItemData);
+	      const above = coveredBy(selectedBoxData, selectedItemData);
+	      const share = selectedBoxStats.totalVolume > 0 ? selectedItemData.width * selectedItemData.height * selectedItemData.depth / selectedBoxStats.totalVolume * 100 : 0;
+	      return /*#__PURE__*/gn.createElement("nav", {
+	        className: "panel",
+	        style: {
+	          flex: '0 0 auto'
+	        }
+	      }, /*#__PURE__*/gn.createElement("p", {
+	        className: "panel-heading"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "heading-row"
+	      }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	        className: "dot",
+	        style: {
+	          background: article.color,
+	          color: article.color
+	        }
+	      }), "Piece ", article.label), /*#__PURE__*/gn.createElement("span", {
+	        className: "heading-tools"
+	      }, /*#__PURE__*/gn.createElement("button", {
+	        type: "button",
+	        onClick: () => this.selectBox(selectedBoxData.id),
+	        title: "Back to the container"
+	      }, "clear")))), /*#__PURE__*/gn.createElement("div", {
+	        className: "details"
+	      }, /*#__PURE__*/gn.createElement("div", {
+	        className: "stat-grid"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-card"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-label"
+	      }, "as declared"), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-value"
+	      }, article.dims), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-unit"
+	      }, "millimetres")), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-card"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-label"
+	      }, "as laid"), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-value"
+	      }, laid), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-unit"
+	      }, turned ? 'turned to fit' : 'the way it came')), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-card"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-label"
+	      }, "weight"), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-value"
+	      }, formatWeight(selectedItemData.weight)), /*#__PURE__*/gn.createElement("span", {
+	        className: "stat-unit"
+	      }, share.toFixed(1), "% of the box"))), /*#__PURE__*/gn.createElement("dl", {
+	        className: "fact-list"
+	      }, /*#__PURE__*/gn.createElement("dt", null, "Corner at"), /*#__PURE__*/gn.createElement("dd", {
+	        className: "mono"
+	      }, Math.round(selectedItemData.position.x), " \xB7 ", Math.round(selectedItemData.position.y), " \xB7 ", Math.round(selectedItemData.position.z), " mm"), /*#__PURE__*/gn.createElement("dt", null, "Layer"), /*#__PURE__*/gn.createElement("dd", null, layer.index, " of ", layer.total, ", floor at ", Math.round(selectedItemData.position.z), " mm"), /*#__PURE__*/gn.createElement("dt", null, "To reach it"), /*#__PURE__*/gn.createElement("dd", null, above.length === 0 ? 'nothing rests on it' : `lift ${above.length} ${above.length === 1 ? 'piece' : 'pieces'} first`), (selectedItemData.nothingOnTop || selectedItemData.maxLoadOnTop > 0) && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Carries"), /*#__PURE__*/gn.createElement("dd", null, selectedItemData.nothingOnTop ? 'nothing may be stacked on it' : `${formatWeight(loadOn(selectedBoxData, selectedItemData))} of ${formatWeight(selectedItemData.maxLoadOnTop)}`)), selectedItemData.separateFrom && selectedItemData.separateFrom.length > 0 && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Kept from"), /*#__PURE__*/gn.createElement("dd", null, selectedItemData.separateFrom.join(', '))), selectedItemData.group && /*#__PURE__*/gn.createElement(gn.Fragment, null, /*#__PURE__*/gn.createElement("dt", null, "Ships with"), /*#__PURE__*/gn.createElement("dd", null, selectedItemData.group)), /*#__PURE__*/gn.createElement("dt", null, "In container"), /*#__PURE__*/gn.createElement("dd", {
+	        className: "mono"
+	      }, Math.round(selectedBoxData.width), "\xD7", Math.round(selectedBoxData.height), "\xD7", Math.round(selectedBoxData.depth)))));
+	    })(), selectedBoxData && selectedBoxStats && /*#__PURE__*/gn.createElement("nav", {
+	      className: "panel",
+	      style: {
+	        flex: '0 0 auto'
+	      }
+	    }, /*#__PURE__*/gn.createElement("p", {
+	      className: "panel-heading"
+	    }, /*#__PURE__*/gn.createElement("strong", null, /*#__PURE__*/gn.createElement("span", {
+	      className: "glyph"
+	    }, "\u2261"), "Container")), /*#__PURE__*/gn.createElement("div", {
+	      className: "details"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "stat-grid"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-card"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-label"
+	    }, "size"), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-value"
+	    }, Math.round(selectedBoxData.width), "\xD7", Math.round(selectedBoxData.height), "\xD7", Math.round(selectedBoxData.depth)), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-unit"
+	    }, "millimetres")), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-card"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-label"
+	    }, "weight"), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-value"
+	    }, formatWeight(selectedBoxStats.grossWeight)), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-unit"
+	    }, "of ", formatWeight(selectedBoxData.weight), selectedBoxStats.tare > 0 && ` · ${formatWeight(selectedBoxStats.tare)} tare`)), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-card"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-label"
+	    }, "items"), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-value"
+	    }, selectedBoxStats.itemsCount), /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-unit"
+	    }, selectedBoxStats.utilization.toFixed(0), "% of the space"))), /*#__PURE__*/gn.createElement("div", {
+	      className: "box-card-meters"
+	    }, meterRow('vol', selectedBoxStats.utilization, `${selectedBoxStats.usedVolume.toLocaleString()} of ${selectedBoxStats.totalVolume.toLocaleString()} mm³`, 'fill'), meterRow('wgt', selectedBoxStats.weightUtilization, `${selectedBoxStats.grossWeight.toLocaleString()} of ${Math.round(selectedBoxData.weight).toLocaleString()} g gross`)), selectedBoxData.accepts && selectedBoxData.accepts.length > 0 && /*#__PURE__*/gn.createElement("dl", {
+	      className: "fact-list"
+	    }, /*#__PURE__*/gn.createElement("dt", null, "Takes"), /*#__PURE__*/gn.createElement("dd", null, selectedBoxData.accepts.join(', '), " only")), /*#__PURE__*/gn.createElement("div", {
+	      className: "manifest"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "stat-label"
+	    }, "contents (", selectedBoxData.items.length, ")"), selectedBoxData.items.map((item, idx) => /*#__PURE__*/gn.createElement("div", {
+	      key: item.id,
+	      className: `manifest-row${selectedItem === item.id ? ' is-active' : ''}`,
+	      onClick: () => this.selectItem(item.id),
+	      onDblClick: () => this.selectItem(item.id, true),
+	      title: "Click to select \xB7 double-click to fly to it"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "dot",
+	      style: {
+	        background: itemColorCss(item),
+	        color: itemColorCss(item)
+	      }
+	    }), /*#__PURE__*/gn.createElement("span", {
+	      className: "manifest-index"
+	    }, idx + 1), /*#__PURE__*/gn.createElement("span", {
+	      className: "manifest-dims"
+	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth)), /*#__PURE__*/gn.createElement("span", {
+	      className: "manifest-at",
+	      title: "Position of the item's near-bottom-left corner"
+	    }, "@ ", Math.round(item.position.x), " ", Math.round(item.position.y), " ", Math.round(item.position.z)), /*#__PURE__*/gn.createElement("span", {
+	      className: "row-weight"
+	    }, formatWeight(item.weight))))))))), printing && packResult && /*#__PURE__*/gn.createElement("div", {
+	      className: "print-sheet"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "print-toolbar"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "print-title"
+	    }, flat ? 'Cutting plan' : 'Loading plan'), /*#__PURE__*/gn.createElement("span", {
+	      style: {
+	        flex: 1
+	      }
+	    }), /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: "button is-info is-small",
+	      onClick: () => window.print()
+	    }, "Print"), /*#__PURE__*/gn.createElement("button", {
+	      type: "button",
+	      className: "button is-small",
+	      onClick: () => this.setState({
+	        printing: false
+	      })
+	    }, "Close")), /*#__PURE__*/gn.createElement("div", {
+	      className: "print-body"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "print-head"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "print-doc"
+	    }, "BoxPacker3 \u2014 ", flat ? 'cutting plan' : 'loading plan'), /*#__PURE__*/gn.createElement("span", {
+	      className: "print-meta"
+	    }, summarise(packResult).boxes, " ", flat ? 'sheets' : 'containers', " \xB7 ", summarise(packResult).packed, " ", flat ? 'pieces' : 'articles', "\xB7 ", summarise(packResult).fill, " full \xB7 ", settings.order, " / ", settings.selection)), (() => {
+	      const plan = loadingPlan(packResult);
+	      if (plan.length < 2) {
+	        return null;
+	      }
+	      return /*#__PURE__*/gn.createElement("section", {
+	        className: "print-box print-manifest"
+	      }, /*#__PURE__*/gn.createElement("div", {
+	        className: "print-box-head"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "print-box-dims"
+	      }, plan.length, " ", flat ? 'sheets' : 'containers', " to load"), /*#__PURE__*/gn.createElement("span", {
+	        style: {
+	          flex: 1
+	        }
+	      }), /*#__PURE__*/gn.createElement("span", {
+	        className: "print-box-facts"
+	      }, "one page each, in this order")), /*#__PURE__*/gn.createElement("table", {
+	        className: "print-table"
+	      }, /*#__PURE__*/gn.createElement("thead", null, /*#__PURE__*/gn.createElement("tr", null, /*#__PURE__*/gn.createElement("th", {
+	        className: "num"
+	      }, "No"), /*#__PURE__*/gn.createElement("th", null, "Size"), /*#__PURE__*/gn.createElement("th", {
+	        className: "num"
+	      }, "Articles"), /*#__PURE__*/gn.createElement("th", {
+	        className: "num"
+	      }, "Full"), /*#__PURE__*/gn.createElement("th", {
+	        className: "num"
+	      }, "Gross"), /*#__PURE__*/gn.createElement("th", null, "Limit"))), /*#__PURE__*/gn.createElement("tbody", null, plan.map(entry => /*#__PURE__*/gn.createElement("tr", {
+	        key: entry.id
+	      }, /*#__PURE__*/gn.createElement("td", {
+	        className: "num print-letter"
+	      }, entry.number), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono"
+	      }, entry.dims, " mm"), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono num"
+	      }, entry.count), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono num"
+	      }, entry.fill), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono num"
+	      }, entry.gross), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono ref"
+	      }, "of ", entry.limit))))));
+	    })(), loadingPlan(packResult).map((sheetBox, sheetIndex, sheetAll) => /*#__PURE__*/gn.createElement("section", {
+	      className: "print-box",
+	      key: sheetBox.id
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "print-box-head"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "print-box-number"
+	    }, sheetBox.number, sheetAll.length > 1 ? ` / ${sheetAll.length}` : ''), /*#__PURE__*/gn.createElement("span", {
+	      className: "print-box-dims"
+	    }, sheetBox.dims, " mm"), /*#__PURE__*/gn.createElement("span", {
+	      style: {
+	        flex: 1
+	      }
+	    }), /*#__PURE__*/gn.createElement("span", {
+	      className: "print-box-facts"
+	    }, sheetBox.count, " ", flat ? 'pieces' : 'articles', " \xB7 ", sheetBox.fill, " full \xB7 ", sheetBox.gross, " of ", sheetBox.limit)), /*#__PURE__*/gn.createElement("table", {
+	      className: "print-table print-cargo"
+	    }, /*#__PURE__*/gn.createElement("thead", null, /*#__PURE__*/gn.createElement("tr", null, /*#__PURE__*/gn.createElement("th", null, "Art"), /*#__PURE__*/gn.createElement("th", null, "Size as declared"), /*#__PURE__*/gn.createElement("th", null, "Unit"), /*#__PURE__*/gn.createElement("th", {
+	      className: "num"
+	    }, "Qty"), /*#__PURE__*/gn.createElement("th", {
+	      className: "num"
+	    }, "Total"), /*#__PURE__*/gn.createElement("th", null, "Notes"))), /*#__PURE__*/gn.createElement("tbody", null, cargoList(sheetBox.box, articles).map(row => /*#__PURE__*/gn.createElement("tr", {
+	      key: row.label
+	    }, /*#__PURE__*/gn.createElement("td", {
+	      className: "ref"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "print-dot",
+	      style: {
+	        background: row.color
+	      }
+	    }), /*#__PURE__*/gn.createElement("span", {
+	      className: "print-letter"
+	    }, row.label)), /*#__PURE__*/gn.createElement("td", {
+	      className: "mono"
+	    }, row.dims, " mm"), /*#__PURE__*/gn.createElement("td", {
+	      className: "mono"
+	    }, formatWeight(row.unit)), /*#__PURE__*/gn.createElement("td", {
+	      className: "mono num"
+	    }, row.count), /*#__PURE__*/gn.createElement("td", {
+	      className: "mono num"
+	    }, formatWeight(row.unit * row.count)), /*#__PURE__*/gn.createElement("td", {
+	      className: "ref"
+	    }, cargoNote(row)))))), (() => {
+	      const cg = centreOfGravity(sheetBox.box);
+	      if (!cg) {
+	        return null;
+	      }
+	      return /*#__PURE__*/gn.createElement("div", {
+	        className: `print-balance${cg.balanced ? '' : ' is-off'}`
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "print-balance-label"
+	      }, "Centre of gravity"), /*#__PURE__*/gn.createElement("span", {
+	        className: "mono"
+	      }, Math.round(cg.x), " \xB7 ", Math.round(cg.y), " \xB7 ", Math.round(cg.z), " mm (", Math.round(cg.shareX * 100), "% along the width,", ' ', Math.round(cg.shareY * 100), "% along the height)"), /*#__PURE__*/gn.createElement("span", {
+	        className: "print-balance-verdict"
+	      }, cg.balanced ? 'within the middle third' : 'outside the middle third — check the load before sealing'));
+	    })(), !flat && /*#__PURE__*/gn.createElement("div", {
+	      className: "print-net"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "print-figure-title"
+	    }, "The box opened out \u2014 the floor with its four walls folded flat"), (() => {
+	      const net = unfoldedNet(sheetBox.box, sheetBox.box.items, articles, 470);
+	      const pad = {
+	        left: 64,
+	        top: 22,
+	        right: 64,
+	        bottom: 46
+	      };
+	      return /*#__PURE__*/gn.createElement("svg", {
+	        viewBox: `${ -64} ${ -22} ${net.width + pad.left + pad.right} ${net.height + pad.top + pad.bottom}`,
+	        width: "100%",
+	        style: {
+	          maxWidth: `${net.width + pad.left + pad.right}px`
+	        }
+	      }, net.panels.map(panel => /*#__PURE__*/gn.createElement("g", {
+	        key: panel.key
+	      }, /*#__PURE__*/gn.createElement("rect", {
+	        x: panel.x,
+	        y: panel.y,
+	        width: panel.w,
+	        height: panel.h,
+	        fill: "none",
+	        stroke: "currentColor",
+	        strokeWidth: panel.key === 'floor' ? 1.6 : 1,
+	        strokeDasharray: panel.key === 'floor' ? '' : '5 3',
+	        className: "print-outline"
+	      }), /*#__PURE__*/gn.createElement("clipPath", {
+	        id: `clip-${sheetBox.id}-${panel.key}`
+	      }, /*#__PURE__*/gn.createElement("rect", {
+	        x: panel.x,
+	        y: panel.y,
+	        width: panel.w,
+	        height: panel.h
+	      })), /*#__PURE__*/gn.createElement("g", {
+	        clipPath: `url(#clip-${sheetBox.id}-${panel.key})`
+	      }, panel.pieces.map(piece => /*#__PURE__*/gn.createElement("g", {
+	        key: `${panel.key}-${piece.key}`
+	      }, /*#__PURE__*/gn.createElement("rect", {
+	        x: piece.x,
+	        y: piece.y,
+	        width: piece.w,
+	        height: piece.h,
+	        fill: piece.color,
+	        fillOpacity: "0.26",
+	        stroke: piece.color,
+	        strokeWidth: "0.9"
+	      }), piece.w > 14 && piece.h > 12 && /*#__PURE__*/gn.createElement("text", {
+	        x: piece.x + piece.w / 2,
+	        y: piece.y + piece.h / 2 + 4,
+	        textAnchor: "middle",
+	        className: "print-piece-label"
+	      }, piece.label)))), /*#__PURE__*/gn.createElement("text", {
+	        x: panel.labelX,
+	        y: panel.labelY,
+	        textAnchor: panel.anchor,
+	        className: "print-axis"
+	      }, panel.title))), /*#__PURE__*/gn.createElement("text", {
+	        x: -64,
+	        y: net.height + 26,
+	        className: "print-axis"
+	      }, "Floor ", Math.round(sheetBox.box.width), " \xD7 ", Math.round(sheetBox.box.height), " mm \xB7", ' ', "walls ", Math.round(sheetBox.box.depth), " mm high"), /*#__PURE__*/gn.createElement("text", {
+	        x: -64,
+	        y: net.height + 38,
+	        className: "print-axis"
+	      }, "Each wall shows only what stands against it, seen from inside the box."));
+	    })()), /*#__PURE__*/gn.createElement("div", {
+	      className: "print-origin"
+	    }, flat ? 'Every measurement is in millimetres from the bottom-left corner of the sheet. Sizes are for the piece as laid out, after any turn.' : 'Stand at the open box. x runs left to right along the floor, y runs away from you into the box, and the layers stack upwards. Every measurement is in millimetres from the near-left corner of the floor. Work through the layers bottom first, following the numbers on each drawing.'), sheetBox.layers.map((layer, layerIndex) => /*#__PURE__*/gn.createElement("div", {
+	      className: "print-layer",
+	      key: layer.floor
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "print-layer-head"
+	    }, flat ? 'Cut plan' : `Layer ${layerIndex + 1} — floor at ${layer.floor} mm`), /*#__PURE__*/gn.createElement("div", {
+	      className: "print-figure"
+	    }, (() => {
+	      const box = sheetBox.box;
+	      const canvas = flat ? 560 : 500;
+	      const scale = canvas / box.width;
+	      const width = box.width * scale;
+	      const height = box.height * scale;
+	      const pieces = pieceBadges(planPieces(box, layer.items, articles, scale));
+	      const ghosts = planPieces(box, sheetBox.layers.slice(0, layerIndex).flatMap(l => l.items), articles, scale);
+	      const acrossTicks = rulerTicks(box.width, scale);
+	      const upTicks = rulerTicks(box.height, scale);
+	      const cg = layerIndex === 0 ? centreOfGravity(box) : null;
+	      const pad = {
+	        left: 46,
+	        top: 14,
+	        right: 34,
+	        bottom: 42
+	      };
+	      return /*#__PURE__*/gn.createElement("svg", {
+	        viewBox: `${ -46} ${ -14} ${width + pad.left + pad.right} ${height + pad.top + pad.bottom}`,
+	        width: "100%",
+	        style: {
+	          maxWidth: `${width + pad.left + pad.right}px`
+	        }
+	      }, ghosts.map(ghost => /*#__PURE__*/gn.createElement("rect", {
+	        key: `ghost-${ghost.key}`,
+	        x: ghost.x,
+	        y: ghost.y,
+	        width: ghost.w,
+	        height: ghost.h,
+	        fill: "none",
+	        stroke: "currentColor",
+	        strokeWidth: "0.7",
+	        strokeDasharray: "3 3",
+	        className: "print-ghost"
+	      })), /*#__PURE__*/gn.createElement("rect", {
+	        x: "0",
+	        y: "0",
+	        width: width,
+	        height: height,
+	        fill: "none",
+	        stroke: "currentColor",
+	        strokeWidth: "1.6",
+	        className: "print-outline"
+	      }), acrossTicks.map(tick => /*#__PURE__*/gn.createElement("g", {
+	        key: `x${tick.at}`
+	      }, /*#__PURE__*/gn.createElement("line", {
+	        x1: tick.pos,
+	        y1: height,
+	        x2: tick.pos,
+	        y2: height + 5,
+	        stroke: "currentColor",
+	        strokeWidth: "0.8",
+	        className: "print-outline"
+	      }), /*#__PURE__*/gn.createElement("text", {
+	        x: tick.pos,
+	        y: height + 17,
+	        textAnchor: "middle",
+	        className: "print-axis"
+	      }, tick.at))), upTicks.map(tick => /*#__PURE__*/gn.createElement("g", {
+	        key: `y${tick.at}`
+	      }, /*#__PURE__*/gn.createElement("line", {
+	        x1: "-5",
+	        y1: height - tick.pos,
+	        x2: "0",
+	        y2: height - tick.pos,
+	        stroke: "currentColor",
+	        strokeWidth: "0.8",
+	        className: "print-outline"
+	      }), /*#__PURE__*/gn.createElement("text", {
+	        x: "-9",
+	        y: height - tick.pos + 3,
+	        textAnchor: "end",
+	        className: "print-axis"
+	      }, tick.at))), pieces.map(piece => /*#__PURE__*/gn.createElement("g", {
+	        key: piece.key
+	      }, /*#__PURE__*/gn.createElement("rect", {
+	        x: piece.x,
+	        y: piece.y,
+	        width: piece.w,
+	        height: piece.h,
+	        fill: piece.color,
+	        fillOpacity: "0.28",
+	        stroke: piece.color,
+	        strokeWidth: "1.2"
+	      }), !piece.inside && /*#__PURE__*/gn.createElement("line", {
+	        x1: piece.x + piece.w,
+	        y1: piece.y + piece.h / 2,
+	        x2: piece.bx - BADGE,
+	        y2: piece.by,
+	        stroke: piece.color,
+	        strokeWidth: "0.8"
+	      }), /*#__PURE__*/gn.createElement("circle", {
+	        cx: piece.bx,
+	        cy: piece.by,
+	        r: BADGE,
+	        fill: piece.color,
+	        fillOpacity: "0.92",
+	        stroke: piece.color,
+	        strokeWidth: "1.1"
+	      }), /*#__PURE__*/gn.createElement("text", {
+	        x: piece.bx,
+	        y: piece.by + 4,
+	        textAnchor: "middle",
+	        className: "print-badge"
+	      }, piece.step), piece.inside && piece.h > BADGE * 4.2 && /*#__PURE__*/gn.createElement("text", {
+	        x: piece.bx,
+	        y: piece.by + BADGE + 13,
+	        textAnchor: "middle",
+	        className: "print-piece-label"
+	      }, piece.label))), cg && /*#__PURE__*/gn.createElement("g", {
+	        className: "print-cg"
+	      }, /*#__PURE__*/gn.createElement("line", {
+	        x1: cg.x * scale - 9,
+	        y1: height - cg.y * scale,
+	        x2: cg.x * scale + 9,
+	        y2: height - cg.y * scale,
+	        strokeWidth: "1.2"
+	      }), /*#__PURE__*/gn.createElement("line", {
+	        x1: cg.x * scale,
+	        y1: height - cg.y * scale - 9,
+	        x2: cg.x * scale,
+	        y2: height - cg.y * scale + 9,
+	        strokeWidth: "1.2"
+	      }), /*#__PURE__*/gn.createElement("circle", {
+	        cx: cg.x * scale,
+	        cy: height - cg.y * scale,
+	        r: "5.5",
+	        fill: "none",
+	        strokeWidth: "1.2"
+	      })), /*#__PURE__*/gn.createElement("text", {
+	        x: "0",
+	        y: height + 35,
+	        className: "print-axis"
+	      }, flat ? 'Sheet' : 'Floor', " ", Math.round(box.width), " across \xD7 ", Math.round(box.height), " deep,", ' ', "millimetres from the near-left corner, seen from above", cg ? ' · the crosshair marks the centre of gravity' : ''));
+	    })()), /*#__PURE__*/gn.createElement("table", {
+	      className: "print-table"
+	    }, /*#__PURE__*/gn.createElement("thead", null, /*#__PURE__*/gn.createElement("tr", null, /*#__PURE__*/gn.createElement("th", null, "\u2713"), /*#__PURE__*/gn.createElement("th", null, "#"), /*#__PURE__*/gn.createElement("th", null, "Article"), /*#__PURE__*/gn.createElement("th", null, "Corner at x \xB7 y"), /*#__PURE__*/gn.createElement("th", null, "Size once laid"), /*#__PURE__*/gn.createElement("th", null, "Weight"))), /*#__PURE__*/gn.createElement("tbody", null, layer.items.map((item, step) => {
+	      const article = articleOf(articles, item);
+	      const turned = `${Math.round(item.width)}×${Math.round(item.height)}×${Math.round(item.depth)}` !== article.dims;
+	      return /*#__PURE__*/gn.createElement("tr", {
+	        key: item.id
+	      }, /*#__PURE__*/gn.createElement("td", {
+	        className: "tick"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "print-tick"
+	      })), /*#__PURE__*/gn.createElement("td", {
+	        className: "num"
+	      }, step + 1), /*#__PURE__*/gn.createElement("td", {
+	        className: "ref"
+	      }, /*#__PURE__*/gn.createElement("span", {
+	        className: "print-dot",
+	        style: {
+	          background: article.color
+	        }
+	      }), /*#__PURE__*/gn.createElement("span", {
+	        className: "print-letter"
+	      }, article.label), /*#__PURE__*/gn.createElement("span", {
+	        className: "mono"
+	      }, article.dims), article.group && /*#__PURE__*/gn.createElement("span", {
+	        className: "print-group"
+	      }, article.group)), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono"
+	      }, Math.round(item.position.x), " \xB7 ", Math.round(item.position.y)), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono"
+	      }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth), turned && /*#__PURE__*/gn.createElement("span", {
+	        className: "print-turn"
+	      }, "turned")), /*#__PURE__*/gn.createElement("td", {
+	        className: "mono"
+	      }, formatWeight(item.weight)));
+	    }))))))), packResult.items && packResult.items.length > 0 && /*#__PURE__*/gn.createElement("section", {
+	      className: "print-box print-left"
+	    }, /*#__PURE__*/gn.createElement("div", {
+	      className: "print-box-head"
+	    }, /*#__PURE__*/gn.createElement("span", {
+	      className: "print-box-number"
+	    }, "\u2014"), /*#__PURE__*/gn.createElement("span", {
+	      className: "print-box-dims"
+	    }, "Not loaded"), /*#__PURE__*/gn.createElement("span", {
+	      style: {
+	        flex: 1
+	      }
+	    }), /*#__PURE__*/gn.createElement("span", {
+	      className: "print-box-facts"
+	    }, packResult.items.length, " articles stay behind")), /*#__PURE__*/gn.createElement("table", {
+	      className: "print-table"
+	    }, /*#__PURE__*/gn.createElement("tbody", null, packResult.items.map(item => /*#__PURE__*/gn.createElement("tr", {
+	      key: item.id
+	    }, /*#__PURE__*/gn.createElement("td", {
+	      className: "mono"
+	    }, Math.round(item.width), "\xD7", Math.round(item.height), "\xD7", Math.round(item.depth)), /*#__PURE__*/gn.createElement("td", {
+	      className: "mono"
+	    }, formatWeight(item.weight)), /*#__PURE__*/gn.createElement("td", {
+	      className: "ref"
+	    }, item.rotationBlocked ? 'rotation locked' : item.unpackable ? 'no box fits' : 'no room left')))))))));
 	  }
 	}
 
-	const playground = new Playground(document.getElementById('bp3'));
 	gn.render(/*#__PURE__*/gn.createElement(ItemComponent, {
-	  playground: playground
-	}), document.getElementById('bp3-input'));
+	  playground: new Playground(null)
+	}), document.getElementById('app'));
 
 })();
 //# sourceMappingURL=index.js.map
