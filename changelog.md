@@ -1,5 +1,38 @@
 # Changelog
 
+## v1.3.0 - 2026-09-04
+
+### What's Changed
+
+* Bump preact from 10.28.0 to 10.28.1 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/357
+* Bump three from 0.181.2 to 0.182.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/353
+* Bump rollup from 4.53.3 to 4.54.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/356
+* Bump preact from 10.28.1 to 10.28.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/359
+* Bump [@babel](https://github.com/babel)/core from 7.28.5 to 7.29.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/365
+* Bump [@rollup](https://github.com/rollup)/plugin-commonjs from 29.0.0 to 29.0.2 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/370
+* Bump [@rollup](https://github.com/rollup)/plugin-babel from 6.1.0 to 7.0.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/369
+* Bump three from 0.182.0 to 0.183.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/367
+* Bump preact from 10.28.2 to 10.28.3 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/366
+* Bump axios from 1.13.2 to 1.13.3 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/364
+* Bump rollup from 4.54.0 to 4.56.0 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/363
+* chore(npm-deps): bump the npm group with 3 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/376
+* ci(deps): bump the actions group with 3 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/375
+* chore(npm-deps): bump preact from 10.29.0 to 10.29.1 in the npm group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/377
+* chore(npm-deps): bump axios from 1.14.0 to 1.15.0 in the npm group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/378
+* chore(npm-deps): bump three from 0.183.2 to 0.184.0 in the npm group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/379
+* chore(npm-deps): bump the npm group with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/380
+* chore(npm-deps): bump axios from 1.15.1 to 1.15.2 in the npm group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/381
+* Add Packrift ecommerce carton CSV example by [@Packrift](https://github.com/Packrift) in https://github.com/bavix/boxpacker3-ui/pull/383
+* chore(npm-deps): bump the npm group across 1 directory with 3 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/384
+* chore(npm-deps): bump the npm group across 1 directory with 6 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/bavix/boxpacker3-ui/pull/388
+* new version v2 by [@rez1dent3](https://github.com/rez1dent3) in https://github.com/bavix/boxpacker3-ui/pull/394
+
+### New Contributors
+
+* [@Packrift](https://github.com/Packrift) made their first contribution in https://github.com/bavix/boxpacker3-ui/pull/383
+
+**Full Changelog**: https://github.com/bavix/boxpacker3-ui/compare/v1.2.1...v1.3.0
+
 ## v1.2.1 - 2025-12-05
 
 ### What's Changed
